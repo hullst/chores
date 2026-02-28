@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Theo's Chores">
+<title>Theo's Chores</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  :root {
+    --purple: #7B5CF5;
+    --purple-dark: #5a3fd4;
+    --green: #30D158;
+    --bg: #000000;
+    --surface: #1C1C1E;
+    --surface2: #2C2C2E;
+    --text: #FFFFFF;
+    --text-dim: #8E8E93;
+  }
+
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, 'SF Pro Rounded', 'SF Pro Display', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ---- Loading ---- */
+  #loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    gap: 16px;
+    color: var(--text-dim);
+    font-size: 14px;
+  }
+
+  .spinner {
+    width: 32px; height: 32px;
+    border: 3px solid var(--surface2);
+    border-top-color: var(--purple);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ---- Main ---- */
+  #app { display: none; padding: 0 0 40px; }
+
+  .top-header {
+    background: var(--surface);
+    padding: 14px 16px 12px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    border-bottom: 1px solid #333;
+  }
+
+  .top-header h1 {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+  }
+
+  .top-header h1 span { color: var(--purple); }
+
+  .progress-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 8px;
+  }
+
+  .progress-track {
+    flex: 1;
+    height: 6px;
+    background: var(--surface2);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--green);
+    border-radius: 3px;
+    transition: width 0.4s ease;
+  }
+
+  .progress-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-dim);
+    white-space: nowrap;
+  }
+
+  /* ---- Day strip ---- */
+  .day-strip {
+    display: flex;
+    overflow-x: auto;
+    gap: 8px;
+    padding: 12px 16px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .day-strip::-webkit-scrollbar { display: none; }
+
+  .day-pill {
+    flex-shrink: 0;
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: none;
+    background: var(--surface2);
+    color: var(--text-dim);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+
+  .day-pill.active {
+    background: var(--purple);
+    color: white;
+  }
+
+  /* ---- Section header ---- */
+  .section-header {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+    padding: 16px 16px 6px;
+  }
+
+  /* ---- Chore rows ---- */
+  .chore-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    background: var(--surface);
+    border-bottom: 1px solid #2a2a2a;
+    cursor: pointer;
+    transition: background 0.1s;
+    min-height: 60px;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .chore-row:active { background: var(--surface2); }
+  .chore-row.done { opacity: 0.45; }
+
+  .chore-check-wrap {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    border: 2.5px solid #444;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+    font-size: 16px;
+  }
+
+  .chore-row.done .chore-check-wrap {
+    background: var(--green);
+    border-color: var(--green);
+  }
+
+  .chore-body { flex: 1; }
+
+  .chore-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.2;
+  }
+
+  .chore-row.done .chore-name {
+    text-decoration: line-through;
+    color: var(--text-dim);
+  }
+
+  .chore-time {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 2px;
+  }
+
+  .chore-emoji { font-size: 22px; flex-shrink: 0; }
+
+  /* ---- Done screen ---- */
+  .all-done-banner {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px 24px;
+    text-align: center;
+    gap: 8px;
+  }
+
+  .all-done-banner.show { display: flex; }
+  .all-done-banner .big-emoji { font-size: 56px; }
+  .all-done-banner h2 { font-size: 22px; font-weight: 700; }
+  .all-done-banner p { font-size: 14px; color: var(--text-dim); }
+
+  /* ---- Sync pill ---- */
+  .sync-pill {
+    position: fixed;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--surface2);
+    color: var(--text-dim);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.3s;
+    z-index: 20;
+  }
+
+  .sync-pill.syncing { color: #f7971e; }
+  .sync-pill.synced { color: var(--green); }
+  .sync-pill.error { color: #ff453a; }
+
+  .sync-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  .sync-dot.spin { animation: pulse 0.8s ease-in-out infinite; }
+
+  @keyframes pulse {
+    0%,100% { opacity:1; transform:scale(1); }
+    50% { opacity:0.3; transform:scale(0.7); }
+  }
+
+  /* ---- Watch media query — ultra compact ---- */
+  @media (max-width: 200px) {
+    .top-header h1 { font-size: 13px; }
+    .day-strip { padding: 6px 8px; }
+    .day-pill { font-size: 10px; padding: 4px 8px; }
+    .chore-row { padding: 10px 8px; min-height: 44px; gap: 8px; }
+    .chore-name { font-size: 12px; }
+    .chore-emoji { font-size: 16px; }
+    .chore-check-wrap { width: 24px; height: 24px; font-size: 12px; }
+    .section-header { font-size: 9px; padding: 10px 8px 4px; }
+    .sync-pill { font-size: 9px; padding: 4px 10px; bottom: 8px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="spinner"></div>
+  <span>Loading...</span>
+</div>
+
+<div id="app">
+  <div class="top-header">
+    <h1>⭐ <span>Theo's</span> Chores</h1>
+    <div class="progress-row">
+      <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+      <div class="progress-label" id="progressLabel">0/0</div>
+    </div>
+  </div>
+
+  <div class="day-strip" id="dayStrip"></div>
+
+  <div class="all-done-banner" id="allDoneBanner">
+    <div class="big-emoji">🎉</div>
+    <h2>All done, Theo!</h2>
+    <p>Amazing job this morning!</p>
+  </div>
+
+  <div id="choreList"></div>
+</div>
+
+<div class="sync-pill synced" id="syncPill">
+  <div class="sync-dot" id="syncDot"></div>
+  <span id="syncLabel">Synced</span>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+// ---- Firebase ----
+const app = initializeApp({
+  apiKey: "AIzaSyBImvAIHP_3S9aDl0_yjhwtGG5pf1e5Z7k",
+  authDomain: "hull-chores.firebaseapp.com",
+  projectId: "hull-chores",
+});
+const db = getFirestore(app);
+
+// ---- Data ----
+const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+const KID_ID = 'theodore';
+
+const CHORE_DEFS = [
+  { section: '🌅 Morning', label: 'Make bed', icon: '🛏️' },
+  { section: '🌅 Morning', label: 'Brush teeth', icon: '🪥' },
+  { section: '🌅 Morning', label: 'Get dressed', icon: '👕' },
+  { section: '🌅 Morning', label: 'Eat breakfast', icon: '🥣' },
+  { section: '🌅 Morning', label: 'Bring plates to sink', icon: '🫧' },
+  { section: '🌅 Morning', label: 'Put shoes & coat on', icon: '👟', noSaturday: true },
+  { section: '🏠 Family', label: 'Unload dishwasher', icon: '🍽️' },
+  { section: '🏠 Family', label: 'Wipe bathroom sink (master)', icon: '🚿' },
+  { section: '🏠 Family', label: 'Help fold laundry', icon: '👕' },
+  { section: '❤️ Special', label: 'Go kiss Momma good morning!', icon: '💋' },
+];
+
+function getChoreDefs(day) {
+  return CHORE_DEFS.filter(c => !(c.noSaturday && day === 'Saturday'));
+}
+
+// ---- State ----
+let currentDay = DAYS[new Date().getDay() === 0 ? 6 : new Date().getDay() - 1];
+let choreState = {};
+let unsub = null;
+
+// ---- Firestore ----
+function docRef(day) { return doc(db, 'chores', day); }
+
+function subscribe(day) {
+  if (unsub) unsub();
+  setSyncStatus('syncing');
+  unsub = onSnapshot(docRef(day), snap => {
+    choreState = snap.exists() ? (snap.data().state || {}) : {};
+    setSyncStatus('synced');
+    render();
+  }, () => setSyncStatus('error'));
+}
+
+async function save() {
+  setSyncStatus('syncing');
+  try {
+    await setDoc(docRef(currentDay), { state: choreState, updatedAt: Date.now() });
+    setSyncStatus('synced');
+  } catch(e) { setSyncStatus('error'); }
+}
+
+function setSyncStatus(s) {
+  const pill = document.getElementById('syncPill');
+  const dot = document.getElementById('syncDot');
+  const label = document.getElementById('syncLabel');
+  pill.className = 'sync-pill ' + s;
+  dot.className = 'sync-dot' + (s === 'syncing' ? ' spin' : '');
+  label.textContent = { syncing: 'Syncing...', synced: 'Synced', error: 'Sync error' }[s];
+}
+
+// ---- Toggle ----
+window.toggleChore = async function(label, el) {
+  el.classList.add('chore-tap');
+  if (!choreState[KID_ID]) choreState[KID_ID] = {};
+  const was = choreState[KID_ID][label] && choreState[KID_ID][label].done;
+  choreState[KID_ID][label] = { done: !was, ts: Date.now() };
+  render();
+  await save();
+};
+
+// ---- Render ----
+function render() {
+  const chores = getChoreDefs(currentDay);
+  const kidState = choreState[KID_ID] || {};
+  const doneCt = chores.filter(c => kidState[c.label] && kidState[c.label].done).length;
+  const pct = chores.length ? Math.round(doneCt / chores.length * 100) : 0;
+  const allDone = doneCt === chores.length && chores.length > 0;
+
+  // Progress
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = `${doneCt}/${chores.length}`;
+
+  // All done banner
+  document.getElementById('allDoneBanner').className = 'all-done-banner' + (allDone ? ' show' : '');
+
+  // Day strip
+  document.getElementById('dayStrip').innerHTML = DAYS.map(d => `
+    <button class="day-pill ${d === currentDay ? 'active' : ''}" onclick="selectDay('${d}')">
+      ${d.slice(0,3)}
+    </button>
+  `).join('');
+
+  // Group by section
+  const sections = {};
+  for (const c of chores) {
+    if (!sections[c.section]) sections[c.section] = [];
+    sections[c.section].push(c);
+  }
+
+  let html = '';
+  for (const [sec, items] of Object.entries(sections)) {
+    html += `<div class="section-header">${sec}</div>`;
+    for (const c of items) {
+      const done = kidState[c.label] && kidState[c.label].done;
+      const ts = kidState[c.label] && kidState[c.label].ts;
+      const timeStr = ts ? new Date(ts).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '';
+      html += `
+        <div class="chore-row ${done ? 'done' : ''}" onclick="toggleChore('${c.label.replace(/'/g,"\\'")}', this)">
+          <span class="chore-emoji">${c.icon}</span>
+          <div class="chore-body">
+            <div class="chore-name">${c.label}</div>
+            ${done && timeStr ? `<div class="chore-time">Done at ${timeStr}</div>` : ''}
+          </div>
+          <div class="chore-check-wrap">${done ? '✓' : ''}</div>
+        </div>`;
+    }
+  }
+
+  document.getElementById('choreList').innerHTML = html;
+}
+
+window.selectDay = function(day) {
+  currentDay = day;
+  subscribe(day);
+};
+
+// ---- Boot ----
+document.getElementById('loading').style.display = 'none';
+document.getElementById('app').style.display = 'block';
+subscribe(currentDay);
+</script>
+</body>
+</html>
