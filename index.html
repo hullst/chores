@@ -22,8 +22,9 @@
     padding: 24px 16px;
   }
 
+  /* ---- Who screen ---- */
   #who-screen {
-    display: none;
+    display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
@@ -67,6 +68,7 @@
   .who-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.18); }
   .who-btn .emoji { font-size: 2.2rem; }
 
+  /* ---- Main board ---- */
   #main-board { display: none; }
 
   header { text-align: center; margin-bottom: 24px; }
@@ -115,8 +117,8 @@
   }
 
   .sync-indicator.syncing { color: #f7971e; }
-  .sync-indicator.synced { color: #43e97b; }
-  .sync-indicator.error { color: #f5576c; }
+  .sync-indicator.synced  { color: #43e97b; }
+  .sync-indicator.error   { color: #f5576c; }
 
   .sync-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
   .sync-dot.spinning { animation: pulse 0.8s ease-in-out infinite; }
@@ -125,34 +127,6 @@
     0%,100% { opacity:1; transform:scale(1); }
     50% { opacity:0.4; transform:scale(0.8); }
   }
-
-  /* Time of day tabs */
-  .tod-tabs {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 28px;
-    flex-wrap: wrap;
-  }
-
-  .tod-tab {
-    padding: 10px 24px;
-    border-radius: 50px;
-    border: 2.5px solid #E0E0E0;
-    background: white;
-    font-family: 'Nunito', sans-serif;
-    font-weight: 800;
-    font-size: 0.95rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    color: #666;
-  }
-
-  .tod-tab.active { border-color: transparent; color: white; }
-  .tod-tab.active.morning { background: linear-gradient(135deg, #f7971e, #ffd200); }
-  .tod-tab.active.afternoon { background: linear-gradient(135deg, #43e97b, #38f9d7); }
-  .tod-tab.active.evening { background: linear-gradient(135deg, #667eea, #764ba2); }
-  .tod-tab:hover:not(.active) { border-color: #bbb; color: #333; }
 
   .summary-bar {
     display: flex;
@@ -174,8 +148,8 @@
 
   .kids-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
-    gap: 18px;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
     max-width: 1400px;
     margin: 0 auto;
   }
@@ -218,40 +192,61 @@
     padding: 4px 12px; border-radius: 50px; color: white;
   }
 
-  .chore-section-header {
-    font-size: 0.68rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 1.2px;
-    color: #bbb;
-    padding: 10px 14px 3px;
+  /* Section dividers inside card */
+  .tod-divider {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px 4px;
+    margin-top: 2px;
   }
 
-  .chore-list { padding: 4px 14px 16px; }
+  .tod-divider-label {
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    white-space: nowrap;
+  }
+
+  .tod-divider-line {
+    flex: 1;
+    height: 1.5px;
+    border-radius: 1px;
+  }
+
+  .tod-morning  .tod-divider-label { color: #f7971e; }
+  .tod-morning  .tod-divider-line  { background: #f7971e44; }
+  .tod-afternoon .tod-divider-label { color: #38c172; }
+  .tod-afternoon .tod-divider-line  { background: #38c17244; }
+  .tod-evening  .tod-divider-label { color: #764ba2; }
+  .tod-evening  .tod-divider-line  { background: #764ba244; }
+
+  .chore-list { padding: 0 14px 16px; }
 
   .chore-item {
     display: flex; align-items: center; gap: 12px;
-    padding: 9px 12px; border-radius: 12px; margin-bottom: 4px;
+    padding: 9px 10px; border-radius: 12px; margin-bottom: 3px;
     cursor: pointer; transition: background 0.15s; user-select: none;
   }
 
   .chore-item:hover { background: #F8F8F8; }
-  .chore-item.done { opacity: 0.55; }
+  .chore-item.done { opacity: 0.5; }
   .chore-item.readonly { cursor: default; }
   .chore-item.readonly:hover { background: none; }
 
   .chore-check {
-    width: 26px; height: 26px; border-radius: 50%;
+    width: 24px; height: 24px; border-radius: 50%;
     border: 2.5px solid #DDD;
     display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0; transition: all 0.2s; font-size: 0.9rem;
+    flex-shrink: 0; transition: all 0.2s; font-size: 0.85rem;
   }
 
   .chore-item.done .chore-check { border-color: transparent; }
   .chore-item.done .chore-label { text-decoration: line-through; color: #AAA; }
-  .chore-label { font-size: 0.9rem; font-weight: 700; color: #333; flex: 1; }
-  .chore-time { font-size: 0.67rem; color: #bbb; font-weight: 600; }
-  .chore-icon { font-size: 1.05rem; }
+  .chore-label { font-size: 0.88rem; font-weight: 700; color: #333; flex: 1; }
+  .chore-time  { font-size: 0.65rem; color: #bbb; font-weight: 600; }
+  .chore-icon  { font-size: 1rem; }
 
   /* Color themes */
   .kid-theodore .kid-header { background: linear-gradient(135deg,#667eea22,#764ba222); }
@@ -314,14 +309,6 @@
     50% { transform: scale(1.15); }
     100% { transform: scale(1); }
   }
-
-  .no-chores {
-    text-align: center;
-    color: #ccc;
-    font-weight: 700;
-    font-size: 0.85rem;
-    padding: 20px 0 8px;
-  }
 </style>
 </head>
 <body>
@@ -335,7 +322,7 @@
 <div id="main-board">
   <header>
     <h1>⭐ Hull Family Chores</h1>
-    <p class="subtitle" id="boardSubtitle">Saturday Chores</p>
+    <p class="subtitle">🗓️ Saturday Chores</p>
   </header>
 
   <div class="top-bar">
@@ -350,10 +337,9 @@
     </div>
   </div>
 
-  <div class="tod-tabs" id="todTabs"></div>
   <div class="summary-bar" id="summaryBar"></div>
   <div class="kids-grid" id="kidsGrid"></div>
-  <button class="reset-btn" id="resetBtn" style="display:none" onclick="resetSection()">🔄 Reset This Section</button>
+  <button class="reset-btn" id="resetBtn" style="display:none" onclick="resetAll()">🔄 Reset All Chores</button>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -367,89 +353,76 @@ firebase.initializeApp({
 var db = firebase.firestore();
 
 // =============================================
-// DATA
+// CHORE DATA
+// Each chore has: tod, label, icon, ids ('all' or array), section
 // =============================================
+var ALL_CHORES = [
+  // ---- MORNING ----
+  { tod:'morning', section:'Everyone',      label:'Make bed',                    icon:'🛏️', ids:'all' },
+  { tod:'morning', section:'Everyone',      label:'Brush teeth',                 icon:'🪥', ids:'all' },
+  { tod:'morning', section:'Everyone',      label:'Get dressed',                 icon:'👕', ids:'all' },
+  { tod:'morning', section:'Everyone',      label:'Eat breakfast',               icon:'🥣', ids:'all' },
+  { tod:'morning', section:'Everyone',      label:'Bring plates to sink',        icon:'🫧', ids:'all' },
+  { tod:'morning', section:'Girls',         label:'Brush hair',                  icon:'💈', ids:['alice','lucy'] },
+  { tod:'morning', section:'Family Chores', label:'Unload dishwasher',           icon:'🍽️', ids:['theodore'] },
+  { tod:'morning', section:'Family Chores', label:'Wipe bathroom sink',          icon:'🚿', ids:['theodore','leo'] },
+  { tod:'morning', section:'Family Chores', label:'Wipe bathroom sink',          icon:'🚿', ids:['alice','lucy'] },
+  { tod:'morning', section:'Family Chores', label:'Wipe bathroom sink',          icon:'🚿', ids:['andrew','felix'] },
+  { tod:'morning', section:'Family Chores', label:'Vacuum living room',          icon:'🧹', ids:['alice'] },
+  { tod:'morning', section:'Family Chores', label:'Vacuum front room',           icon:'🧹', ids:['andrew'] },
+  { tod:'morning', section:'Family Chores', label:'Put away blankets',           icon:'🛋️', ids:['lucy','leo'] },
+  { tod:'morning', section:'Family Chores', label:"Fill up Sophie's food",       icon:'🐾', ids:['felix'] },
+  { tod:'morning', section:'Family Chores', label:"Fill up Sophie's water",      icon:'💧', ids:['andrew'] },
+  { tod:'morning', section:'Family Chores', label:'Help fold laundry',           icon:'👕', ids:'all' },
+  { tod:'morning', section:'❤️ Special',    label:'Go kiss Momma good morning!', icon:'💋', ids:'all' },
+
+  // ---- AFTERNOON ----
+  { tod:'afternoon', section:'Everyone', label:'Eat lunch',                  icon:'🥪', ids:'all' },
+  { tod:'afternoon', section:'Everyone', label:'Bring lunch plates to sink', icon:'🫧', ids:'all' },
+  { tod:'afternoon', section:'Clean Up', label:'Load dishwasher',            icon:'🫧', ids:['alice'] },
+  { tod:'afternoon', section:'Clean Up', label:'Put away lunch stuff',       icon:'🧹', ids:['felix'] },
+  { tod:'afternoon', section:'Clean Up', label:'Take out recyclables',       icon:'♻️', ids:['andrew'] },
+  { tod:'afternoon', section:'Bathrooms',label:'Clean pool bathroom',        icon:'🚿', ids:['theodore'] },
+  { tod:'afternoon', section:'Bathrooms',label:'Clean front bathroom',       icon:'🚿', ids:['alice'] },
+  { tod:'afternoon', section:'Bathrooms',label:'Clean basement bathroom',    icon:'🚿', ids:['felix'] },
+
+  // ---- EVENING ----
+  { tod:'evening', section:'Everyone', label:'Eat dinner',                   icon:'🍽️', ids:'all' },
+  { tod:'evening', section:'Everyone', label:'Bring dinner plates to sink',  icon:'🫧', ids:'all' },
+  { tod:'evening', section:'Everyone', label:'Eat dessert',                  icon:'🍨', ids:'all' },
+  { tod:'evening', section:'Clean Up', label:'Load dishwasher',              icon:'🍽️', ids:['andrew','felix'] },
+  { tod:'evening', section:'Clean Up', label:'Wipe kitchen counter',         icon:'🧽', ids:['alice'] },
+  { tod:'evening', section:'Clean Up', label:'Wipe kitchen table',           icon:'🧹', ids:['lucy'] },
+];
+
+var TOD_ORDER = ['morning','afternoon','evening'];
+var TOD_LABELS = { morning:'🌅 Morning', afternoon:'☀️ Afternoon', evening:'🌆 Evening' };
+
 var USERS = [
-  { id: 'theodore', name: 'Theodore', age: 11, emoji: '🦁', type: 'kid' },
-  { id: 'alice',    name: 'Alice',    age: 9,  emoji: '🦋', type: 'kid' },
-  { id: 'andrew',   name: 'Andrew',   age: 8,  emoji: '🚀', type: 'kid' },
-  { id: 'felix',    name: 'Felix',    age: 6,  emoji: '🐸', type: 'kid' },
-  { id: 'lucy',     name: 'Lucy',     age: 5,  emoji: '🌸', type: 'kid' },
-  { id: 'leo',      name: 'Leo',      age: 3,  emoji: '🐻', type: 'kid' },
-  { id: 'parent',   name: 'Mom & Dad', emoji: '👨‍👩‍👧‍👦', type: 'parent' },
+  { id:'theodore', name:'Theodore', age:11, emoji:'🦁', type:'kid' },
+  { id:'alice',    name:'Alice',    age:9,  emoji:'🦋', type:'kid' },
+  { id:'andrew',   name:'Andrew',   age:8,  emoji:'🚀', type:'kid' },
+  { id:'felix',    name:'Felix',    age:6,  emoji:'🐸', type:'kid' },
+  { id:'lucy',     name:'Lucy',     age:5,  emoji:'🌸', type:'kid' },
+  { id:'leo',      name:'Leo',      age:3,  emoji:'🐻', type:'kid' },
+  { id:'parent',   name:'Mom & Dad', emoji:'👨‍👩‍👧‍👦', type:'parent' },
 ];
 
 var KIDS = USERS.filter(function(u) { return u.type === 'kid'; });
 
-var TOD = ['morning', 'afternoon', 'evening'];
-var TOD_LABELS = { morning: '🌅 Morning', afternoon: '☀️ Afternoon', evening: '🌆 Evening' };
-
-// Each chore: { label, icon, section (display label), ids: ['all'] or array of kid ids }
-var ALL_CHORES = {
-  morning: [
-    // Everyone
-    { label: 'Make bed',             icon: '🛏️', ids: 'all', section: 'Everyone' },
-    { label: 'Brush teeth',          icon: '🪥', ids: 'all', section: 'Everyone' },
-    { label: 'Get dressed',          icon: '👕', ids: 'all', section: 'Everyone' },
-    { label: 'Eat breakfast',        icon: '🥣', ids: 'all', section: 'Everyone' },
-    { label: 'Bring plates to sink', icon: '🫧', ids: 'all', section: 'Everyone' },
-    // Girls brush hair (Alice & Lucy)
-    { label: 'Brush hair',           icon: '💈', ids: ['alice','lucy'], section: 'Girls' },
-    // Family chores
-    { label: 'Unload dishwasher',              icon: '🍽️', ids: ['theodore'], section: 'Family Chores' },
-    { label: 'Wipe bathroom sink',             icon: '🚿', ids: ['theodore','leo'], section: 'Family Chores' },
-    { label: 'Wipe bathroom sink',             icon: '🚿', ids: ['alice','lucy'], section: 'Family Chores' },
-    { label: 'Wipe bathroom sink',             icon: '🚿', ids: ['andrew','felix'], section: 'Family Chores' },
-    { label: 'Vacuum living room',             icon: '🧹', ids: ['alice'], section: 'Family Chores' },
-    { label: 'Vacuum front room',              icon: '🧹', ids: ['andrew'], section: 'Family Chores' },
-    { label: 'Put away blankets',              icon: '🛋️', ids: ['lucy','leo'], section: 'Family Chores' },
-    { label: 'Fill up Sophie\'s food',         icon: '🐾', ids: ['felix'], section: 'Family Chores' },
-    { label: 'Fill up Sophie\'s water',        icon: '💧', ids: ['andrew'], section: 'Family Chores' },
-    { label: 'Help fold laundry',              icon: '👕', ids: 'all', section: 'Family Chores' },
-    // Special
-    { label: 'Go kiss Momma good morning!',    icon: '💋', ids: 'all', section: '❤️ Special' },
-  ],
-  afternoon: [
-    { label: 'Eat lunch',            icon: '🥪', ids: 'all', section: 'Everyone' },
-    { label: 'Bring lunch plates to sink', icon: '🫧', ids: 'all', section: 'Everyone' },
-    { label: 'Load dishwasher',      icon: '🫧', ids: ['alice'], section: 'Clean Up' },
-    { label: 'Put away lunch stuff', icon: '🧹', ids: ['felix'], section: 'Clean Up' },
-    { label: 'Take out recyclables', icon: '♻️', ids: ['andrew'], section: 'Clean Up' },
-    { label: 'Clean pool bathroom',  icon: '🚿', ids: ['theodore'], section: 'Bathrooms' },
-    { label: 'Clean front bathroom', icon: '🚿', ids: ['alice'], section: 'Bathrooms' },
-    { label: 'Clean basement bathroom', icon: '🚿', ids: ['felix'], section: 'Bathrooms' },
-  ],
-  evening: [
-    { label: 'Eat dinner',           icon: '🍽️', ids: 'all', section: 'Everyone' },
-    { label: 'Bring dinner plates to sink', icon: '🫧', ids: 'all', section: 'Everyone' },
-    { label: 'Eat dessert',          icon: '🍨', ids: 'all', section: 'Everyone' },
-    { label: 'Load dishwasher',      icon: '🍽️', ids: ['andrew','felix'], section: 'Clean Up' },
-    { label: 'Wipe kitchen counter', icon: '🧽', ids: ['alice'], section: 'Clean Up' },
-    { label: 'Wipe kitchen table',   icon: '🧹', ids: ['lucy'], section: 'Clean Up' },
-  ]
-};
-
-// Build per-kid chore list for a given time of day
-function getChoresForKid(kidId, tod) {
-  var result = [];
-  var defs = ALL_CHORES[tod];
-  for (var i = 0; i < defs.length; i++) {
-    var d = defs[i];
-    var forMe = d.ids === 'all' || d.ids.indexOf(kidId) !== -1;
-    if (forMe) result.push(d);
-  }
-  return result;
+function getChoresForKid(kidId) {
+  return ALL_CHORES.filter(function(c) {
+    return c.ids === 'all' || c.ids.indexOf(kidId) !== -1;
+  });
 }
 
 // =============================================
-// STATE
+// STATE & FIREBASE
 // =============================================
 var currentUser = null;
-var currentTod = 'morning';
-var choreState = {}; // { [kidId]: { [tod_label]: { done, ts } } }
-var unsub = null;
+var choreState  = {};
+var unsub       = null;
 
-// Firestore doc per saturday (reuse same doc, keyed by section)
 function docRef() { return db.collection('chores').doc('saturday'); }
 
 function subscribe() {
@@ -470,12 +443,31 @@ function save() {
 }
 
 function setSyncStatus(s) {
-  var ind = document.getElementById('syncIndicator');
-  var dot = document.getElementById('syncDot');
-  var lbl = document.getElementById('syncLabel');
-  ind.className = 'sync-indicator ' + s;
-  dot.className = 'sync-dot' + (s === 'syncing' ? ' spinning' : '');
-  lbl.textContent = s === 'syncing' ? 'Syncing...' : s === 'synced' ? 'Live sync on' : 'Sync error';
+  document.getElementById('syncIndicator').className = 'sync-indicator ' + s;
+  document.getElementById('syncDot').className = 'sync-dot' + (s === 'syncing' ? ' spinning' : '');
+  document.getElementById('syncLabel').textContent =
+    s === 'syncing' ? 'Syncing...' : s === 'synced' ? 'Live sync on' : 'Sync error';
+}
+
+// =============================================
+// KEY / TOGGLE / CHECK
+// =============================================
+function choreKey(kidId, tod, label) { return kidId + '__' + tod + '__' + label; }
+
+function isChecked(kidId, tod, label) {
+  var k = choreKey(kidId, tod, label);
+  return !!(choreState[kidId] && choreState[kidId][k] && choreState[kidId][k].done);
+}
+
+function handleChore(kidId, tod, label, el) {
+  el.classList.add('confetti-pop');
+  setTimeout(function() { el.classList.remove('confetti-pop'); }, 300);
+  var k = choreKey(kidId, tod, label);
+  if (!choreState[kidId]) choreState[kidId] = {};
+  var was = choreState[kidId][k] && choreState[kidId][k].done;
+  choreState[kidId][k] = { done: !was, ts: Date.now() };
+  render();
+  save();
 }
 
 // =============================================
@@ -485,8 +477,7 @@ function renderWhoScreen() {
   document.getElementById('whoGrid').innerHTML = USERS.map(function(u) {
     return '<button class="who-btn kid-' + u.id + (u.type === 'parent' ? ' parent-btn' : '') +
       '" onclick="selectUser(\'' + u.id + '\')">' +
-      '<span class="emoji">' + u.emoji + '</span>' +
-      '<span>' + u.name + '</span></button>';
+      '<span class="emoji">' + u.emoji + '</span><span>' + u.name + '</span></button>';
   }).join('');
 }
 
@@ -495,10 +486,9 @@ function selectUser(userId) {
   document.getElementById('who-screen').style.display = 'none';
   document.getElementById('main-board').style.display = 'block';
   document.getElementById('userEmoji').textContent = currentUser.emoji;
-  document.getElementById('userName').textContent = currentUser.name;
+  document.getElementById('userName').textContent   = currentUser.name;
   document.getElementById('resetBtn').style.display = currentUser.type === 'parent' ? 'block' : 'none';
   subscribe();
-  renderTodTabs();
 }
 
 function switchUser() {
@@ -509,131 +499,88 @@ function switchUser() {
 }
 
 // =============================================
-// TOD TABS
-// =============================================
-function renderTodTabs() {
-  document.getElementById('todTabs').innerHTML = TOD.map(function(t) {
-    return '<button class="tod-tab ' + t + (t === currentTod ? ' active' : '') +
-      '" onclick="selectTod(\'' + t + '\')">' + TOD_LABELS[t] + '</button>';
-  }).join('');
-}
-
-function selectTod(tod) {
-  currentTod = tod;
-  renderTodTabs();
-  render();
-}
-
-// =============================================
-// TOGGLE
-// =============================================
-function handleChore(kidId, tod, label, el) {
-  el.classList.add('confetti-pop');
-  setTimeout(function() { el.classList.remove('confetti-pop'); }, 300);
-  var key = tod + '__' + label;
-  if (!choreState[kidId]) choreState[kidId] = {};
-  var was = choreState[kidId][key] && choreState[kidId][key].done;
-  choreState[kidId][key] = { done: !was, ts: Date.now() };
-  render();
-  save();
-}
-
-// =============================================
 // RENDER
 // =============================================
-function choreKey(tod, label) { return tod + '__' + label; }
-
-function isChecked(kidId, tod, label) {
-  var k = choreKey(tod, label);
-  return !!(choreState[kidId] && choreState[kidId][k] && choreState[kidId][k].done);
-}
-
 function render() {
-  var tod = currentTod;
   var isParent = currentUser && currentUser.type === 'parent';
-  var myId = currentUser ? currentUser.id : null;
+  var myId     = currentUser ? currentUser.id : null;
 
-  // Summary across all kids for this tod
+  // Summary — all chores across all kids
   var totalDone = 0, totalAll = 0;
   for (var ki = 0; ki < KIDS.length; ki++) {
-    var kc = getChoresForKid(KIDS[ki].id, tod);
+    var kc = getChoresForKid(KIDS[ki].id);
     totalAll += kc.length;
     for (var ci = 0; ci < kc.length; ci++) {
-      if (isChecked(KIDS[ki].id, tod, kc[ci].label + KIDS[ki].id)) totalDone++;
+      if (isChecked(KIDS[ki].id, kc[ci].tod, kc[ci].label)) totalDone++;
     }
   }
-
-  // Better: count individually keyed
-  totalDone = 0; totalAll = 0;
-  for (var ki2 = 0; ki2 < KIDS.length; ki2++) {
-    var kc2 = getChoresForKid(KIDS[ki2].id, tod);
-    totalAll += kc2.length;
-    for (var ci2 = 0; ci2 < kc2.length; ci2++) {
-      var key2 = choreKey(tod, KIDS[ki2].id + '__' + kc2[ci2].label);
-      if (choreState[KIDS[ki2].id] && choreState[KIDS[ki2].id][key2] && choreState[KIDS[ki2].id][key2].done) totalDone++;
-    }
-  }
-
   var pct = totalAll ? Math.round(totalDone / totalAll * 100) : 0;
   document.getElementById('summaryBar').innerHTML =
     '<div class="summary-item">📋 ' + totalDone + ' / ' + totalAll + ' done</div>' +
     '<div class="summary-item">🏆 ' + pct + '% complete</div>';
 
-  // Kids grid
-  var html = '';
+  // Build each kid card
+  var gridHtml = '';
   for (var k = 0; k < KIDS.length; k++) {
-    var kid = KIDS[k];
-    var chores = getChoresForKid(kid.id, tod);
+    var kid    = KIDS[k];
+    var chores = getChoresForKid(kid.id);
     var doneCt = 0;
     for (var c = 0; c < chores.length; c++) {
-      var ck = choreKey(tod, kid.id + '__' + chores[c].label);
-      if (choreState[kid.id] && choreState[kid.id][ck] && choreState[kid.id][ck].done) doneCt++;
+      if (isChecked(kid.id, chores[c].tod, chores[c].label)) doneCt++;
     }
-    var kpct = chores.length ? Math.round(doneCt / chores.length * 100) : 0;
+    var kpct    = chores.length ? Math.round(doneCt / chores.length * 100) : 0;
     var allDone = chores.length > 0 && doneCt === chores.length;
     var isMyCard = myId === kid.id;
     var readonly = !isParent && !isMyCard;
 
     var cardClass = 'kid-card kid-' + kid.id;
     if (!isParent && !isMyCard) cardClass += ' dimmed';
-    if (!isParent && isMyCard) cardClass += ' own-card';
+    if (!isParent && isMyCard)  cardClass += ' own-card';
 
-    // Group chores by section
-    var sections = {}, sectionOrder = [];
-    for (var sc = 0; sc < chores.length; sc++) {
-      var sec = chores[sc].section;
-      if (!sections[sec]) { sections[sec] = []; sectionOrder.push(sec); }
-      sections[sec].push(chores[sc]);
-    }
+    // Build chore list grouped by tod then section
+    var choreHtml = '<div class="chore-list">';
+    for (var ti = 0; ti < TOD_ORDER.length; ti++) {
+      var tod = TOD_ORDER[ti];
+      var todChores = chores.filter(function(ch) { return ch.tod === tod; });
+      if (todChores.length === 0) continue;
 
-    var choreHtml = '';
-    if (chores.length === 0) {
-      choreHtml = '<div class="no-chores">No chores this time! 🎉</div>';
-    } else {
-      for (var si = 0; si < sectionOrder.length; si++) {
-        var secName = sectionOrder[si];
-        choreHtml += '<div class="chore-section-header">' + secName + '</div>';
-        var sitems = sections[secName];
-        for (var sj = 0; sj < sitems.length; sj++) {
-          var ch = sitems[sj];
-          var ck2 = choreKey(tod, kid.id + '__' + ch.label);
-          var isDone = choreState[kid.id] && choreState[kid.id][ck2] && choreState[kid.id][ck2].done;
-          var ts = choreState[kid.id] && choreState[kid.id][ck2] && choreState[kid.id][ck2].ts;
-          var timeStr = ts ? new Date(ts).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : '';
-          var safeLabel = ch.label.replace(/'/g,"\\'");
+      // TOD divider
+      choreHtml += '<div class="tod-divider tod-' + tod + '">' +
+        '<span class="tod-divider-label">' + TOD_LABELS[tod] + '</span>' +
+        '<div class="tod-divider-line"></div></div>';
+
+      // Group by section within this tod
+      var secs = {}, secOrder = [];
+      for (var tc = 0; tc < todChores.length; tc++) {
+        var sec = todChores[tc].section;
+        if (!secs[sec]) { secs[sec] = []; secOrder.push(sec); }
+        secs[sec].push(todChores[tc]);
+      }
+
+      for (var si = 0; si < secOrder.length; si++) {
+        var items = secs[secOrder[si]];
+        for (var ii = 0; ii < items.length; ii++) {
+          var ch    = items[ii];
+          var isDone = isChecked(kid.id, tod, ch.label);
+          var ck     = choreKey(kid.id, tod, ch.label);
+          var ts     = choreState[kid.id] && choreState[kid.id][ck] && choreState[kid.id][ck].ts;
+          var tStr   = ts ? new Date(ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) : '';
+          var safe   = ch.label.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+
           choreHtml +=
             '<div class="chore-item' + (isDone ? ' done' : '') + (readonly ? ' readonly' : '') + '"' +
-            (readonly ? '' : ' onclick="handleChore(\'' + kid.id + '\',\'' + tod + '\',\'' + safeLabel + '\',this)"') + '>' +
+            (readonly ? '' : ' onclick="handleChore(\'' + kid.id + '\',\'' + tod + '\',\'' + safe + '\',this)"') + '>' +
             '<div class="chore-check">' + (isDone ? '✓' : '') + '</div>' +
             '<span class="chore-icon">' + ch.icon + '</span>' +
             '<div style="flex:1"><div class="chore-label">' + ch.label + '</div>' +
-            (isDone && timeStr ? '<div class="chore-time">✓ ' + timeStr + '</div>' : '') +
+            (isDone && tStr ? '<div class="chore-time">✓ ' + tStr + '</div>' : '') +
             '</div></div>';
         }
       }
     }
+    choreHtml += '</div>';
 
-    html +=
+    gridHtml +=
       '<div class="' + cardClass + '">' +
         '<div class="kid-header">' +
           '<div class="kid-avatar">' + kid.emoji + '</div>' +
@@ -644,24 +591,15 @@ function render() {
           '</div>' +
           '<div class="score-badge">' + doneCt + '/' + chores.length + '</div>' +
         '</div>' +
-        '<div class="chore-list">' + choreHtml + '</div>' +
+        choreHtml +
       '</div>';
   }
-  document.getElementById('kidsGrid').innerHTML = html;
+  document.getElementById('kidsGrid').innerHTML = gridHtml;
 }
 
-function resetSection() {
-  if (!confirm('Reset all ' + TOD_LABELS[currentTod] + ' chores?')) return;
-  var tod = currentTod;
-  for (var k = 0; k < KIDS.length; k++) {
-    var kid = KIDS[k];
-    var chores = getChoresForKid(kid.id, tod);
-    if (!choreState[kid.id]) continue;
-    for (var c = 0; c < chores.length; c++) {
-      var ck = choreKey(tod, kid.id + '__' + chores[c].label);
-      delete choreState[kid.id][ck];
-    }
-  }
+function resetAll() {
+  if (!confirm('Reset ALL chores for everyone?')) return;
+  choreState = {};
   save();
   render();
 }
@@ -670,7 +608,6 @@ function resetSection() {
 // BOOT
 // =============================================
 renderWhoScreen();
-document.getElementById('who-screen').style.display = 'flex';
 </script>
 </body>
 </html>
