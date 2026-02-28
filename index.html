@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hull Family Chore Board</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FFF9F0;
+    --card-bg: #ffffff;
+    --shadow: 0 4px 20px rgba(0,0,0,0.08);
+    --radius: 20px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    padding: 24px 16px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+
+  header h1 {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    color: #2D2D2D;
+    letter-spacing: 1px;
+  }
+
+  header .subtitle {
+    font-size: 1rem;
+    color: #888;
+    font-weight: 600;
+    margin-top: 4px;
+  }
+
+  .day-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+  }
+
+  .day-tab {
+    padding: 8px 18px;
+    border-radius: 50px;
+    border: 2px solid #E0E0E0;
+    background: white;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: #666;
+  }
+
+  .day-tab.active {
+    border-color: transparent;
+    background: #2D2D2D;
+    color: white;
+  }
+
+  .day-tab:hover:not(.active) {
+    border-color: #aaa;
+    color: #333;
+  }
+
+  .kids-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .kid-card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    transition: transform 0.2s;
+  }
+
+  .kid-card:hover { transform: translateY(-2px); }
+
+  .kid-header {
+    padding: 18px 22px 14px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    position: relative;
+  }
+
+  .kid-avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    flex-shrink: 0;
+    border: 3px solid rgba(255,255,255,0.6);
+  }
+
+  .kid-info h2 {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.4rem;
+    color: #2D2D2D;
+  }
+
+  .kid-age {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .progress-bar-wrap {
+    height: 8px;
+    background: #F0F0F0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 10px;
+    width: 100%;
+  }
+
+  .progress-bar {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.4s ease;
+  }
+
+  .chore-list {
+    padding: 8px 14px 18px;
+  }
+
+  .chore-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    margin-bottom: 6px;
+    cursor: pointer;
+    transition: background 0.15s;
+    user-select: none;
+  }
+
+  .chore-item:hover { background: #F8F8F8; }
+
+  .chore-item.done { opacity: 0.6; }
+
+  .chore-check {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 2.5px solid #DDD;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+  }
+
+  .chore-item.done .chore-check {
+    border-color: transparent;
+  }
+
+  .chore-item.done .chore-label {
+    text-decoration: line-through;
+    color: #AAA;
+  }
+
+  .chore-label {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #333;
+    transition: color 0.2s;
+    flex: 1;
+  }
+
+  .chore-icon {
+    font-size: 1.1rem;
+  }
+
+  /* Score badge */
+  .score-badge {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.1rem;
+    padding: 4px 12px;
+    border-radius: 50px;
+    color: white;
+  }
+
+  /* Color themes per kid */
+  .kid-theodore .kid-header { background: linear-gradient(135deg, #667eea22, #764ba222); }
+  .kid-theodore .kid-avatar { background: linear-gradient(135deg, #667eea, #764ba2); }
+  .kid-theodore .progress-bar { background: linear-gradient(90deg, #667eea, #764ba2); }
+  .kid-theodore .score-badge { background: linear-gradient(135deg, #667eea, #764ba2); }
+  .kid-theodore .chore-item.done .chore-check { background: linear-gradient(135deg, #667eea, #764ba2); }
+
+  .kid-alice .kid-header { background: linear-gradient(135deg, #f093fb22, #f5576c22); }
+  .kid-alice .kid-avatar { background: linear-gradient(135deg, #f093fb, #f5576c); }
+  .kid-alice .progress-bar { background: linear-gradient(90deg, #f093fb, #f5576c); }
+  .kid-alice .score-badge { background: linear-gradient(135deg, #f093fb, #f5576c); }
+  .kid-alice .chore-item.done .chore-check { background: linear-gradient(135deg, #f093fb, #f5576c); }
+
+  .kid-andrew .kid-header { background: linear-gradient(135deg, #4facfe22, #00f2fe22); }
+  .kid-andrew .kid-avatar { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+  .kid-andrew .progress-bar { background: linear-gradient(90deg, #4facfe, #00f2fe); }
+  .kid-andrew .score-badge { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+  .kid-andrew .chore-item.done .chore-check { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+
+  .kid-felix .kid-header { background: linear-gradient(135deg, #43e97b22, #38f9d722); }
+  .kid-felix .kid-avatar { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+  .kid-felix .progress-bar { background: linear-gradient(90deg, #43e97b, #38f9d7); }
+  .kid-felix .score-badge { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+  .kid-felix .chore-item.done .chore-check { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+
+  .kid-lucy .kid-header { background: linear-gradient(135deg, #fa709a22, #fee14022); }
+  .kid-lucy .kid-avatar { background: linear-gradient(135deg, #fa709a, #fee140); }
+  .kid-lucy .progress-bar { background: linear-gradient(90deg, #fa709a, #fee140); }
+  .kid-lucy .score-badge { background: linear-gradient(135deg, #fa709a, #fee140); }
+  .kid-lucy .chore-item.done .chore-check { background: linear-gradient(135deg, #fa709a, #fee140); }
+
+  .kid-leo .kid-header { background: linear-gradient(135deg, #f7971e22, #ffd20022); }
+  .kid-leo .kid-avatar { background: linear-gradient(135deg, #f7971e, #ffd200); }
+  .kid-leo .progress-bar { background: linear-gradient(90deg, #f7971e, #ffd200); }
+  .kid-leo .score-badge { background: linear-gradient(135deg, #f7971e, #ffd200); }
+  .kid-leo .chore-item.done .chore-check { background: linear-gradient(135deg, #f7971e, #ffd200); }
+
+  .summary-bar {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #555;
+  }
+
+  .summary-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: white;
+    padding: 8px 18px;
+    border-radius: 50px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  }
+
+  .confetti-pop {
+    animation: pop 0.3s ease;
+  }
+
+  @keyframes pop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+    100% { transform: scale(1); }
+  }
+
+  .reset-btn {
+    display: block;
+    margin: 24px auto 0;
+    padding: 10px 28px;
+    border-radius: 50px;
+    border: 2px solid #DDD;
+    background: white;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    color: #777;
+    transition: all 0.2s;
+  }
+
+  .reset-btn:hover { border-color: #aaa; color: #333; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>⭐ Hull Family Chores ⭐</h1>
+  <p class="subtitle">☀️ Morning Routine — Let's go, Hulls!</p>
+</header>
+
+<div class="day-tabs" id="dayTabs"></div>
+
+<div class="summary-bar" id="summaryBar"></div>
+
+<div class="kids-grid" id="kidsGrid"></div>
+
+<button class="reset-btn" onclick="resetDay()">🔄 Reset Today's Chores</button>
+
+<script>
+const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+
+// Chore definitions per kid, including day-specific chores
+// format: { label, icon, days: ['all'] or specific days }
+const KIDS = [
+  {
+    id: 'theodore',
+    name: 'Theodore',
+    age: 11,
+    emoji: '🦁',
+    chores: [
+      { label: 'Get dressed', icon: '👕', days: 'all' },
+      { label: 'Brush teeth', icon: '🪥', days: 'all' },
+      { label: 'Brush hair', icon: '💈', days: 'all' },
+      { label: 'Make bed', icon: '🛏️', days: 'all' },
+      { label: 'Eat breakfast', icon: '🥣', days: 'all' },
+      { label: 'Empty dishwasher', icon: '🍽️', days: 'all' },
+      { label: 'Pack school bag', icon: '🎒', days: ['Monday','Tuesday','Wednesday','Thursday','Friday'] },
+      { label: 'Shoes & coat on', icon: '👟', days: 'all' },
+    ]
+  },
+  {
+    id: 'alice',
+    name: 'Alice',
+    age: 9,
+    emoji: '🦋',
+    chores: [
+      { label: 'Get dressed', icon: '👕', days: 'all' },
+      { label: 'Brush teeth', icon: '🪥', days: 'all' },
+      { label: 'Brush hair', icon: '💈', days: 'all' },
+      { label: 'Make bed', icon: '🛏️', days: 'all' },
+      { label: 'Eat breakfast', icon: '🥣', days: 'all' },
+      { label: 'Bring bowl to sink', icon: '🫧', days: 'all' },
+      { label: 'Pack school bag', icon: '🎒', days: ['Monday','Tuesday','Wednesday','Thursday','Friday'] },
+      { label: 'Shoes & coat on', icon: '👟', days: 'all' },
+    ]
+  },
+  {
+    id: 'andrew',
+    name: 'Andrew',
+    age: 8,
+    emoji: '🚀',
+    chores: [
+      { label: 'Get dressed', icon: '👕', days: 'all' },
+      { label: 'Brush teeth', icon: '🪥', days: 'all' },
+      { label: 'Brush hair', icon: '💈', days: 'all' },
+      { label: 'Make bed', icon: '🛏️', days: 'all' },
+      { label: 'Eat breakfast', icon: '🥣', days: 'all' },
+      { label: 'Bring bowl to sink', icon: '🫧', days: 'all' },
+      { label: 'Pack school bag', icon: '🎒', days: ['Monday','Tuesday','Wednesday','Thursday','Friday'] },
+      { label: 'Shoes & coat on', icon: '👟', days: 'all' },
+    ]
+  },
+  {
+    id: 'felix',
+    name: 'Felix',
+    age: 6,
+    emoji: '🐸',
+    chores: [
+      { label: 'Get dressed', icon: '👕', days: 'all' },
+      { label: 'Brush teeth', icon: '🪥', days: 'all' },
+      { label: 'Brush hair', icon: '💈', days: 'all' },
+      { label: 'Make bed', icon: '🛏️', days: 'all' },
+      { label: 'Eat breakfast', icon: '🥣', days: 'all' },
+      { label: 'Bring bowl to sink', icon: '🫧', days: 'all' },
+      { label: 'Shoes & coat on', icon: '👟', days: 'all' },
+    ]
+  },
+  {
+    id: 'lucy',
+    name: 'Lucy',
+    age: 5,
+    emoji: '🌸',
+    chores: [
+      { label: 'Get dressed', icon: '👕', days: 'all' },
+      { label: 'Brush teeth', icon: '🪥', days: 'all' },
+      { label: 'Brush hair', icon: '💈', days: 'all' },
+      { label: 'Make bed (with help)', icon: '🛏️', days: 'all' },
+      { label: 'Eat breakfast', icon: '🥣', days: 'all' },
+      { label: 'Bring bowl to sink', icon: '🫧', days: 'all' },
+      { label: 'Shoes & coat on', icon: '👟', days: 'all' },
+    ]
+  },
+  {
+    id: 'leo',
+    name: 'Leo',
+    age: 3,
+    emoji: '🐻',
+    chores: [
+      { label: 'Get dressed (with help)', icon: '👕', days: 'all' },
+      { label: 'Brush teeth', icon: '🪥', days: 'all' },
+      { label: 'Put PJs away', icon: '💤', days: 'all' },
+      { label: 'Eat breakfast', icon: '🥣', days: 'all' },
+      { label: 'Wash hands', icon: '🧼', days: 'all' },
+      { label: 'Shoes on', icon: '👟', days: 'all' },
+    ]
+  }
+];
+
+let currentDay = DAYS[new Date().getDay() === 0 ? 6 : new Date().getDay() - 1];
+let state = {}; // state[day][kidId][choreLabel] = done bool
+
+function getStateKey(day, kidId, label) {
+  return `chore_${day}_${kidId}_${label}`;
+}
+
+function isChecked(day, kidId, label) {
+  const k = getStateKey(day, kidId, label);
+  return localStorage.getItem(k) === '1';
+}
+
+function setChecked(day, kidId, label, val) {
+  const k = getStateKey(day, kidId, label);
+  if (val) localStorage.setItem(k, '1');
+  else localStorage.removeItem(k);
+}
+
+function getDayChores(kid, day) {
+  return kid.chores.filter(c => c.days === 'all' || c.days.includes(day));
+}
+
+function renderDayTabs() {
+  const el = document.getElementById('dayTabs');
+  el.innerHTML = DAYS.map(d => `
+    <button class="day-tab ${d === currentDay ? 'active' : ''}" onclick="selectDay('${d}')">${d}</button>
+  `).join('');
+}
+
+function renderSummary() {
+  let totalDone = 0, total = 0;
+  KIDS.forEach(kid => {
+    const chores = getDayChores(kid, currentDay);
+    total += chores.length;
+    chores.forEach(c => { if (isChecked(currentDay, kid.id, c.label)) totalDone++; });
+  });
+  const pct = total ? Math.round(totalDone / total * 100) : 0;
+  document.getElementById('summaryBar').innerHTML = `
+    <div class="summary-item">📋 ${totalDone} / ${total} chores done</div>
+    <div class="summary-item">🏆 ${pct}% complete</div>
+    <div class="summary-item">👨‍👩‍👧‍👦 ${KIDS.length} kids</div>
+  `;
+}
+
+function renderGrid() {
+  const grid = document.getElementById('kidsGrid');
+  grid.innerHTML = KIDS.map(kid => {
+    const chores = getDayChores(kid, currentDay);
+    const done = chores.filter(c => isChecked(currentDay, kid.id, c.label)).length;
+    const pct = chores.length ? Math.round(done / chores.length * 100) : 0;
+    const allDone = done === chores.length;
+
+    return `
+      <div class="kid-card kid-${kid.id}" id="card-${kid.id}">
+        <div class="kid-header">
+          <div class="kid-avatar">${kid.emoji}</div>
+          <div class="kid-info">
+            <h2>${kid.name} ${allDone ? '🎉' : ''}</h2>
+            <div class="kid-age">Age ${kid.age}</div>
+            <div class="progress-bar-wrap">
+              <div class="progress-bar" style="width:${pct}%"></div>
+            </div>
+          </div>
+          <div class="score-badge">${done}/${chores.length}</div>
+        </div>
+        <div class="chore-list">
+          ${chores.map(c => {
+            const checked = isChecked(currentDay, kid.id, c.label);
+            return `
+              <div class="chore-item ${checked ? 'done' : ''}" onclick="toggleChore('${kid.id}', '${c.label.replace(/'/g,"\\'")}', this)">
+                <div class="chore-check">${checked ? '✓' : ''}</div>
+                <span class="chore-icon">${c.icon}</span>
+                <span class="chore-label">${c.label}</span>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function toggleChore(kidId, label, el) {
+  const wasDone = el.classList.contains('done');
+  setChecked(currentDay, kidId, label, !wasDone);
+  el.classList.toggle('done', !wasDone);
+  const check = el.querySelector('.chore-check');
+  check.textContent = !wasDone ? '✓' : '';
+  if (!wasDone) el.classList.add('confetti-pop');
+  setTimeout(() => el.classList.remove('confetti-pop'), 300);
+
+  // Update card score & progress
+  const kid = KIDS.find(k => k.id === kidId);
+  const chores = getDayChores(kid, currentDay);
+  const done = chores.filter(c => isChecked(currentDay, kid.id, c.label)).length;
+  const pct = chores.length ? Math.round(done / chores.length * 100) : 0;
+
+  const card = document.getElementById(`card-${kidId}`);
+  card.querySelector('.progress-bar').style.width = pct + '%';
+  card.querySelector('.score-badge').textContent = `${done}/${chores.length}`;
+  const nameEl = card.querySelector('h2');
+  nameEl.textContent = `${kid.name} ${done === chores.length ? '🎉' : ''}`;
+
+  renderSummary();
+}
+
+function selectDay(day) {
+  currentDay = day;
+  renderDayTabs();
+  renderGrid();
+  renderSummary();
+}
+
+function resetDay() {
+  if (!confirm(`Reset all chores for ${currentDay}?`)) return;
+  KIDS.forEach(kid => {
+    getDayChores(kid, currentDay).forEach(c => setChecked(currentDay, kid.id, c.label, false));
+  });
+  renderGrid();
+  renderSummary();
+}
+
+// Init
+renderDayTabs();
+renderSummary();
+renderGrid();
+</script>
+</body>
+</html>
