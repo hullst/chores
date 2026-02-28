@@ -22,9 +22,6 @@
     padding: 24px 16px;
   }
 
-
-
-  /* ---- Who screen ---- */
   #who-screen {
     display: none;
     flex-direction: column;
@@ -70,17 +67,14 @@
   .who-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.18); }
   .who-btn .emoji { font-size: 2.2rem; }
 
-  /* ---- Main board ---- */
   #main-board { display: none; }
 
   header { text-align: center; margin-bottom: 24px; }
-
   header h1 {
     font-family: 'Fredoka One', cursive;
     font-size: clamp(1.8rem, 4vw, 2.8rem);
     color: #2D2D2D;
   }
-
   header .subtitle { font-size: 0.95rem; color: #888; font-weight: 600; margin-top: 4px; }
 
   .top-bar {
@@ -128,33 +122,37 @@
   .sync-dot.spinning { animation: pulse 0.8s ease-in-out infinite; }
 
   @keyframes pulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.4; transform: scale(0.8); }
+    0%,100% { opacity:1; transform:scale(1); }
+    50% { opacity:0.4; transform:scale(0.8); }
   }
 
-  .day-tabs {
+  /* Time of day tabs */
+  .tod-tabs {
     display: flex;
     justify-content: center;
-    gap: 8px;
+    gap: 10px;
+    margin-bottom: 28px;
     flex-wrap: wrap;
-    margin-bottom: 24px;
   }
 
-  .day-tab {
-    padding: 8px 18px;
+  .tod-tab {
+    padding: 10px 24px;
     border-radius: 50px;
-    border: 2px solid #E0E0E0;
+    border: 2.5px solid #E0E0E0;
     background: white;
     font-family: 'Nunito', sans-serif;
-    font-weight: 700;
-    font-size: 0.85rem;
+    font-weight: 800;
+    font-size: 0.95rem;
     cursor: pointer;
     transition: all 0.2s;
     color: #666;
   }
 
-  .day-tab.active { border-color: transparent; background: #2D2D2D; color: white; }
-  .day-tab:hover:not(.active) { border-color: #aaa; color: #333; }
+  .tod-tab.active { border-color: transparent; color: white; }
+  .tod-tab.active.morning { background: linear-gradient(135deg, #f7971e, #ffd200); }
+  .tod-tab.active.afternoon { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+  .tod-tab.active.evening { background: linear-gradient(135deg, #667eea, #764ba2); }
+  .tod-tab:hover:not(.active) { border-color: #bbb; color: #333; }
 
   .summary-bar {
     display: flex;
@@ -220,14 +218,13 @@
     padding: 4px 12px; border-radius: 50px; color: white;
   }
 
-  /* Chore section headers */
   .chore-section-header {
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 1.2px;
     color: #bbb;
-    padding: 10px 12px 4px;
+    padding: 10px 14px 3px;
   }
 
   .chore-list { padding: 4px 14px 16px; }
@@ -317,24 +314,28 @@
     50% { transform: scale(1.15); }
     100% { transform: scale(1); }
   }
+
+  .no-chores {
+    text-align: center;
+    color: #ccc;
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 20px 0 8px;
+  }
 </style>
 </head>
 <body>
 
-
-
-<!-- ===== WHO ARE YOU ===== -->
 <div id="who-screen">
   <h1>⭐ Hull Family Chores</h1>
   <p>Who's checking in?</p>
   <div class="who-grid" id="whoGrid"></div>
 </div>
 
-<!-- ===== MAIN BOARD ===== -->
 <div id="main-board">
   <header>
     <h1>⭐ Hull Family Chores</h1>
-    <p class="subtitle">☀️ Morning Routine — Let's go, Hulls!</p>
+    <p class="subtitle" id="boardSubtitle">Saturday Chores</p>
   </header>
 
   <div class="top-bar">
@@ -349,23 +350,26 @@
     </div>
   </div>
 
-  <div class="day-tabs" id="dayTabs"></div>
+  <div class="tod-tabs" id="todTabs"></div>
   <div class="summary-bar" id="summaryBar"></div>
   <div class="kids-grid" id="kidsGrid"></div>
-  <button class="reset-btn" id="resetBtn" style="display:none" onclick="resetDay()">🔄 Reset Today's Chores</button>
+  <button class="reset-btn" id="resetBtn" style="display:none" onclick="resetSection()">🔄 Reset This Section</button>
 </div>
 
-<!-- Firebase SDK -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, doc, setDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
+firebase.initializeApp({
+  apiKey: "AIzaSyBImvAIHP_3S9aDl0_yjhwtGG5pf1e5Z7k",
+  authDomain: "hull-chores.firebaseapp.com",
+  projectId: "hull-chores"
+});
+var db = firebase.firestore();
 
 // =============================================
 // DATA
 // =============================================
-const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
-
-const USERS = [
+var USERS = [
   { id: 'theodore', name: 'Theodore', age: 11, emoji: '🦁', type: 'kid' },
   { id: 'alice',    name: 'Alice',    age: 9,  emoji: '🦋', type: 'kid' },
   { id: 'andrew',   name: 'Andrew',   age: 8,  emoji: '🚀', type: 'kid' },
@@ -375,255 +379,298 @@ const USERS = [
   { id: 'parent',   name: 'Mom & Dad', emoji: '👨‍👩‍👧‍👦', type: 'parent' },
 ];
 
-// Chore helper: noSaturday means skip on Saturday
-const everyone = (label, icon, opts={}) => ({ label, icon, everyone: true, ...opts });
-const only = (ids, label, icon, opts={}) => ({ label, icon, assignedTo: ids, ...opts });
+var KIDS = USERS.filter(function(u) { return u.type === 'kid'; });
 
-const CHORE_DEFS = [
-  // ---- Morning basics (everyone) ----
-  { section: '🌅 Morning Basics' },
-  everyone('Make bed', '🛏️'),
-  everyone('Brush teeth', '🪥'),
-  everyone('Get dressed', '👕'),
-  everyone('Eat breakfast', '🥣'),
-  everyone('Bring plates to sink', '🫧'),
-  everyone('Put shoes & coat on', '👟', { noSaturday: true }),
+var TOD = ['morning', 'afternoon', 'evening'];
+var TOD_LABELS = { morning: '🌅 Morning', afternoon: '☀️ Afternoon', evening: '🌆 Evening' };
 
-  // ---- Family chores ----
-  { section: '🏠 Family Chores' },
-  only(['theodore'], 'Unload dishwasher', '🍽️'),
-  only(['alice', 'lucy'], 'Wipe bathroom sink (upstairs)', '🚿'),
-  only(['andrew', 'felix'], 'Wipe bathroom sink (downstairs)', '🚿'),
-  only(['theodore'], 'Wipe bathroom sink (master)', '🚿'),
-  only(['alice'], 'Vacuum living room', '🧹'),
-  only(['andrew'], 'Vacuum front room', '🧹'),
-  only(['lucy', 'leo'], 'Put away blankets', '🛋️'),
-  only(['theodore','alice','andrew','felix','lucy','leo'], 'Help fold laundry', '👕'),
-  only(['felix'], 'Fill up Sophie\'s dog food', '🐾'),
-  only(['andrew'], 'Fill up Sophie\'s water', '💧'),
+// Each chore: { label, icon, section (display label), ids: ['all'] or array of kid ids }
+var ALL_CHORES = {
+  morning: [
+    // Everyone
+    { label: 'Make bed',             icon: '🛏️', ids: 'all', section: 'Everyone' },
+    { label: 'Brush teeth',          icon: '🪥', ids: 'all', section: 'Everyone' },
+    { label: 'Get dressed',          icon: '👕', ids: 'all', section: 'Everyone' },
+    { label: 'Eat breakfast',        icon: '🥣', ids: 'all', section: 'Everyone' },
+    { label: 'Bring plates to sink', icon: '🫧', ids: 'all', section: 'Everyone' },
+    // Girls brush hair (Alice & Lucy)
+    { label: 'Brush hair',           icon: '💈', ids: ['alice','lucy'], section: 'Girls' },
+    // Family chores
+    { label: 'Unload dishwasher',              icon: '🍽️', ids: ['theodore'], section: 'Family Chores' },
+    { label: 'Wipe bathroom sink',             icon: '🚿', ids: ['theodore','leo'], section: 'Family Chores' },
+    { label: 'Wipe bathroom sink',             icon: '🚿', ids: ['alice','lucy'], section: 'Family Chores' },
+    { label: 'Wipe bathroom sink',             icon: '🚿', ids: ['andrew','felix'], section: 'Family Chores' },
+    { label: 'Vacuum living room',             icon: '🧹', ids: ['alice'], section: 'Family Chores' },
+    { label: 'Vacuum front room',              icon: '🧹', ids: ['andrew'], section: 'Family Chores' },
+    { label: 'Put away blankets',              icon: '🛋️', ids: ['lucy','leo'], section: 'Family Chores' },
+    { label: 'Fill up Sophie\'s food',         icon: '🐾', ids: ['felix'], section: 'Family Chores' },
+    { label: 'Fill up Sophie\'s water',        icon: '💧', ids: ['andrew'], section: 'Family Chores' },
+    { label: 'Help fold laundry',              icon: '👕', ids: 'all', section: 'Family Chores' },
+    // Special
+    { label: 'Go kiss Momma good morning!',    icon: '💋', ids: 'all', section: '❤️ Special' },
+  ],
+  afternoon: [
+    { label: 'Eat lunch',            icon: '🥪', ids: 'all', section: 'Everyone' },
+    { label: 'Bring lunch plates to sink', icon: '🫧', ids: 'all', section: 'Everyone' },
+    { label: 'Load dishwasher',      icon: '🫧', ids: ['alice'], section: 'Clean Up' },
+    { label: 'Put away lunch stuff', icon: '🧹', ids: ['felix'], section: 'Clean Up' },
+    { label: 'Take out recyclables', icon: '♻️', ids: ['andrew'], section: 'Clean Up' },
+    { label: 'Clean pool bathroom',  icon: '🚿', ids: ['theodore'], section: 'Bathrooms' },
+    { label: 'Clean front bathroom', icon: '🚿', ids: ['alice'], section: 'Bathrooms' },
+    { label: 'Clean basement bathroom', icon: '🚿', ids: ['felix'], section: 'Bathrooms' },
+  ],
+  evening: [
+    { label: 'Eat dinner',           icon: '🍽️', ids: 'all', section: 'Everyone' },
+    { label: 'Bring dinner plates to sink', icon: '🫧', ids: 'all', section: 'Everyone' },
+    { label: 'Eat dessert',          icon: '🍨', ids: 'all', section: 'Everyone' },
+    { label: 'Load dishwasher',      icon: '🍽️', ids: ['andrew','felix'], section: 'Clean Up' },
+    { label: 'Wipe kitchen counter', icon: '🧽', ids: ['alice'], section: 'Clean Up' },
+    { label: 'Wipe kitchen table',   icon: '🧹', ids: ['lucy'], section: 'Clean Up' },
+  ]
+};
 
-  // ---- Special ----
-  { section: '❤️ Special' },
-  everyone('Go kiss Momma good morning!', '💋'),
-];
-
-// Build per-kid chore list from CHORE_DEFS
-function getChoreDefs(kidId, day) {
-  const isSaturday = day === 'Saturday';
-  const result = [];
-  let currentSection = null;
-  for (const def of CHORE_DEFS) {
-    if (def.section) { currentSection = def.section; continue; }
-    if (def.noSaturday && isSaturday) continue;
-    const forMe = def.everyone || (def.assignedTo && def.assignedTo.includes(kidId));
-    if (forMe) result.push({ ...def, section: currentSection });
+// Build per-kid chore list for a given time of day
+function getChoresForKid(kidId, tod) {
+  var result = [];
+  var defs = ALL_CHORES[tod];
+  for (var i = 0; i < defs.length; i++) {
+    var d = defs[i];
+    var forMe = d.ids === 'all' || d.ids.indexOf(kidId) !== -1;
+    if (forMe) result.push(d);
   }
   return result;
 }
 
 // =============================================
-// FIREBASE
-// =============================================
-let db = null;
-let unsubscribe = null;
-
-function initFirebase() {
-  const app = initializeApp({
-    apiKey: "AIzaSyBImvAIHP_3S9aDl0_yjhwtGG5pf1e5Z7k",
-    authDomain: "hull-chores.firebaseapp.com",
-    projectId: "hull-chores",
-  });
-  db = getFirestore(app);
-  document.getElementById('who-screen').style.display = 'flex';
-  renderWhoScreen();
-}
-
-function docRef(day) {
-  return doc(db, 'chores', day);
-}
-
-// =============================================
 // STATE
 // =============================================
-let currentUser = null;
-let currentDay = DAYS[new Date().getDay() === 0 ? 6 : new Date().getDay() - 1];
-let choreState = {}; // { [kidId]: { [label]: { done, ts } } }
+var currentUser = null;
+var currentTod = 'morning';
+var choreState = {}; // { [kidId]: { [tod_label]: { done, ts } } }
+var unsub = null;
+
+// Firestore doc per saturday (reuse same doc, keyed by section)
+function docRef() { return db.collection('chores').doc('saturday'); }
+
+function subscribe() {
+  if (unsub) unsub();
+  setSyncStatus('syncing');
+  unsub = docRef().onSnapshot(function(snap) {
+    choreState = snap.exists ? (snap.data().state || {}) : {};
+    setSyncStatus('synced');
+    render();
+  }, function() { setSyncStatus('error'); });
+}
+
+function save() {
+  setSyncStatus('syncing');
+  docRef().set({ state: choreState, updatedAt: Date.now() })
+    .then(function() { setSyncStatus('synced'); })
+    .catch(function() { setSyncStatus('error'); });
+}
+
+function setSyncStatus(s) {
+  var ind = document.getElementById('syncIndicator');
+  var dot = document.getElementById('syncDot');
+  var lbl = document.getElementById('syncLabel');
+  ind.className = 'sync-indicator ' + s;
+  dot.className = 'sync-dot' + (s === 'syncing' ? ' spinning' : '');
+  lbl.textContent = s === 'syncing' ? 'Syncing...' : s === 'synced' ? 'Live sync on' : 'Sync error';
+}
 
 // =============================================
 // WHO SCREEN
 // =============================================
-window.renderWhoScreen = function() {
-  document.getElementById('whoGrid').innerHTML = USERS.map(u => `
-    <button class="who-btn kid-${u.id} ${u.type==='parent'?'parent-btn':''}" onclick="selectUser('${u.id}')">
-      <span class="emoji">${u.emoji}</span>
-      <span>${u.name}</span>
-    </button>
-  `).join('');
-};
+function renderWhoScreen() {
+  document.getElementById('whoGrid').innerHTML = USERS.map(function(u) {
+    return '<button class="who-btn kid-' + u.id + (u.type === 'parent' ? ' parent-btn' : '') +
+      '" onclick="selectUser(\'' + u.id + '\')">' +
+      '<span class="emoji">' + u.emoji + '</span>' +
+      '<span>' + u.name + '</span></button>';
+  }).join('');
+}
 
-window.selectUser = function(userId) {
-  currentUser = USERS.find(u => u.id === userId);
+function selectUser(userId) {
+  currentUser = USERS.find(function(u) { return u.id === userId; });
   document.getElementById('who-screen').style.display = 'none';
   document.getElementById('main-board').style.display = 'block';
   document.getElementById('userEmoji').textContent = currentUser.emoji;
   document.getElementById('userName').textContent = currentUser.name;
   document.getElementById('resetBtn').style.display = currentUser.type === 'parent' ? 'block' : 'none';
-  subscribeToDay(currentDay);
-  renderDayTabs();
-};
+  subscribe();
+  renderTodTabs();
+}
 
-window.switchUser = function() {
-  if (unsubscribe) { unsubscribe(); unsubscribe = null; }
+function switchUser() {
+  if (unsub) { unsub(); unsub = null; }
   currentUser = null;
   document.getElementById('who-screen').style.display = 'flex';
   document.getElementById('main-board').style.display = 'none';
-};
-
-// =============================================
-// FIRESTORE REALTIME
-// =============================================
-function subscribeToDay(day) {
-  if (unsubscribe) unsubscribe();
-  setSyncStatus('syncing');
-  unsubscribe = onSnapshot(docRef(day), (snap) => {
-    choreState = snap.exists() ? (snap.data().state || {}) : {};
-    setSyncStatus('synced');
-    renderGrid();
-    renderSummary();
-  }, () => setSyncStatus('error'));
 }
 
-async function saveState() {
-  setSyncStatus('syncing');
-  try {
-    await setDoc(docRef(currentDay), { state: choreState, updatedAt: Date.now() });
-    setSyncStatus('synced');
-  } catch(e) { setSyncStatus('error'); }
+// =============================================
+// TOD TABS
+// =============================================
+function renderTodTabs() {
+  document.getElementById('todTabs').innerHTML = TOD.map(function(t) {
+    return '<button class="tod-tab ' + t + (t === currentTod ? ' active' : '') +
+      '" onclick="selectTod(\'' + t + '\')">' + TOD_LABELS[t] + '</button>';
+  }).join('');
 }
 
-function setSyncStatus(s) {
-  const ind = document.getElementById('syncIndicator');
-  const dot = document.getElementById('syncDot');
-  const label = document.getElementById('syncLabel');
-  ind.className = 'sync-indicator ' + s;
-  dot.className = 'sync-dot' + (s === 'syncing' ? ' spinning' : '');
-  label.textContent = { syncing: 'Syncing...', synced: 'Live sync on', error: 'Sync error' }[s] || s;
+function selectTod(tod) {
+  currentTod = tod;
+  renderTodTabs();
+  render();
 }
 
 // =============================================
 // TOGGLE
 // =============================================
-window.handleChore = async function(kidId, label, el) {
+function handleChore(kidId, tod, label, el) {
   el.classList.add('confetti-pop');
-  setTimeout(() => el.classList.remove('confetti-pop'), 300);
+  setTimeout(function() { el.classList.remove('confetti-pop'); }, 300);
+  var key = tod + '__' + label;
   if (!choreState[kidId]) choreState[kidId] = {};
-  const wasDone = choreState[kidId][label] && choreState[kidId][label].done;
-  choreState[kidId][label] = { done: !wasDone, ts: Date.now() };
-  renderGrid();
-  renderSummary();
-  await saveState();
-};
+  var was = choreState[kidId][key] && choreState[kidId][key].done;
+  choreState[kidId][key] = { done: !was, ts: Date.now() };
+  render();
+  save();
+}
 
 // =============================================
 // RENDER
 // =============================================
-window.renderDayTabs = function() {
-  document.getElementById('dayTabs').innerHTML = DAYS.map(d => `
-    <button class="day-tab ${d===currentDay?'active':''}" onclick="selectDay('${d}')">${d}</button>
-  `).join('');
-};
+function choreKey(tod, label) { return tod + '__' + label; }
 
-function renderSummary() {
-  let done = 0, total = 0;
-  for (const kid of USERS.filter(u=>u.type==='kid')) {
-    for (const c of getChoreDefs(kid.id, currentDay)) {
-      total++;
-      if (choreState[kid.id] && choreState[kid.id][c.label] && choreState[kid.id][c.label].done) done++;
-    }
-  }
-  const pct = total ? Math.round(done/total*100) : 0;
-  document.getElementById('summaryBar').innerHTML = `
-    <div class="summary-item">📋 ${done} / ${total} chores done</div>
-    <div class="summary-item">🏆 ${pct}% complete</div>
-  `;
+function isChecked(kidId, tod, label) {
+  var k = choreKey(tod, label);
+  return !!(choreState[kidId] && choreState[kidId][k] && choreState[kidId][k].done);
 }
 
-function renderGrid() {
-  const isParent = currentUser && currentUser.type === 'parent';
-  const myId = currentUser ? currentUser.id : null;
-  const kids = USERS.filter(u => u.type === 'kid');
+function render() {
+  var tod = currentTod;
+  var isParent = currentUser && currentUser.type === 'parent';
+  var myId = currentUser ? currentUser.id : null;
 
-  document.getElementById('kidsGrid').innerHTML = kids.map(kid => {
-    const chores = getChoreDefs(kid.id, currentDay);
-    const doneCt = chores.filter(c => choreState[kid.id] && choreState[kid.id][c.label] && choreState[kid.id][c.label].done).length;
-    const pct = chores.length ? Math.round(doneCt/chores.length*100) : 0;
-    const allDone = doneCt === chores.length && chores.length > 0;
-    const isMyCard = myId === kid.id;
-    const readonly = !isParent && !isMyCard;
-
-    // Group chores by section
-    const sections = {};
-    for (const c of chores) {
-      if (!sections[c.section]) sections[c.section] = [];
-      sections[c.section].push(c);
+  // Summary across all kids for this tod
+  var totalDone = 0, totalAll = 0;
+  for (var ki = 0; ki < KIDS.length; ki++) {
+    var kc = getChoresForKid(KIDS[ki].id, tod);
+    totalAll += kc.length;
+    for (var ci = 0; ci < kc.length; ci++) {
+      if (isChecked(KIDS[ki].id, tod, kc[ci].label + KIDS[ki].id)) totalDone++;
     }
+  }
 
-    let choreHTML = '';
-    for (const [sec, items] of Object.entries(sections)) {
-      choreHTML += `<div class="chore-section-header">${sec}</div>`;
-      for (const c of items) {
-        const checked = choreState[kid.id] && choreState[kid.id][c.label] && choreState[kid.id][c.label].done;
-        const ts = choreState[kid.id] && choreState[kid.id][c.label] && choreState[kid.id][c.label].ts;
-        const timeStr = ts ? new Date(ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) : '';
-        choreHTML += `
-          <div class="chore-item ${checked?'done':''} ${readonly?'readonly':''}"
-               onclick="${readonly?'':` handleChore('${kid.id}','${c.label.replace(/'/g,"\\'").replace(/"/g,'&quot;')}',this)`}">
-            <div class="chore-check">${checked?'✓':''}</div>
-            <span class="chore-icon">${c.icon}</span>
-            <div style="flex:1">
-              <div class="chore-label">${c.label}</div>
-              ${checked&&timeStr?`<div class="chore-time">✓ ${timeStr}</div>`:''}
-            </div>
-          </div>`;
-      }
+  // Better: count individually keyed
+  totalDone = 0; totalAll = 0;
+  for (var ki2 = 0; ki2 < KIDS.length; ki2++) {
+    var kc2 = getChoresForKid(KIDS[ki2].id, tod);
+    totalAll += kc2.length;
+    for (var ci2 = 0; ci2 < kc2.length; ci2++) {
+      var key2 = choreKey(tod, KIDS[ki2].id + '__' + kc2[ci2].label);
+      if (choreState[KIDS[ki2].id] && choreState[KIDS[ki2].id][key2] && choreState[KIDS[ki2].id][key2].done) totalDone++;
     }
+  }
 
-    let cardClass = `kid-card kid-${kid.id}`;
+  var pct = totalAll ? Math.round(totalDone / totalAll * 100) : 0;
+  document.getElementById('summaryBar').innerHTML =
+    '<div class="summary-item">📋 ' + totalDone + ' / ' + totalAll + ' done</div>' +
+    '<div class="summary-item">🏆 ' + pct + '% complete</div>';
+
+  // Kids grid
+  var html = '';
+  for (var k = 0; k < KIDS.length; k++) {
+    var kid = KIDS[k];
+    var chores = getChoresForKid(kid.id, tod);
+    var doneCt = 0;
+    for (var c = 0; c < chores.length; c++) {
+      var ck = choreKey(tod, kid.id + '__' + chores[c].label);
+      if (choreState[kid.id] && choreState[kid.id][ck] && choreState[kid.id][ck].done) doneCt++;
+    }
+    var kpct = chores.length ? Math.round(doneCt / chores.length * 100) : 0;
+    var allDone = chores.length > 0 && doneCt === chores.length;
+    var isMyCard = myId === kid.id;
+    var readonly = !isParent && !isMyCard;
+
+    var cardClass = 'kid-card kid-' + kid.id;
     if (!isParent && !isMyCard) cardClass += ' dimmed';
     if (!isParent && isMyCard) cardClass += ' own-card';
 
-    return `
-      <div class="${cardClass}">
-        <div class="kid-header">
-          <div class="kid-avatar">${kid.emoji}</div>
-          <div class="kid-info" style="flex:1">
-            <h2>${kid.name}${allDone?' 🎉':''}</h2>
-            <div class="kid-age">Age ${kid.age}</div>
-            <div class="progress-bar-wrap"><div class="progress-bar" style="width:${pct}%"></div></div>
-          </div>
-          <div class="score-badge">${doneCt}/${chores.length}</div>
-        </div>
-        <div class="chore-list">${choreHTML}</div>
-      </div>`;
-  }).join('');
+    // Group chores by section
+    var sections = {}, sectionOrder = [];
+    for (var sc = 0; sc < chores.length; sc++) {
+      var sec = chores[sc].section;
+      if (!sections[sec]) { sections[sec] = []; sectionOrder.push(sec); }
+      sections[sec].push(chores[sc]);
+    }
+
+    var choreHtml = '';
+    if (chores.length === 0) {
+      choreHtml = '<div class="no-chores">No chores this time! 🎉</div>';
+    } else {
+      for (var si = 0; si < sectionOrder.length; si++) {
+        var secName = sectionOrder[si];
+        choreHtml += '<div class="chore-section-header">' + secName + '</div>';
+        var sitems = sections[secName];
+        for (var sj = 0; sj < sitems.length; sj++) {
+          var ch = sitems[sj];
+          var ck2 = choreKey(tod, kid.id + '__' + ch.label);
+          var isDone = choreState[kid.id] && choreState[kid.id][ck2] && choreState[kid.id][ck2].done;
+          var ts = choreState[kid.id] && choreState[kid.id][ck2] && choreState[kid.id][ck2].ts;
+          var timeStr = ts ? new Date(ts).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : '';
+          var safeLabel = ch.label.replace(/'/g,"\\'");
+          choreHtml +=
+            '<div class="chore-item' + (isDone ? ' done' : '') + (readonly ? ' readonly' : '') + '"' +
+            (readonly ? '' : ' onclick="handleChore(\'' + kid.id + '\',\'' + tod + '\',\'' + safeLabel + '\',this)"') + '>' +
+            '<div class="chore-check">' + (isDone ? '✓' : '') + '</div>' +
+            '<span class="chore-icon">' + ch.icon + '</span>' +
+            '<div style="flex:1"><div class="chore-label">' + ch.label + '</div>' +
+            (isDone && timeStr ? '<div class="chore-time">✓ ' + timeStr + '</div>' : '') +
+            '</div></div>';
+        }
+      }
+    }
+
+    html +=
+      '<div class="' + cardClass + '">' +
+        '<div class="kid-header">' +
+          '<div class="kid-avatar">' + kid.emoji + '</div>' +
+          '<div class="kid-info" style="flex:1">' +
+            '<h2>' + kid.name + (allDone ? ' 🎉' : '') + '</h2>' +
+            '<div class="kid-age">Age ' + kid.age + '</div>' +
+            '<div class="progress-bar-wrap"><div class="progress-bar" style="width:' + kpct + '%"></div></div>' +
+          '</div>' +
+          '<div class="score-badge">' + doneCt + '/' + chores.length + '</div>' +
+        '</div>' +
+        '<div class="chore-list">' + choreHtml + '</div>' +
+      '</div>';
+  }
+  document.getElementById('kidsGrid').innerHTML = html;
 }
 
-window.selectDay = function(day) {
-  currentDay = day;
-  renderDayTabs();
-  subscribeToDay(day);
-};
-
-window.resetDay = async function() {
-  if (!confirm(`Reset all chores for ${currentDay}?`)) return;
-  choreState = {};
-  await saveState();
-};
+function resetSection() {
+  if (!confirm('Reset all ' + TOD_LABELS[currentTod] + ' chores?')) return;
+  var tod = currentTod;
+  for (var k = 0; k < KIDS.length; k++) {
+    var kid = KIDS[k];
+    var chores = getChoresForKid(kid.id, tod);
+    if (!choreState[kid.id]) continue;
+    for (var c = 0; c < chores.length; c++) {
+      var ck = choreKey(tod, kid.id + '__' + chores[c].label);
+      delete choreState[kid.id][ck];
+    }
+  }
+  save();
+  render();
+}
 
 // =============================================
 // BOOT
 // =============================================
-initFirebase();
+renderWhoScreen();
+document.getElementById('who-screen').style.display = 'flex';
 </script>
 </body>
 </html>

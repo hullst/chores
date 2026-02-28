@@ -15,7 +15,6 @@
     color: #fff;
     font-family: -apple-system, sans-serif;
     min-height: 100vh;
-    font-size: 16px;
   }
 
   #loading {
@@ -39,7 +38,7 @@
 
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  #app { display: none; }
+  #app { display: none; padding-bottom: 48px; }
 
   .header {
     background: #111;
@@ -58,37 +57,41 @@
   .prog-fill { height: 100%; background: #30D158; border-radius: 3px; transition: width 0.3s; }
   .prog-txt { font-size: 11px; font-weight: 700; color: #888; white-space: nowrap; }
 
-  .days {
+  /* TOD tabs */
+  .tod-strip {
     display: flex;
-    overflow-x: auto;
     gap: 6px;
-    padding: 8px 12px;
-    scrollbar-width: none;
+    padding: 8px 10px;
+    background: #0a0a0a;
+    border-bottom: 1px solid #1a1a1a;
   }
-  .days::-webkit-scrollbar { display: none; }
 
-  .day {
-    flex-shrink: 0;
-    padding: 5px 12px;
-    border-radius: 20px;
+  .tod-btn {
+    flex: 1;
+    padding: 7px 4px;
+    border-radius: 12px;
     border: none;
     background: #222;
-    color: #888;
-    font-size: 12px;
+    color: #666;
+    font-size: 11px;
     font-weight: 700;
     cursor: pointer;
     font-family: -apple-system, sans-serif;
+    text-align: center;
+    transition: all 0.15s;
   }
 
-  .day.on { background: #7B5CF5; color: #fff; }
+  .tod-btn.morning.on  { background: #f7971e; color: #000; }
+  .tod-btn.afternoon.on { background: #30D158; color: #000; }
+  .tod-btn.evening.on  { background: #7B5CF5; color: #fff; }
 
   .sec-head {
     font-size: 10px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 1px;
-    color: #666;
-    padding: 12px 12px 4px;
+    color: #555;
+    padding: 10px 12px 3px;
   }
 
   .row {
@@ -99,18 +102,17 @@
     background: #1a1a1a;
     border-bottom: 1px solid #222;
     cursor: pointer;
-    min-height: 54px;
+    min-height: 52px;
   }
 
   .row:active { background: #252525; }
   .row.done { opacity: 0.4; }
 
   .ico { font-size: 20px; flex-shrink: 0; }
-
   .mid { flex: 1; }
   .lbl { font-size: 15px; font-weight: 600; }
-  .row.done .lbl { text-decoration: line-through; color: #666; }
-  .tm { font-size: 10px; color: #666; margin-top: 1px; }
+  .row.done .lbl { text-decoration: line-through; color: #555; }
+  .tm { font-size: 10px; color: #555; margin-top: 1px; }
 
   .chk {
     width: 28px; height: 28px;
@@ -120,9 +122,10 @@
     flex-shrink: 0;
     font-size: 14px;
     font-weight: 700;
+    color: #000;
   }
 
-  .row.done .chk { background: #30D158; border-color: #30D158; color: #000; }
+  .row.done .chk { background: #30D158; border-color: #30D158; }
 
   .done-msg {
     display: none;
@@ -140,7 +143,7 @@
 
   .sync {
     position: fixed;
-    bottom: 12px;
+    bottom: 10px;
     left: 50%;
     transform: translateX(-50%);
     background: #1a1a1a;
@@ -157,8 +160,8 @@
   }
 
   .sync.syncing { color: #f7971e; }
-  .sync.synced { color: #30D158; }
-  .sync.error { color: #ff453a; }
+  .sync.synced  { color: #30D158; }
+  .sync.error   { color: #ff453a; }
 
   .dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
   .dot.spin { animation: pulse 0.8s ease-in-out infinite; }
@@ -167,17 +170,13 @@
     0%,100% { opacity:1; } 50% { opacity:0.2; }
   }
 
-  /* Extra small screens (Watch) */
   @media (max-width: 200px) {
-    body { font-size: 12px; }
-    .header h1 { font-size: 13px; }
     .lbl { font-size: 12px; }
     .ico { font-size: 15px; }
     .chk { width: 22px; height: 22px; font-size: 11px; }
-    .row { padding: 9px 8px; min-height: 42px; gap: 8px; }
-    .day { font-size: 10px; padding: 4px 8px; }
-    .sec-head { font-size: 8px; }
-    .sync { font-size: 9px; }
+    .row { padding: 8px; min-height: 40px; gap: 8px; }
+    .tod-btn { font-size: 9px; }
+    .header h1 { font-size: 13px; }
   }
 </style>
 </head>
@@ -197,12 +196,12 @@
     </div>
   </div>
 
-  <div class="days" id="days"></div>
+  <div class="tod-strip" id="todStrip"></div>
 
   <div class="done-msg" id="doneMsg">
     <div class="big">🎉</div>
     <h2>All done, Theo!</h2>
-    <p>Amazing morning!</p>
+    <p>Crushing it!</p>
   </div>
 
   <div id="list"></div>
@@ -213,12 +212,9 @@
   <span id="synctxt">Synced</span>
 </div>
 
-<!-- Firebase compat SDKs — classic script tags, no ES modules -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
 <script>
-// ---- Firebase init ----
 firebase.initializeApp({
   apiKey: "AIzaSyBImvAIHP_3S9aDl0_yjhwtGG5pf1e5Z7k",
   authDomain: "hull-chores.firebaseapp.com",
@@ -226,40 +222,44 @@ firebase.initializeApp({
 });
 var db = firebase.firestore();
 
-// ---- Data ----
-var DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
 var KID = 'theodore';
+var TOD_LIST = ['morning', 'afternoon', 'evening'];
+var TOD_LABELS = { morning: '🌅 AM', afternoon: '☀️ PM', evening: '🌆 EVE' };
 
-var CHORES = [
-  { s: '🌅 Morning', label: 'Make bed', icon: '🛏️' },
-  { s: '🌅 Morning', label: 'Brush teeth', icon: '🪥' },
-  { s: '🌅 Morning', label: 'Get dressed', icon: '👕' },
-  { s: '🌅 Morning', label: 'Eat breakfast', icon: '🥣' },
-  { s: '🌅 Morning', label: 'Bring plates to sink', icon: '🫧' },
-  { s: '🌅 Morning', label: 'Put shoes & coat on', icon: '👟', noSat: true },
-  { s: '🏠 Family',  label: 'Unload dishwasher', icon: '🍽️' },
-  { s: '🏠 Family',  label: 'Wipe bathroom sink (master)', icon: '🚿' },
-  { s: '🏠 Family',  label: 'Help fold laundry', icon: '👕' },
-  { s: '❤️ Special', label: 'Go kiss Momma good morning!', icon: '💋' },
-];
+var CHORES = {
+  morning: [
+    { s: 'Everyone',      label: 'Make bed',                   icon: '🛏️' },
+    { s: 'Everyone',      label: 'Brush teeth',                icon: '🪥' },
+    { s: 'Everyone',      label: 'Get dressed',                icon: '👕' },
+    { s: 'Everyone',      label: 'Eat breakfast',              icon: '🥣' },
+    { s: 'Everyone',      label: 'Bring plates to sink',       icon: '🫧' },
+    { s: 'Family Chores', label: 'Unload dishwasher',          icon: '🍽️' },
+    { s: 'Family Chores', label: 'Wipe bathroom sink',         icon: '🚿' },
+    { s: 'Family Chores', label: 'Help fold laundry',          icon: '👕' },
+    { s: '❤️ Special',    label: 'Go kiss Momma good morning!',icon: '💋' },
+  ],
+  afternoon: [
+    { s: 'Everyone',  label: 'Eat lunch',             icon: '🥪' },
+    { s: 'Everyone',  label: 'Bring lunch plates to sink', icon: '🫧' },
+    { s: 'Clean Up',  label: 'Clean pool bathroom',   icon: '🚿' },
+  ],
+  evening: [
+    { s: 'Everyone', label: 'Eat dinner',             icon: '🍽️' },
+    { s: 'Everyone', label: 'Bring dinner plates to sink', icon: '🫧' },
+    { s: 'Everyone', label: 'Eat dessert',            icon: '🍨' },
+  ]
+};
 
-function getChores(day) {
-  return CHORES.filter(function(c) { return !(c.noSat && day === 'Saturday'); });
-}
-
-// ---- State ----
-var today = new Date().getDay();
-var currentDay = DAYS[today === 0 ? 6 : today - 1];
+var currentTod = 'morning';
 var state = {};
 var unsub = null;
 
-// ---- Firestore ----
-function docRef(day) { return db.collection('chores').doc(day); }
+function docRef() { return db.collection('chores').doc('saturday'); }
 
-function subscribe(day) {
+function subscribe() {
   if (unsub) unsub();
   setSyncing('syncing');
-  unsub = docRef(day).onSnapshot(function(snap) {
+  unsub = docRef().onSnapshot(function(snap) {
     state = snap.exists ? (snap.data().state || {}) : {};
     setSyncing('synced');
     render();
@@ -268,7 +268,7 @@ function subscribe(day) {
 
 function save() {
   setSyncing('syncing');
-  docRef(currentDay).set({ state: state, updatedAt: Date.now() })
+  docRef().set({ state: state, updatedAt: Date.now() })
     .then(function() { setSyncing('synced'); })
     .catch(function() { setSyncing('error'); });
 }
@@ -282,80 +282,92 @@ function setSyncing(s) {
   txt.textContent = s === 'syncing' ? 'Syncing...' : s === 'synced' ? 'Synced' : 'Error';
 }
 
-// ---- Toggle ----
-function toggle(label) {
+function choreKey(tod, label) { return tod + '__' + KID + '__' + label; }
+
+function toggle(tod, label) {
+  var k = choreKey(tod, label);
   if (!state[KID]) state[KID] = {};
-  var was = state[KID][label] && state[KID][label].done;
-  state[KID][label] = { done: !was, ts: Date.now() };
+  var was = state[KID][k] && state[KID][k].done;
+  state[KID][k] = { done: !was, ts: Date.now() };
   render();
   save();
 }
 
-// ---- Render ----
+function selectTod(tod) {
+  currentTod = tod;
+  render();
+}
+
 function render() {
-  var chores = getChores(currentDay);
+  var tod = currentTod;
+  var chores = CHORES[tod];
   var kidState = state[KID] || {};
-  var done = 0;
-  for (var i = 0; i < chores.length; i++) {
-    if (kidState[chores[i].label] && kidState[chores[i].label].done) done++;
-  }
-  var pct = chores.length ? Math.round(done / chores.length * 100) : 0;
-  var allDone = done === chores.length && chores.length > 0;
 
-  document.getElementById('pFill').style.width = pct + '%';
-  document.getElementById('pTxt').textContent = done + '/' + chores.length;
-  document.getElementById('doneMsg').className = 'done-msg' + (allDone ? ' show' : '');
-
-  // Day tabs
-  var daysHtml = '';
-  for (var d = 0; d < DAYS.length; d++) {
-    daysHtml += '<button class="day' + (DAYS[d] === currentDay ? ' on' : '') +
-      '" onclick="selectDay(\'' + DAYS[d] + '\')">' + DAYS[d].slice(0,3) + '</button>';
+  // Progress across ALL sections today
+  var allDone = 0, allTotal = 0;
+  for (var t = 0; t < TOD_LIST.length; t++) {
+    var tc = CHORES[TOD_LIST[t]];
+    for (var i = 0; i < tc.length; i++) {
+      var tk = choreKey(TOD_LIST[t], tc[i].label);
+      allTotal++;
+      if (kidState[tk] && kidState[tk].done) allDone++;
+    }
   }
-  document.getElementById('days').innerHTML = daysHtml;
+  document.getElementById('pFill').style.width = (allTotal ? Math.round(allDone/allTotal*100) : 0) + '%';
+  document.getElementById('pTxt').textContent = allDone + '/' + allTotal;
+
+  // TOD strip
+  var todHtml = '';
+  for (var ti = 0; ti < TOD_LIST.length; ti++) {
+    var t2 = TOD_LIST[ti];
+    todHtml += '<button class="tod-btn ' + t2 + (t2 === tod ? ' on' : '') +
+      '" onclick="selectTod(\'' + t2 + '\')">' + TOD_LABELS[t2] + '</button>';
+  }
+  document.getElementById('todStrip').innerHTML = todHtml;
+
+  // Current section chores
+  var doneCt = 0;
+  for (var ci = 0; ci < chores.length; ci++) {
+    var ck = choreKey(tod, chores[ci].label);
+    if (kidState[ck] && kidState[ck].done) doneCt++;
+  }
+  var secAllDone = doneCt === chores.length && chores.length > 0;
+  document.getElementById('doneMsg').className = 'done-msg' + (secAllDone ? ' show' : '');
 
   // Group by section
-  var sections = {};
-  var sectionOrder = [];
-  for (var j = 0; j < chores.length; j++) {
-    var c = chores[j];
-    if (!sections[c.s]) { sections[c.s] = []; sectionOrder.push(c.s); }
-    sections[c.s].push(c);
+  var sections = {}, sectionOrder = [];
+  for (var sj = 0; sj < chores.length; sj++) {
+    var sec = chores[sj].s;
+    if (!sections[sec]) { sections[sec] = []; sectionOrder.push(sec); }
+    sections[sec].push(chores[sj]);
   }
 
   var html = '';
   for (var si = 0; si < sectionOrder.length; si++) {
-    var sec = sectionOrder[si];
-    html += '<div class="sec-head">' + sec + '</div>';
-    var items = sections[sec];
-    for (var k = 0; k < items.length; k++) {
-      var ch = items[k];
-      var isDone = kidState[ch.label] && kidState[ch.label].done;
-      var ts = kidState[ch.label] && kidState[ch.label].ts;
+    var sn = sectionOrder[si];
+    html += '<div class="sec-head">' + sn + '</div>';
+    var items = sections[sn];
+    for (var ii = 0; ii < items.length; ii++) {
+      var ch = items[ii];
+      var k = choreKey(tod, ch.label);
+      var isDone = kidState[k] && kidState[k].done;
+      var ts = kidState[k] && kidState[k].ts;
       var timeStr = ts ? new Date(ts).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '';
-      var safeLabel = ch.label.replace(/'/g, "\\'");
-      html += '<div class="row' + (isDone ? ' done' : '') + '" onclick="toggle(\'' + safeLabel + '\')">' +
+      var safe = ch.label.replace(/'/g,"\\'");
+      html += '<div class="row' + (isDone ? ' done' : '') + '" onclick="toggle(\'' + tod + '\',\'' + safe + '\')">' +
         '<span class="ico">' + ch.icon + '</span>' +
-        '<div class="mid">' +
-          '<div class="lbl">' + ch.label + '</div>' +
-          (isDone && timeStr ? '<div class="tm">Done at ' + timeStr + '</div>' : '') +
-        '</div>' +
-        '<div class="chk">' + (isDone ? '✓' : '') + '</div>' +
-      '</div>';
+        '<div class="mid"><div class="lbl">' + ch.label + '</div>' +
+        (isDone && timeStr ? '<div class="tm">Done at ' + timeStr + '</div>' : '') +
+        '</div><div class="chk">' + (isDone ? '✓' : '') + '</div></div>';
     }
   }
   document.getElementById('list').innerHTML = html;
 }
 
-function selectDay(day) {
-  currentDay = day;
-  subscribe(day);
-}
-
-// ---- Boot ----
+// Boot
 document.getElementById('loading').style.display = 'none';
 document.getElementById('app').style.display = 'block';
-subscribe(currentDay);
+subscribe();
 </script>
 </body>
 </html>
