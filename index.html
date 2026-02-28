@@ -22,23 +22,114 @@
     padding: 24px 16px;
   }
 
-  header {
-    text-align: center;
-    margin-bottom: 32px;
+
+
+  /* ---- Who screen ---- */
+  #who-screen {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    gap: 16px;
   }
+
+  #who-screen h1 {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(2rem, 6vw, 3.5rem);
+    color: #2D2D2D;
+  }
+
+  #who-screen p { color: #888; font-weight: 700; font-size: 1rem; }
+
+  .who-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 14px;
+    max-width: 700px;
+    width: 100%;
+    padding: 0 16px;
+  }
+
+  .who-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 22px 16px;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.1rem;
+    color: white;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+
+  .who-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.18); }
+  .who-btn .emoji { font-size: 2.2rem; }
+
+  /* ---- Main board ---- */
+  #main-board { display: none; }
+
+  header { text-align: center; margin-bottom: 24px; }
 
   header h1 {
     font-family: 'Fredoka One', cursive;
-    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
     color: #2D2D2D;
-    letter-spacing: 1px;
   }
 
-  header .subtitle {
+  header .subtitle { font-size: 0.95rem; color: #888; font-weight: 600; margin-top: 4px; }
+
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1400px;
+    margin: 0 auto 20px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .user-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 800;
     font-size: 1rem;
-    color: #888;
-    font-weight: 600;
-    margin-top: 4px;
+    color: #555;
+    background: white;
+    padding: 8px 16px;
+    border-radius: 50px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+    cursor: pointer;
+  }
+
+  .sync-indicator {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #aaa;
+    background: white;
+    padding: 8px 14px;
+    border-radius: 50px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+  }
+
+  .sync-indicator.syncing { color: #f7971e; }
+  .sync-indicator.synced { color: #43e97b; }
+  .sync-indicator.error { color: #f5576c; }
+
+  .sync-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+  .sync-dot.spinning { animation: pulse 0.8s ease-in-out infinite; }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
   }
 
   .day-tabs {
@@ -46,7 +137,7 @@
     justify-content: center;
     gap: 8px;
     flex-wrap: wrap;
-    margin-bottom: 28px;
+    margin-bottom: 24px;
   }
 
   .day-tab {
@@ -62,21 +153,31 @@
     color: #666;
   }
 
-  .day-tab.active {
-    border-color: transparent;
-    background: #2D2D2D;
-    color: white;
+  .day-tab.active { border-color: transparent; background: #2D2D2D; color: white; }
+  .day-tab:hover:not(.active) { border-color: #aaa; color: #333; }
+
+  .summary-bar {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
   }
 
-  .day-tab:hover:not(.active) {
-    border-color: #aaa;
-    color: #333;
+  .summary-item {
+    background: white;
+    padding: 8px 16px;
+    border-radius: 50px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #555;
   }
 
   .kids-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    gap: 18px;
     max-width: 1400px;
     margin: 0 auto;
   }
@@ -86,10 +187,11 @@
     border-radius: var(--radius);
     box-shadow: var(--shadow);
     overflow: hidden;
-    transition: transform 0.2s;
+    transition: transform 0.2s, opacity 0.3s;
   }
 
-  .kid-card:hover { transform: translateY(-2px); }
+  .kid-card.dimmed { opacity: 0.4; pointer-events: none; }
+  .kid-card.own-card { box-shadow: 0 8px 30px rgba(0,0,0,0.16); transform: scale(1.01); }
 
   .kid-header {
     padding: 18px 22px 14px;
@@ -100,439 +202,428 @@
   }
 
   .kid-avatar {
-    width: 52px;
-    height: 52px;
+    width: 52px; height: 52px;
     border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.6rem;
-    flex-shrink: 0;
-    border: 3px solid rgba(255,255,255,0.6);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem; flex-shrink: 0;
   }
 
-  .kid-info h2 {
-    font-family: 'Fredoka One', cursive;
-    font-size: 1.4rem;
-    color: #2D2D2D;
+  .kid-info h2 { font-family: 'Fredoka One', cursive; font-size: 1.35rem; color: #2D2D2D; }
+  .kid-age { font-size: 0.75rem; font-weight: 700; color: #999; text-transform: uppercase; letter-spacing: 1px; }
+
+  .progress-bar-wrap { height: 8px; background: #F0F0F0; border-radius: 4px; overflow: hidden; margin-top: 8px; }
+  .progress-bar { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
+
+  .score-badge {
+    position: absolute; top: 18px; right: 18px;
+    font-family: 'Fredoka One', cursive; font-size: 1.05rem;
+    padding: 4px 12px; border-radius: 50px; color: white;
   }
 
-  .kid-age {
-    font-size: 0.78rem;
-    font-weight: 700;
-    color: #999;
+  /* Chore section headers */
+  .chore-section-header {
+    font-size: 0.7rem;
+    font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 1.2px;
+    color: #bbb;
+    padding: 10px 12px 4px;
   }
 
-  .progress-bar-wrap {
-    height: 8px;
-    background: #F0F0F0;
-    border-radius: 4px;
-    overflow: hidden;
-    margin-top: 10px;
-    width: 100%;
-  }
-
-  .progress-bar {
-    height: 100%;
-    border-radius: 4px;
-    transition: width 0.4s ease;
-  }
-
-  .chore-list {
-    padding: 8px 14px 18px;
-  }
+  .chore-list { padding: 4px 14px 16px; }
 
   .chore-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 12px;
-    border-radius: 12px;
-    margin-bottom: 6px;
-    cursor: pointer;
-    transition: background 0.15s;
-    user-select: none;
+    display: flex; align-items: center; gap: 12px;
+    padding: 9px 12px; border-radius: 12px; margin-bottom: 4px;
+    cursor: pointer; transition: background 0.15s; user-select: none;
   }
 
   .chore-item:hover { background: #F8F8F8; }
-
-  .chore-item.done { opacity: 0.6; }
+  .chore-item.done { opacity: 0.55; }
+  .chore-item.readonly { cursor: default; }
+  .chore-item.readonly:hover { background: none; }
 
   .chore-check {
-    width: 26px;
-    height: 26px;
-    border-radius: 50%;
+    width: 26px; height: 26px; border-radius: 50%;
     border: 2.5px solid #DDD;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: all 0.2s; font-size: 0.9rem;
+  }
+
+  .chore-item.done .chore-check { border-color: transparent; }
+  .chore-item.done .chore-label { text-decoration: line-through; color: #AAA; }
+  .chore-label { font-size: 0.9rem; font-weight: 700; color: #333; flex: 1; }
+  .chore-time { font-size: 0.67rem; color: #bbb; font-weight: 600; }
+  .chore-icon { font-size: 1.05rem; }
+
+  /* Color themes */
+  .kid-theodore .kid-header { background: linear-gradient(135deg,#667eea22,#764ba222); }
+  .kid-theodore .kid-avatar { background: linear-gradient(135deg,#667eea,#764ba2); }
+  .kid-theodore .progress-bar { background: linear-gradient(90deg,#667eea,#764ba2); }
+  .kid-theodore .score-badge { background: linear-gradient(135deg,#667eea,#764ba2); }
+  .kid-theodore .chore-item.done .chore-check { background: linear-gradient(135deg,#667eea,#764ba2); }
+  .kid-theodore.who-btn { background: linear-gradient(135deg,#667eea,#764ba2); }
+
+  .kid-alice .kid-header { background: linear-gradient(135deg,#f093fb22,#f5576c22); }
+  .kid-alice .kid-avatar { background: linear-gradient(135deg,#f093fb,#f5576c); }
+  .kid-alice .progress-bar { background: linear-gradient(90deg,#f093fb,#f5576c); }
+  .kid-alice .score-badge { background: linear-gradient(135deg,#f093fb,#f5576c); }
+  .kid-alice .chore-item.done .chore-check { background: linear-gradient(135deg,#f093fb,#f5576c); }
+  .kid-alice.who-btn { background: linear-gradient(135deg,#f093fb,#f5576c); }
+
+  .kid-andrew .kid-header { background: linear-gradient(135deg,#4facfe22,#00f2fe22); }
+  .kid-andrew .kid-avatar { background: linear-gradient(135deg,#4facfe,#00f2fe); }
+  .kid-andrew .progress-bar { background: linear-gradient(90deg,#4facfe,#00f2fe); }
+  .kid-andrew .score-badge { background: linear-gradient(135deg,#4facfe,#00f2fe); }
+  .kid-andrew .chore-item.done .chore-check { background: linear-gradient(135deg,#4facfe,#00f2fe); }
+  .kid-andrew.who-btn { background: linear-gradient(135deg,#4facfe,#00f2fe); }
+
+  .kid-felix .kid-header { background: linear-gradient(135deg,#43e97b22,#38f9d722); }
+  .kid-felix .kid-avatar { background: linear-gradient(135deg,#43e97b,#38f9d7); }
+  .kid-felix .progress-bar { background: linear-gradient(90deg,#43e97b,#38f9d7); }
+  .kid-felix .score-badge { background: linear-gradient(135deg,#43e97b,#38f9d7); }
+  .kid-felix .chore-item.done .chore-check { background: linear-gradient(135deg,#43e97b,#38f9d7); }
+  .kid-felix.who-btn { background: linear-gradient(135deg,#43e97b,#38f9d7); }
+
+  .kid-lucy .kid-header { background: linear-gradient(135deg,#fa709a22,#fee14022); }
+  .kid-lucy .kid-avatar { background: linear-gradient(135deg,#fa709a,#fee140); }
+  .kid-lucy .progress-bar { background: linear-gradient(90deg,#fa709a,#fee140); }
+  .kid-lucy .score-badge { background: linear-gradient(135deg,#fa709a,#fee140); }
+  .kid-lucy .chore-item.done .chore-check { background: linear-gradient(135deg,#fa709a,#fee140); }
+  .kid-lucy.who-btn { background: linear-gradient(135deg,#fa709a,#fee140); }
+
+  .kid-leo .kid-header { background: linear-gradient(135deg,#f7971e22,#ffd20022); }
+  .kid-leo .kid-avatar { background: linear-gradient(135deg,#f7971e,#ffd200); }
+  .kid-leo .progress-bar { background: linear-gradient(90deg,#f7971e,#ffd200); }
+  .kid-leo .score-badge { background: linear-gradient(135deg,#f7971e,#ffd200); }
+  .kid-leo .chore-item.done .chore-check { background: linear-gradient(135deg,#f7971e,#ffd200); }
+  .kid-leo.who-btn { background: linear-gradient(135deg,#f7971e,#ffd200); }
+
+  .parent-btn { background: linear-gradient(135deg,#2D2D2D,#555); }
+
+  .reset-btn {
+    display: block; margin: 24px auto 0;
+    padding: 10px 28px; border-radius: 50px;
+    border: 2px solid #DDD; background: white;
+    font-family: 'Nunito', sans-serif; font-weight: 700;
+    font-size: 0.9rem; cursor: pointer; color: #777;
     transition: all 0.2s;
-    font-size: 0.9rem;
   }
+  .reset-btn:hover { border-color: #aaa; color: #333; }
 
-  .chore-item.done .chore-check {
-    border-color: transparent;
-  }
-
-  .chore-item.done .chore-label {
-    text-decoration: line-through;
-    color: #AAA;
-  }
-
-  .chore-label {
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: #333;
-    transition: color 0.2s;
-    flex: 1;
-  }
-
-  .chore-icon {
-    font-size: 1.1rem;
-  }
-
-  /* Score badge */
-  .score-badge {
-    position: absolute;
-    top: 18px;
-    right: 18px;
-    font-family: 'Fredoka One', cursive;
-    font-size: 1.1rem;
-    padding: 4px 12px;
-    border-radius: 50px;
-    color: white;
-  }
-
-  /* Color themes per kid */
-  .kid-theodore .kid-header { background: linear-gradient(135deg, #667eea22, #764ba222); }
-  .kid-theodore .kid-avatar { background: linear-gradient(135deg, #667eea, #764ba2); }
-  .kid-theodore .progress-bar { background: linear-gradient(90deg, #667eea, #764ba2); }
-  .kid-theodore .score-badge { background: linear-gradient(135deg, #667eea, #764ba2); }
-  .kid-theodore .chore-item.done .chore-check { background: linear-gradient(135deg, #667eea, #764ba2); }
-
-  .kid-alice .kid-header { background: linear-gradient(135deg, #f093fb22, #f5576c22); }
-  .kid-alice .kid-avatar { background: linear-gradient(135deg, #f093fb, #f5576c); }
-  .kid-alice .progress-bar { background: linear-gradient(90deg, #f093fb, #f5576c); }
-  .kid-alice .score-badge { background: linear-gradient(135deg, #f093fb, #f5576c); }
-  .kid-alice .chore-item.done .chore-check { background: linear-gradient(135deg, #f093fb, #f5576c); }
-
-  .kid-andrew .kid-header { background: linear-gradient(135deg, #4facfe22, #00f2fe22); }
-  .kid-andrew .kid-avatar { background: linear-gradient(135deg, #4facfe, #00f2fe); }
-  .kid-andrew .progress-bar { background: linear-gradient(90deg, #4facfe, #00f2fe); }
-  .kid-andrew .score-badge { background: linear-gradient(135deg, #4facfe, #00f2fe); }
-  .kid-andrew .chore-item.done .chore-check { background: linear-gradient(135deg, #4facfe, #00f2fe); }
-
-  .kid-felix .kid-header { background: linear-gradient(135deg, #43e97b22, #38f9d722); }
-  .kid-felix .kid-avatar { background: linear-gradient(135deg, #43e97b, #38f9d7); }
-  .kid-felix .progress-bar { background: linear-gradient(90deg, #43e97b, #38f9d7); }
-  .kid-felix .score-badge { background: linear-gradient(135deg, #43e97b, #38f9d7); }
-  .kid-felix .chore-item.done .chore-check { background: linear-gradient(135deg, #43e97b, #38f9d7); }
-
-  .kid-lucy .kid-header { background: linear-gradient(135deg, #fa709a22, #fee14022); }
-  .kid-lucy .kid-avatar { background: linear-gradient(135deg, #fa709a, #fee140); }
-  .kid-lucy .progress-bar { background: linear-gradient(90deg, #fa709a, #fee140); }
-  .kid-lucy .score-badge { background: linear-gradient(135deg, #fa709a, #fee140); }
-  .kid-lucy .chore-item.done .chore-check { background: linear-gradient(135deg, #fa709a, #fee140); }
-
-  .kid-leo .kid-header { background: linear-gradient(135deg, #f7971e22, #ffd20022); }
-  .kid-leo .kid-avatar { background: linear-gradient(135deg, #f7971e, #ffd200); }
-  .kid-leo .progress-bar { background: linear-gradient(90deg, #f7971e, #ffd200); }
-  .kid-leo .score-badge { background: linear-gradient(135deg, #f7971e, #ffd200); }
-  .kid-leo .chore-item.done .chore-check { background: linear-gradient(135deg, #f7971e, #ffd200); }
-
-  .summary-bar {
-    display: flex;
-    justify-content: center;
-    gap: 24px;
-    flex-wrap: wrap;
-    margin-bottom: 24px;
-    font-size: 0.9rem;
-    font-weight: 700;
-    color: #555;
-  }
-
-  .summary-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background: white;
-    padding: 8px 18px;
-    border-radius: 50px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
-  }
-
-  .confetti-pop {
-    animation: pop 0.3s ease;
-  }
-
+  .confetti-pop { animation: pop 0.3s ease; }
   @keyframes pop {
     0% { transform: scale(1); }
     50% { transform: scale(1.15); }
     100% { transform: scale(1); }
   }
-
-  .reset-btn {
-    display: block;
-    margin: 24px auto 0;
-    padding: 10px 28px;
-    border-radius: 50px;
-    border: 2px solid #DDD;
-    background: white;
-    font-family: 'Nunito', sans-serif;
-    font-weight: 700;
-    font-size: 0.9rem;
-    cursor: pointer;
-    color: #777;
-    transition: all 0.2s;
-  }
-
-  .reset-btn:hover { border-color: #aaa; color: #333; }
 </style>
 </head>
 <body>
 
-<header>
-  <h1>⭐ Hull Family Chores ⭐</h1>
-  <p class="subtitle">☀️ Morning Routine — Let's go, Hulls!</p>
-</header>
 
-<div class="day-tabs" id="dayTabs"></div>
 
-<div class="summary-bar" id="summaryBar"></div>
+<!-- ===== WHO ARE YOU ===== -->
+<div id="who-screen">
+  <h1>⭐ Hull Family Chores</h1>
+  <p>Who's checking in?</p>
+  <div class="who-grid" id="whoGrid"></div>
+</div>
 
-<div class="kids-grid" id="kidsGrid"></div>
+<!-- ===== MAIN BOARD ===== -->
+<div id="main-board">
+  <header>
+    <h1>⭐ Hull Family Chores</h1>
+    <p class="subtitle">☀️ Morning Routine — Let's go, Hulls!</p>
+  </header>
 
-<button class="reset-btn" onclick="resetDay()">🔄 Reset Today's Chores</button>
+  <div class="top-bar">
+    <div class="user-badge" onclick="switchUser()">
+      <span id="userEmoji"></span>
+      <span id="userName"></span>
+      <span style="color:#ccc;font-size:0.8rem">▾ switch</span>
+    </div>
+    <div class="sync-indicator synced" id="syncIndicator">
+      <div class="sync-dot" id="syncDot"></div>
+      <span id="syncLabel">Live sync on</span>
+    </div>
+  </div>
 
-<script>
+  <div class="day-tabs" id="dayTabs"></div>
+  <div class="summary-bar" id="summaryBar"></div>
+  <div class="kids-grid" id="kidsGrid"></div>
+  <button class="reset-btn" id="resetBtn" style="display:none" onclick="resetDay()">🔄 Reset Today's Chores</button>
+</div>
+
+<!-- Firebase SDK -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, setDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+// =============================================
+// DATA
+// =============================================
 const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
 
-// Chore definitions per kid, including day-specific chores
-// format: { label, icon, days: ['all'] or specific days }
-const KIDS = [
-  {
-    id: 'theodore',
-    name: 'Theodore',
-    age: 11,
-    emoji: '🦁',
-    chores: [
-      { label: 'Get dressed', icon: '👕', days: 'all' },
-      { label: 'Brush teeth', icon: '🪥', days: 'all' },
-      { label: 'Brush hair', icon: '💈', days: 'all' },
-      { label: 'Make bed', icon: '🛏️', days: 'all' },
-      { label: 'Eat breakfast', icon: '🥣', days: 'all' },
-      { label: 'Empty dishwasher', icon: '🍽️', days: 'all' },
-      { label: 'Pack school bag', icon: '🎒', days: ['Monday','Tuesday','Wednesday','Thursday','Friday'] },
-      { label: 'Shoes & coat on', icon: '👟', days: 'all' },
-    ]
-  },
-  {
-    id: 'alice',
-    name: 'Alice',
-    age: 9,
-    emoji: '🦋',
-    chores: [
-      { label: 'Get dressed', icon: '👕', days: 'all' },
-      { label: 'Brush teeth', icon: '🪥', days: 'all' },
-      { label: 'Brush hair', icon: '💈', days: 'all' },
-      { label: 'Make bed', icon: '🛏️', days: 'all' },
-      { label: 'Eat breakfast', icon: '🥣', days: 'all' },
-      { label: 'Bring bowl to sink', icon: '🫧', days: 'all' },
-      { label: 'Pack school bag', icon: '🎒', days: ['Monday','Tuesday','Wednesday','Thursday','Friday'] },
-      { label: 'Shoes & coat on', icon: '👟', days: 'all' },
-    ]
-  },
-  {
-    id: 'andrew',
-    name: 'Andrew',
-    age: 8,
-    emoji: '🚀',
-    chores: [
-      { label: 'Get dressed', icon: '👕', days: 'all' },
-      { label: 'Brush teeth', icon: '🪥', days: 'all' },
-      { label: 'Brush hair', icon: '💈', days: 'all' },
-      { label: 'Make bed', icon: '🛏️', days: 'all' },
-      { label: 'Eat breakfast', icon: '🥣', days: 'all' },
-      { label: 'Bring bowl to sink', icon: '🫧', days: 'all' },
-      { label: 'Pack school bag', icon: '🎒', days: ['Monday','Tuesday','Wednesday','Thursday','Friday'] },
-      { label: 'Shoes & coat on', icon: '👟', days: 'all' },
-    ]
-  },
-  {
-    id: 'felix',
-    name: 'Felix',
-    age: 6,
-    emoji: '🐸',
-    chores: [
-      { label: 'Get dressed', icon: '👕', days: 'all' },
-      { label: 'Brush teeth', icon: '🪥', days: 'all' },
-      { label: 'Brush hair', icon: '💈', days: 'all' },
-      { label: 'Make bed', icon: '🛏️', days: 'all' },
-      { label: 'Eat breakfast', icon: '🥣', days: 'all' },
-      { label: 'Bring bowl to sink', icon: '🫧', days: 'all' },
-      { label: 'Shoes & coat on', icon: '👟', days: 'all' },
-    ]
-  },
-  {
-    id: 'lucy',
-    name: 'Lucy',
-    age: 5,
-    emoji: '🌸',
-    chores: [
-      { label: 'Get dressed', icon: '👕', days: 'all' },
-      { label: 'Brush teeth', icon: '🪥', days: 'all' },
-      { label: 'Brush hair', icon: '💈', days: 'all' },
-      { label: 'Make bed (with help)', icon: '🛏️', days: 'all' },
-      { label: 'Eat breakfast', icon: '🥣', days: 'all' },
-      { label: 'Bring bowl to sink', icon: '🫧', days: 'all' },
-      { label: 'Shoes & coat on', icon: '👟', days: 'all' },
-    ]
-  },
-  {
-    id: 'leo',
-    name: 'Leo',
-    age: 3,
-    emoji: '🐻',
-    chores: [
-      { label: 'Get dressed (with help)', icon: '👕', days: 'all' },
-      { label: 'Brush teeth', icon: '🪥', days: 'all' },
-      { label: 'Put PJs away', icon: '💤', days: 'all' },
-      { label: 'Eat breakfast', icon: '🥣', days: 'all' },
-      { label: 'Wash hands', icon: '🧼', days: 'all' },
-      { label: 'Shoes on', icon: '👟', days: 'all' },
-    ]
-  }
+const USERS = [
+  { id: 'theodore', name: 'Theodore', age: 11, emoji: '🦁', type: 'kid' },
+  { id: 'alice',    name: 'Alice',    age: 9,  emoji: '🦋', type: 'kid' },
+  { id: 'andrew',   name: 'Andrew',   age: 8,  emoji: '🚀', type: 'kid' },
+  { id: 'felix',    name: 'Felix',    age: 6,  emoji: '🐸', type: 'kid' },
+  { id: 'lucy',     name: 'Lucy',     age: 5,  emoji: '🌸', type: 'kid' },
+  { id: 'leo',      name: 'Leo',      age: 3,  emoji: '🐻', type: 'kid' },
+  { id: 'parent',   name: 'Mom & Dad', emoji: '👨‍👩‍👧‍👦', type: 'parent' },
 ];
 
+// Chore helper: noSaturday means skip on Saturday
+const everyone = (label, icon, opts={}) => ({ label, icon, everyone: true, ...opts });
+const only = (ids, label, icon, opts={}) => ({ label, icon, assignedTo: ids, ...opts });
+
+const CHORE_DEFS = [
+  // ---- Morning basics (everyone) ----
+  { section: '🌅 Morning Basics' },
+  everyone('Make bed', '🛏️'),
+  everyone('Brush teeth', '🪥'),
+  everyone('Get dressed', '👕'),
+  everyone('Eat breakfast', '🥣'),
+  everyone('Bring plates to sink', '🫧'),
+  everyone('Put shoes & coat on', '👟', { noSaturday: true }),
+
+  // ---- Family chores ----
+  { section: '🏠 Family Chores' },
+  only(['theodore'], 'Unload dishwasher', '🍽️'),
+  only(['alice', 'lucy'], 'Wipe bathroom sink (upstairs)', '🚿'),
+  only(['andrew', 'felix'], 'Wipe bathroom sink (downstairs)', '🚿'),
+  only(['theodore'], 'Wipe bathroom sink (master)', '🚿'),
+  only(['alice'], 'Vacuum living room', '🧹'),
+  only(['andrew'], 'Vacuum front room', '🧹'),
+  only(['lucy', 'leo'], 'Put away blankets', '🛋️'),
+  only(['theodore','alice','andrew','felix','lucy','leo'], 'Help fold laundry', '👕'),
+  only(['felix'], 'Fill up Sophie\'s dog food', '🐾'),
+  only(['andrew'], 'Fill up Sophie\'s water', '💧'),
+
+  // ---- Special ----
+  { section: '❤️ Special' },
+  everyone('Go kiss Momma good morning!', '💋'),
+];
+
+// Build per-kid chore list from CHORE_DEFS
+function getChoreDefs(kidId, day) {
+  const isSaturday = day === 'Saturday';
+  const result = [];
+  let currentSection = null;
+  for (const def of CHORE_DEFS) {
+    if (def.section) { currentSection = def.section; continue; }
+    if (def.noSaturday && isSaturday) continue;
+    const forMe = def.everyone || (def.assignedTo && def.assignedTo.includes(kidId));
+    if (forMe) result.push({ ...def, section: currentSection });
+  }
+  return result;
+}
+
+// =============================================
+// FIREBASE
+// =============================================
+let db = null;
+let unsubscribe = null;
+
+function initFirebase() {
+  const app = initializeApp({
+    apiKey: "AIzaSyBImvAIHP_3S9aDl0_yjhwtGG5pf1e5Z7k",
+    authDomain: "hull-chores.firebaseapp.com",
+    projectId: "hull-chores",
+  });
+  db = getFirestore(app);
+  document.getElementById('who-screen').style.display = 'flex';
+  renderWhoScreen();
+}
+
+function docRef(day) {
+  return doc(db, 'chores', day);
+}
+
+// =============================================
+// STATE
+// =============================================
+let currentUser = null;
 let currentDay = DAYS[new Date().getDay() === 0 ? 6 : new Date().getDay() - 1];
-let state = {}; // state[day][kidId][choreLabel] = done bool
+let choreState = {}; // { [kidId]: { [label]: { done, ts } } }
 
-function getStateKey(day, kidId, label) {
-  return `chore_${day}_${kidId}_${label}`;
-}
-
-function isChecked(day, kidId, label) {
-  const k = getStateKey(day, kidId, label);
-  return localStorage.getItem(k) === '1';
-}
-
-function setChecked(day, kidId, label, val) {
-  const k = getStateKey(day, kidId, label);
-  if (val) localStorage.setItem(k, '1');
-  else localStorage.removeItem(k);
-}
-
-function getDayChores(kid, day) {
-  return kid.chores.filter(c => c.days === 'all' || c.days.includes(day));
-}
-
-function renderDayTabs() {
-  const el = document.getElementById('dayTabs');
-  el.innerHTML = DAYS.map(d => `
-    <button class="day-tab ${d === currentDay ? 'active' : ''}" onclick="selectDay('${d}')">${d}</button>
+// =============================================
+// WHO SCREEN
+// =============================================
+window.renderWhoScreen = function() {
+  document.getElementById('whoGrid').innerHTML = USERS.map(u => `
+    <button class="who-btn kid-${u.id} ${u.type==='parent'?'parent-btn':''}" onclick="selectUser('${u.id}')">
+      <span class="emoji">${u.emoji}</span>
+      <span>${u.name}</span>
+    </button>
   `).join('');
+};
+
+window.selectUser = function(userId) {
+  currentUser = USERS.find(u => u.id === userId);
+  document.getElementById('who-screen').style.display = 'none';
+  document.getElementById('main-board').style.display = 'block';
+  document.getElementById('userEmoji').textContent = currentUser.emoji;
+  document.getElementById('userName').textContent = currentUser.name;
+  document.getElementById('resetBtn').style.display = currentUser.type === 'parent' ? 'block' : 'none';
+  subscribeToDay(currentDay);
+  renderDayTabs();
+};
+
+window.switchUser = function() {
+  if (unsubscribe) { unsubscribe(); unsubscribe = null; }
+  currentUser = null;
+  document.getElementById('who-screen').style.display = 'flex';
+  document.getElementById('main-board').style.display = 'none';
+};
+
+// =============================================
+// FIRESTORE REALTIME
+// =============================================
+function subscribeToDay(day) {
+  if (unsubscribe) unsubscribe();
+  setSyncStatus('syncing');
+  unsubscribe = onSnapshot(docRef(day), (snap) => {
+    choreState = snap.exists() ? (snap.data().state || {}) : {};
+    setSyncStatus('synced');
+    renderGrid();
+    renderSummary();
+  }, () => setSyncStatus('error'));
 }
+
+async function saveState() {
+  setSyncStatus('syncing');
+  try {
+    await setDoc(docRef(currentDay), { state: choreState, updatedAt: Date.now() });
+    setSyncStatus('synced');
+  } catch(e) { setSyncStatus('error'); }
+}
+
+function setSyncStatus(s) {
+  const ind = document.getElementById('syncIndicator');
+  const dot = document.getElementById('syncDot');
+  const label = document.getElementById('syncLabel');
+  ind.className = 'sync-indicator ' + s;
+  dot.className = 'sync-dot' + (s === 'syncing' ? ' spinning' : '');
+  label.textContent = { syncing: 'Syncing...', synced: 'Live sync on', error: 'Sync error' }[s] || s;
+}
+
+// =============================================
+// TOGGLE
+// =============================================
+window.handleChore = async function(kidId, label, el) {
+  el.classList.add('confetti-pop');
+  setTimeout(() => el.classList.remove('confetti-pop'), 300);
+  if (!choreState[kidId]) choreState[kidId] = {};
+  const wasDone = choreState[kidId][label] && choreState[kidId][label].done;
+  choreState[kidId][label] = { done: !wasDone, ts: Date.now() };
+  renderGrid();
+  renderSummary();
+  await saveState();
+};
+
+// =============================================
+// RENDER
+// =============================================
+window.renderDayTabs = function() {
+  document.getElementById('dayTabs').innerHTML = DAYS.map(d => `
+    <button class="day-tab ${d===currentDay?'active':''}" onclick="selectDay('${d}')">${d}</button>
+  `).join('');
+};
 
 function renderSummary() {
-  let totalDone = 0, total = 0;
-  KIDS.forEach(kid => {
-    const chores = getDayChores(kid, currentDay);
-    total += chores.length;
-    chores.forEach(c => { if (isChecked(currentDay, kid.id, c.label)) totalDone++; });
-  });
-  const pct = total ? Math.round(totalDone / total * 100) : 0;
+  let done = 0, total = 0;
+  for (const kid of USERS.filter(u=>u.type==='kid')) {
+    for (const c of getChoreDefs(kid.id, currentDay)) {
+      total++;
+      if (choreState[kid.id] && choreState[kid.id][c.label] && choreState[kid.id][c.label].done) done++;
+    }
+  }
+  const pct = total ? Math.round(done/total*100) : 0;
   document.getElementById('summaryBar').innerHTML = `
-    <div class="summary-item">📋 ${totalDone} / ${total} chores done</div>
+    <div class="summary-item">📋 ${done} / ${total} chores done</div>
     <div class="summary-item">🏆 ${pct}% complete</div>
-    <div class="summary-item">👨‍👩‍👧‍👦 ${KIDS.length} kids</div>
   `;
 }
 
 function renderGrid() {
-  const grid = document.getElementById('kidsGrid');
-  grid.innerHTML = KIDS.map(kid => {
-    const chores = getDayChores(kid, currentDay);
-    const done = chores.filter(c => isChecked(currentDay, kid.id, c.label)).length;
-    const pct = chores.length ? Math.round(done / chores.length * 100) : 0;
-    const allDone = done === chores.length;
+  const isParent = currentUser && currentUser.type === 'parent';
+  const myId = currentUser ? currentUser.id : null;
+  const kids = USERS.filter(u => u.type === 'kid');
+
+  document.getElementById('kidsGrid').innerHTML = kids.map(kid => {
+    const chores = getChoreDefs(kid.id, currentDay);
+    const doneCt = chores.filter(c => choreState[kid.id] && choreState[kid.id][c.label] && choreState[kid.id][c.label].done).length;
+    const pct = chores.length ? Math.round(doneCt/chores.length*100) : 0;
+    const allDone = doneCt === chores.length && chores.length > 0;
+    const isMyCard = myId === kid.id;
+    const readonly = !isParent && !isMyCard;
+
+    // Group chores by section
+    const sections = {};
+    for (const c of chores) {
+      if (!sections[c.section]) sections[c.section] = [];
+      sections[c.section].push(c);
+    }
+
+    let choreHTML = '';
+    for (const [sec, items] of Object.entries(sections)) {
+      choreHTML += `<div class="chore-section-header">${sec}</div>`;
+      for (const c of items) {
+        const checked = choreState[kid.id] && choreState[kid.id][c.label] && choreState[kid.id][c.label].done;
+        const ts = choreState[kid.id] && choreState[kid.id][c.label] && choreState[kid.id][c.label].ts;
+        const timeStr = ts ? new Date(ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) : '';
+        choreHTML += `
+          <div class="chore-item ${checked?'done':''} ${readonly?'readonly':''}"
+               onclick="${readonly?'':` handleChore('${kid.id}','${c.label.replace(/'/g,"\\'").replace(/"/g,'&quot;')}',this)`}">
+            <div class="chore-check">${checked?'✓':''}</div>
+            <span class="chore-icon">${c.icon}</span>
+            <div style="flex:1">
+              <div class="chore-label">${c.label}</div>
+              ${checked&&timeStr?`<div class="chore-time">✓ ${timeStr}</div>`:''}
+            </div>
+          </div>`;
+      }
+    }
+
+    let cardClass = `kid-card kid-${kid.id}`;
+    if (!isParent && !isMyCard) cardClass += ' dimmed';
+    if (!isParent && isMyCard) cardClass += ' own-card';
 
     return `
-      <div class="kid-card kid-${kid.id}" id="card-${kid.id}">
+      <div class="${cardClass}">
         <div class="kid-header">
           <div class="kid-avatar">${kid.emoji}</div>
-          <div class="kid-info">
-            <h2>${kid.name} ${allDone ? '🎉' : ''}</h2>
+          <div class="kid-info" style="flex:1">
+            <h2>${kid.name}${allDone?' 🎉':''}</h2>
             <div class="kid-age">Age ${kid.age}</div>
-            <div class="progress-bar-wrap">
-              <div class="progress-bar" style="width:${pct}%"></div>
-            </div>
+            <div class="progress-bar-wrap"><div class="progress-bar" style="width:${pct}%"></div></div>
           </div>
-          <div class="score-badge">${done}/${chores.length}</div>
+          <div class="score-badge">${doneCt}/${chores.length}</div>
         </div>
-        <div class="chore-list">
-          ${chores.map(c => {
-            const checked = isChecked(currentDay, kid.id, c.label);
-            return `
-              <div class="chore-item ${checked ? 'done' : ''}" onclick="toggleChore('${kid.id}', '${c.label.replace(/'/g,"\\'")}', this)">
-                <div class="chore-check">${checked ? '✓' : ''}</div>
-                <span class="chore-icon">${c.icon}</span>
-                <span class="chore-label">${c.label}</span>
-              </div>
-            `;
-          }).join('')}
-        </div>
-      </div>
-    `;
+        <div class="chore-list">${choreHTML}</div>
+      </div>`;
   }).join('');
 }
 
-function toggleChore(kidId, label, el) {
-  const wasDone = el.classList.contains('done');
-  setChecked(currentDay, kidId, label, !wasDone);
-  el.classList.toggle('done', !wasDone);
-  const check = el.querySelector('.chore-check');
-  check.textContent = !wasDone ? '✓' : '';
-  if (!wasDone) el.classList.add('confetti-pop');
-  setTimeout(() => el.classList.remove('confetti-pop'), 300);
-
-  // Update card score & progress
-  const kid = KIDS.find(k => k.id === kidId);
-  const chores = getDayChores(kid, currentDay);
-  const done = chores.filter(c => isChecked(currentDay, kid.id, c.label)).length;
-  const pct = chores.length ? Math.round(done / chores.length * 100) : 0;
-
-  const card = document.getElementById(`card-${kidId}`);
-  card.querySelector('.progress-bar').style.width = pct + '%';
-  card.querySelector('.score-badge').textContent = `${done}/${chores.length}`;
-  const nameEl = card.querySelector('h2');
-  nameEl.textContent = `${kid.name} ${done === chores.length ? '🎉' : ''}`;
-
-  renderSummary();
-}
-
-function selectDay(day) {
+window.selectDay = function(day) {
   currentDay = day;
   renderDayTabs();
-  renderGrid();
-  renderSummary();
-}
+  subscribeToDay(day);
+};
 
-function resetDay() {
+window.resetDay = async function() {
   if (!confirm(`Reset all chores for ${currentDay}?`)) return;
-  KIDS.forEach(kid => {
-    getDayChores(kid, currentDay).forEach(c => setChecked(currentDay, kid.id, c.label, false));
-  });
-  renderGrid();
-  renderSummary();
-}
+  choreState = {};
+  await saveState();
+};
 
-// Init
-renderDayTabs();
-renderSummary();
-renderGrid();
+// =============================================
+// BOOT
+// =============================================
+initFirebase();
 </script>
 </body>
 </html>
