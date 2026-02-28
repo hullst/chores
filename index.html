@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Hull Chores">
 <title>Hull Family Chore Board</title>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -19,59 +21,10 @@
     font-family: 'Nunito', sans-serif;
     background: var(--bg);
     min-height: 100vh;
-    padding: 24px 16px;
+    padding: 16px;
   }
 
-  /* ---- Who screen ---- */
-  #who-screen {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    gap: 16px;
-  }
-
-  #who-screen h1 {
-    font-family: 'Fredoka One', cursive;
-    font-size: clamp(2rem, 6vw, 3.5rem);
-    color: #2D2D2D;
-  }
-
-  #who-screen p { color: #888; font-weight: 700; font-size: 1rem; }
-
-  .who-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 14px;
-    max-width: 700px;
-    width: 100%;
-    padding: 0 16px;
-  }
-
-  .who-btn {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    padding: 22px 16px;
-    border-radius: 20px;
-    border: none;
-    cursor: pointer;
-    font-family: 'Fredoka One', cursive;
-    font-size: 1.1rem;
-    color: white;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
-    transition: transform 0.15s, box-shadow 0.15s;
-  }
-
-  .who-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.18); }
-  .who-btn .emoji { font-size: 2.2rem; }
-
-  /* ---- Main board ---- */
-  #main-board { display: none; }
-
-  header { text-align: center; margin-bottom: 24px; }
+  header { text-align: center; margin-bottom: 16px; }
   header h1 {
     font-family: 'Fredoka One', cursive;
     font-size: clamp(1.8rem, 4vw, 2.8rem);
@@ -79,29 +32,42 @@
   }
   header .subtitle { font-size: 0.95rem; color: #888; font-weight: 600; margin-top: 4px; }
 
+  /* Sticky top bar with jump links */
   .top-bar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--bg);
+    padding: 8px 0 10px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    max-width: 1400px;
-    margin: 0 auto 20px;
-    flex-wrap: wrap;
     gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
   }
 
-  .user-badge {
+  .jump-links {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .jump-link {
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-weight: 800;
-    font-size: 1rem;
-    color: #555;
-    background: white;
-    padding: 8px 16px;
+    gap: 5px;
+    padding: 7px 13px;
     border-radius: 50px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.07);
-    cursor: pointer;
+    text-decoration: none;
+    font-weight: 800;
+    font-size: 0.85rem;
+    color: white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    transition: transform 0.15s, box-shadow 0.15s;
   }
+
+  .jump-link:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
 
   .sync-indicator {
     display: flex;
@@ -111,9 +77,10 @@
     font-weight: 700;
     color: #aaa;
     background: white;
-    padding: 8px 14px;
+    padding: 7px 14px;
     border-radius: 50px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+    white-space: nowrap;
   }
 
   .sync-indicator.syncing { color: #f7971e; }
@@ -131,14 +98,14 @@
   .summary-bar {
     display: flex;
     justify-content: center;
-    gap: 16px;
+    gap: 12px;
     flex-wrap: wrap;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
   }
 
   .summary-item {
     background: white;
-    padding: 8px 16px;
+    padding: 7px 16px;
     border-radius: 50px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.06);
     font-size: 0.88rem;
@@ -149,7 +116,7 @@
   .kids-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
+    gap: 18px;
     max-width: 1400px;
     margin: 0 auto;
   }
@@ -159,14 +126,11 @@
     border-radius: var(--radius);
     box-shadow: var(--shadow);
     overflow: hidden;
-    transition: transform 0.2s, opacity 0.3s;
+    scroll-margin-top: 80px;
   }
 
-  .kid-card.dimmed { opacity: 0.4; pointer-events: none; }
-  .kid-card.own-card { box-shadow: 0 8px 30px rgba(0,0,0,0.16); transform: scale(1.01); }
-
   .kid-header {
-    padding: 18px 22px 14px;
+    padding: 16px 20px 12px;
     display: flex;
     align-items: center;
     gap: 14px;
@@ -174,55 +138,49 @@
   }
 
   .kid-avatar {
-    width: 52px; height: 52px;
+    width: 50px; height: 50px;
     border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    font-size: 1.6rem; flex-shrink: 0;
+    font-size: 1.5rem; flex-shrink: 0;
   }
 
-  .kid-info h2 { font-family: 'Fredoka One', cursive; font-size: 1.35rem; color: #2D2D2D; }
-  .kid-age { font-size: 0.75rem; font-weight: 700; color: #999; text-transform: uppercase; letter-spacing: 1px; }
-
-  .progress-bar-wrap { height: 8px; background: #F0F0F0; border-radius: 4px; overflow: hidden; margin-top: 8px; }
+  .kid-info h2 { font-family: 'Fredoka One', cursive; font-size: 1.3rem; color: #2D2D2D; }
+  .kid-age { font-size: 0.72rem; font-weight: 700; color: #999; text-transform: uppercase; letter-spacing: 1px; }
+  .progress-bar-wrap { height: 7px; background: #F0F0F0; border-radius: 4px; overflow: hidden; margin-top: 7px; }
   .progress-bar { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
 
   .score-badge {
-    position: absolute; top: 18px; right: 18px;
-    font-family: 'Fredoka One', cursive; font-size: 1.05rem;
+    position: absolute; top: 16px; right: 16px;
+    font-family: 'Fredoka One', cursive; font-size: 1rem;
     padding: 4px 12px; border-radius: 50px; color: white;
   }
 
-  /* Section dividers inside card */
+  /* TOD dividers */
   .tod-divider {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 10px 14px 4px;
-    margin-top: 2px;
+    padding: 10px 14px 3px;
   }
 
   .tod-divider-label {
-    font-size: 0.72rem;
+    font-size: 0.7rem;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 1px;
     white-space: nowrap;
   }
 
-  .tod-divider-line {
-    flex: 1;
-    height: 1.5px;
-    border-radius: 1px;
-  }
+  .tod-divider-line { flex: 1; height: 1.5px; border-radius: 1px; }
 
-  .tod-morning  .tod-divider-label { color: #f7971e; }
-  .tod-morning  .tod-divider-line  { background: #f7971e44; }
+  .tod-morning   .tod-divider-label { color: #f7971e; }
+  .tod-morning   .tod-divider-line  { background: #f7971e44; }
   .tod-afternoon .tod-divider-label { color: #38c172; }
   .tod-afternoon .tod-divider-line  { background: #38c17244; }
-  .tod-evening  .tod-divider-label { color: #764ba2; }
-  .tod-evening  .tod-divider-line  { background: #764ba244; }
+  .tod-evening   .tod-divider-label { color: #764ba2; }
+  .tod-evening   .tod-divider-line  { background: #764ba244; }
 
-  .chore-list { padding: 0 14px 16px; }
+  .chore-list { padding: 0 14px 14px; }
 
   .chore-item {
     display: flex; align-items: center; gap: 12px;
@@ -231,15 +189,15 @@
   }
 
   .chore-item:hover { background: #F8F8F8; }
-  .chore-item.done { opacity: 0.5; }
-  .chore-item.readonly { cursor: default; }
-  .chore-item.readonly:hover { background: none; }
+  .chore-item:active { background: #F0F0F0; }
+  .chore-item.done { opacity: 0.45; }
 
   .chore-check {
     width: 24px; height: 24px; border-radius: 50%;
     border: 2.5px solid #DDD;
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0; transition: all 0.2s; font-size: 0.85rem;
+    color: white;
   }
 
   .chore-item.done .chore-check { border-color: transparent; }
@@ -248,53 +206,8 @@
   .chore-time  { font-size: 0.65rem; color: #bbb; font-weight: 600; }
   .chore-icon  { font-size: 1rem; }
 
-  /* Color themes */
-  .kid-theodore .kid-header { background: linear-gradient(135deg,#667eea22,#764ba222); }
-  .kid-theodore .kid-avatar { background: linear-gradient(135deg,#667eea,#764ba2); }
-  .kid-theodore .progress-bar { background: linear-gradient(90deg,#667eea,#764ba2); }
-  .kid-theodore .score-badge { background: linear-gradient(135deg,#667eea,#764ba2); }
-  .kid-theodore .chore-item.done .chore-check { background: linear-gradient(135deg,#667eea,#764ba2); }
-  .kid-theodore.who-btn { background: linear-gradient(135deg,#667eea,#764ba2); }
-
-  .kid-alice .kid-header { background: linear-gradient(135deg,#f093fb22,#f5576c22); }
-  .kid-alice .kid-avatar { background: linear-gradient(135deg,#f093fb,#f5576c); }
-  .kid-alice .progress-bar { background: linear-gradient(90deg,#f093fb,#f5576c); }
-  .kid-alice .score-badge { background: linear-gradient(135deg,#f093fb,#f5576c); }
-  .kid-alice .chore-item.done .chore-check { background: linear-gradient(135deg,#f093fb,#f5576c); }
-  .kid-alice.who-btn { background: linear-gradient(135deg,#f093fb,#f5576c); }
-
-  .kid-andrew .kid-header { background: linear-gradient(135deg,#4facfe22,#00f2fe22); }
-  .kid-andrew .kid-avatar { background: linear-gradient(135deg,#4facfe,#00f2fe); }
-  .kid-andrew .progress-bar { background: linear-gradient(90deg,#4facfe,#00f2fe); }
-  .kid-andrew .score-badge { background: linear-gradient(135deg,#4facfe,#00f2fe); }
-  .kid-andrew .chore-item.done .chore-check { background: linear-gradient(135deg,#4facfe,#00f2fe); }
-  .kid-andrew.who-btn { background: linear-gradient(135deg,#4facfe,#00f2fe); }
-
-  .kid-felix .kid-header { background: linear-gradient(135deg,#43e97b22,#38f9d722); }
-  .kid-felix .kid-avatar { background: linear-gradient(135deg,#43e97b,#38f9d7); }
-  .kid-felix .progress-bar { background: linear-gradient(90deg,#43e97b,#38f9d7); }
-  .kid-felix .score-badge { background: linear-gradient(135deg,#43e97b,#38f9d7); }
-  .kid-felix .chore-item.done .chore-check { background: linear-gradient(135deg,#43e97b,#38f9d7); }
-  .kid-felix.who-btn { background: linear-gradient(135deg,#43e97b,#38f9d7); }
-
-  .kid-lucy .kid-header { background: linear-gradient(135deg,#fa709a22,#fee14022); }
-  .kid-lucy .kid-avatar { background: linear-gradient(135deg,#fa709a,#fee140); }
-  .kid-lucy .progress-bar { background: linear-gradient(90deg,#fa709a,#fee140); }
-  .kid-lucy .score-badge { background: linear-gradient(135deg,#fa709a,#fee140); }
-  .kid-lucy .chore-item.done .chore-check { background: linear-gradient(135deg,#fa709a,#fee140); }
-  .kid-lucy.who-btn { background: linear-gradient(135deg,#fa709a,#fee140); }
-
-  .kid-leo .kid-header { background: linear-gradient(135deg,#f7971e22,#ffd20022); }
-  .kid-leo .kid-avatar { background: linear-gradient(135deg,#f7971e,#ffd200); }
-  .kid-leo .progress-bar { background: linear-gradient(90deg,#f7971e,#ffd200); }
-  .kid-leo .score-badge { background: linear-gradient(135deg,#f7971e,#ffd200); }
-  .kid-leo .chore-item.done .chore-check { background: linear-gradient(135deg,#f7971e,#ffd200); }
-  .kid-leo.who-btn { background: linear-gradient(135deg,#f7971e,#ffd200); }
-
-  .parent-btn { background: linear-gradient(135deg,#2D2D2D,#555); }
-
   .reset-btn {
-    display: block; margin: 24px auto 0;
+    display: block; margin: 24px auto 32px;
     padding: 10px 28px; border-radius: 50px;
     border: 2px solid #DDD; background: white;
     font-family: 'Nunito', sans-serif; font-weight: 700;
@@ -303,44 +216,75 @@
   }
   .reset-btn:hover { border-color: #aaa; color: #333; }
 
-  .confetti-pop { animation: pop 0.3s ease; }
+  .confetti-pop { animation: pop 0.25s ease; }
   @keyframes pop {
     0% { transform: scale(1); }
-    50% { transform: scale(1.15); }
+    50% { transform: scale(1.12); }
     100% { transform: scale(1); }
   }
+
+  /* Kid color themes */
+  .kid-theodore .kid-header { background: linear-gradient(135deg,#667eea22,#764ba222); }
+  .kid-theodore .kid-avatar { background: linear-gradient(135deg,#667eea,#764ba2); }
+  .kid-theodore .progress-bar { background: linear-gradient(90deg,#667eea,#764ba2); }
+  .kid-theodore .score-badge { background: linear-gradient(135deg,#667eea,#764ba2); }
+  .kid-theodore .chore-item.done .chore-check { background: linear-gradient(135deg,#667eea,#764ba2); }
+  .jump-theodore { background: linear-gradient(135deg,#667eea,#764ba2); }
+
+  .kid-alice .kid-header { background: linear-gradient(135deg,#f093fb22,#f5576c22); }
+  .kid-alice .kid-avatar { background: linear-gradient(135deg,#f093fb,#f5576c); }
+  .kid-alice .progress-bar { background: linear-gradient(90deg,#f093fb,#f5576c); }
+  .kid-alice .score-badge { background: linear-gradient(135deg,#f093fb,#f5576c); }
+  .kid-alice .chore-item.done .chore-check { background: linear-gradient(135deg,#f093fb,#f5576c); }
+  .jump-alice { background: linear-gradient(135deg,#f093fb,#f5576c); }
+
+  .kid-andrew .kid-header { background: linear-gradient(135deg,#4facfe22,#00f2fe22); }
+  .kid-andrew .kid-avatar { background: linear-gradient(135deg,#4facfe,#00f2fe); }
+  .kid-andrew .progress-bar { background: linear-gradient(90deg,#4facfe,#00f2fe); }
+  .kid-andrew .score-badge { background: linear-gradient(135deg,#4facfe,#00f2fe); }
+  .kid-andrew .chore-item.done .chore-check { background: linear-gradient(135deg,#4facfe,#00f2fe); }
+  .jump-andrew { background: linear-gradient(135deg,#4facfe,#00f2fe); }
+
+  .kid-felix .kid-header { background: linear-gradient(135deg,#43e97b22,#38f9d722); }
+  .kid-felix .kid-avatar { background: linear-gradient(135deg,#43e97b,#38f9d7); }
+  .kid-felix .progress-bar { background: linear-gradient(90deg,#43e97b,#38f9d7); }
+  .kid-felix .score-badge { background: linear-gradient(135deg,#43e97b,#38f9d7); }
+  .kid-felix .chore-item.done .chore-check { background: linear-gradient(135deg,#43e97b,#38f9d7); }
+  .jump-felix { background: linear-gradient(135deg,#43e97b,#38f9d7); }
+
+  .kid-lucy .kid-header { background: linear-gradient(135deg,#fa709a22,#fee14022); }
+  .kid-lucy .kid-avatar { background: linear-gradient(135deg,#fa709a,#fee140); }
+  .kid-lucy .progress-bar { background: linear-gradient(90deg,#fa709a,#fee140); }
+  .kid-lucy .score-badge { background: linear-gradient(135deg,#fa709a,#fee140); }
+  .kid-lucy .chore-item.done .chore-check { background: linear-gradient(135deg,#fa709a,#fee140); }
+  .jump-lucy { background: linear-gradient(135deg,#fa709a,#fee140); }
+
+  .kid-leo .kid-header { background: linear-gradient(135deg,#f7971e22,#ffd20022); }
+  .kid-leo .kid-avatar { background: linear-gradient(135deg,#f7971e,#ffd200); }
+  .kid-leo .progress-bar { background: linear-gradient(90deg,#f7971e,#ffd200); }
+  .kid-leo .score-badge { background: linear-gradient(135deg,#f7971e,#ffd200); }
+  .kid-leo .chore-item.done .chore-check { background: linear-gradient(135deg,#f7971e,#ffd200); }
+  .jump-leo { background: linear-gradient(135deg,#f7971e,#ffd200); }
 </style>
 </head>
 <body>
 
-<div id="who-screen">
+<header>
   <h1>⭐ Hull Family Chores</h1>
-  <p>Who's checking in?</p>
-  <div class="who-grid" id="whoGrid"></div>
-</div>
+  <p class="subtitle">🗓️ Saturday</p>
+</header>
 
-<div id="main-board">
-  <header>
-    <h1>⭐ Hull Family Chores</h1>
-    <p class="subtitle">🗓️ Saturday Chores</p>
-  </header>
-
-  <div class="top-bar">
-    <div class="user-badge" onclick="switchUser()">
-      <span id="userEmoji"></span>
-      <span id="userName"></span>
-      <span style="color:#ccc;font-size:0.8rem">▾ switch</span>
-    </div>
-    <div class="sync-indicator synced" id="syncIndicator">
-      <div class="sync-dot" id="syncDot"></div>
-      <span id="syncLabel">Live sync on</span>
-    </div>
+<div class="top-bar">
+  <div class="jump-links" id="jumpLinks"></div>
+  <div class="sync-indicator synced" id="syncIndicator">
+    <div class="sync-dot" id="syncDot"></div>
+    <span id="syncLabel">Live</span>
   </div>
-
-  <div class="summary-bar" id="summaryBar"></div>
-  <div class="kids-grid" id="kidsGrid"></div>
-  <button class="reset-btn" id="resetBtn" style="display:none" onclick="resetAll()">🔄 Reset All Chores</button>
 </div>
+
+<div class="summary-bar" id="summaryBar"></div>
+<div class="kids-grid" id="kidsGrid"></div>
+<button class="reset-btn" onclick="resetAll()">🔄 Reset All Chores</button>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -353,25 +297,36 @@ firebase.initializeApp({
 var db = firebase.firestore();
 
 // =============================================
-// CHORE DATA
-// Each chore has: tod, label, icon, ids ('all' or array), section
+// DATA
 // =============================================
+var KIDS = [
+  { id:'theodore', name:'Theodore', age:11, emoji:'🦁' },
+  { id:'alice',    name:'Alice',    age:9,  emoji:'🦋' },
+  { id:'andrew',   name:'Andrew',   age:8,  emoji:'🚀' },
+  { id:'felix',    name:'Felix',    age:6,  emoji:'🐸' },
+  { id:'lucy',     name:'Lucy',     age:5,  emoji:'🌸' },
+  { id:'leo',      name:'Leo',      age:3,  emoji:'🐻' },
+];
+
+var TOD_ORDER  = ['morning','afternoon','evening'];
+var TOD_LABELS = { morning:'🌅 Morning', afternoon:'☀️ Afternoon', evening:'🌆 Evening' };
+
 var ALL_CHORES = [
   // ---- MORNING ----
-  { tod:'morning', section:'Everyone',      label:'Make bed',                    icon:'🛏️', ids:'all' },
-  { tod:'morning', section:'Everyone',      label:'Brush teeth',                 icon:'🪥', ids:'all' },
-  { tod:'morning', section:'Everyone',      label:'Get dressed',                 icon:'👕', ids:'all' },
-  { tod:'morning', section:'Everyone',      label:'Eat breakfast',               icon:'🥣', ids:'all' },
-  { tod:'morning', section:'Everyone',      label:'Bring plates to sink',        icon:'🫧', ids:'all' },
-  { tod:'morning', section:'Family Chores', label:'Unload dishwasher',           icon:'🍽️', ids:['theodore'] },
-  { tod:'morning', section:'Family Chores', label:'Wipe bathroom sink',          icon:'🚿', ids:['theodore','leo'] },
-  { tod:'morning', section:'Family Chores', label:'Wipe bathroom sink',          icon:'🚿', ids:['alice','lucy'] },
-  { tod:'morning', section:'Family Chores', label:'Wipe bathroom sink',          icon:'🚿', ids:['andrew','felix'] },
-  { tod:'morning', section:'Family Chores', label:'Vacuum living room',          icon:'🧹', ids:['alice'] },
-  { tod:'morning', section:'Family Chores', label:'Vacuum front room',           icon:'🧹', ids:['andrew'] },
-  { tod:'morning', section:'Family Chores', label:'Put away blankets',           icon:'🛋️', ids:['lucy','leo'] },
+  { tod:'morning', section:'Everyone',      label:'Make bed',                      icon:'🛏️', ids:'all' },
+  { tod:'morning', section:'Everyone',      label:'Brush teeth',                   icon:'🪥', ids:'all' },
+  { tod:'morning', section:'Everyone',      label:'Get dressed',                   icon:'👕', ids:'all' },
+  { tod:'morning', section:'Everyone',      label:'Eat breakfast',                 icon:'🥣', ids:'all' },
+  { tod:'morning', section:'Everyone',      label:'Bring plates to sink',          icon:'🫧', ids:'all' },
+  { tod:'morning', section:'Family Chores', label:'Unload dishwasher',             icon:'🍽️', ids:['theodore'] },
+  { tod:'morning', section:'Family Chores', label:'Wipe bathroom sink',            icon:'🚿', ids:['theodore','leo'] },
+  { tod:'morning', section:'Family Chores', label:'Wipe bathroom sink',            icon:'🚿', ids:['alice','lucy'] },
+  { tod:'morning', section:'Family Chores', label:'Wipe bathroom sink',            icon:'🚿', ids:['andrew','felix'] },
+  { tod:'morning', section:'Family Chores', label:'Vacuum living room',            icon:'🧹', ids:['alice'] },
+  { tod:'morning', section:'Family Chores', label:'Vacuum front room',             icon:'🧹', ids:['andrew'] },
+  { tod:'morning', section:'Family Chores', label:'Put away blankets',             icon:'🛋️', ids:['lucy','leo'] },
   { tod:'morning', section:'Family Chores', label:"Fill up Sophie's food & water", icon:'🐾', ids:['felix'] },
-  { tod:'morning', section:'❤️ Special',    label:'Go kiss Momma good morning!', icon:'💋', ids:'all' },
+  { tod:'morning', section:'❤️ Special',    label:'Go kiss Momma good morning!',   icon:'💋', ids:'all' },
 
   // ---- AFTERNOON ----
   { tod:'afternoon', section:'Everyone', label:'Eat lunch',                  icon:'🥪', ids:'all' },
@@ -395,21 +350,6 @@ var ALL_CHORES = [
   { tod:'evening', section:'Clean Up', label:'Wipe kitchen table',           icon:'🧹', ids:['lucy'] },
 ];
 
-var TOD_ORDER = ['morning','afternoon','evening'];
-var TOD_LABELS = { morning:'🌅 Morning', afternoon:'☀️ Afternoon', evening:'🌆 Evening' };
-
-var USERS = [
-  { id:'theodore', name:'Theodore', age:11, emoji:'🦁', type:'kid' },
-  { id:'alice',    name:'Alice',    age:9,  emoji:'🦋', type:'kid' },
-  { id:'andrew',   name:'Andrew',   age:8,  emoji:'🚀', type:'kid' },
-  { id:'felix',    name:'Felix',    age:6,  emoji:'🐸', type:'kid' },
-  { id:'lucy',     name:'Lucy',     age:5,  emoji:'🌸', type:'kid' },
-  { id:'leo',      name:'Leo',      age:3,  emoji:'🐻', type:'kid' },
-  { id:'parent',   name:'Mom & Dad', emoji:'👨‍👩‍👧‍👦', type:'parent' },
-];
-
-var KIDS = USERS.filter(function(u) { return u.type === 'kid'; });
-
 function getChoresForKid(kidId) {
   return ALL_CHORES.filter(function(c) {
     return c.ids === 'all' || c.ids.indexOf(kidId) !== -1;
@@ -417,11 +357,10 @@ function getChoresForKid(kidId) {
 }
 
 // =============================================
-// STATE & FIREBASE
+// FIREBASE
 // =============================================
-var currentUser = null;
-var choreState  = {};
-var unsub       = null;
+var choreState = {};
+var unsub = null;
 
 function docRef() { return db.collection('chores').doc('saturday'); }
 
@@ -446,11 +385,11 @@ function setSyncStatus(s) {
   document.getElementById('syncIndicator').className = 'sync-indicator ' + s;
   document.getElementById('syncDot').className = 'sync-dot' + (s === 'syncing' ? ' spinning' : '');
   document.getElementById('syncLabel').textContent =
-    s === 'syncing' ? 'Syncing...' : s === 'synced' ? 'Live sync on' : 'Sync error';
+    s === 'syncing' ? 'Syncing...' : s === 'synced' ? 'Live' : 'Error';
 }
 
 // =============================================
-// KEY / TOGGLE / CHECK
+// TOGGLE
 // =============================================
 function choreKey(kidId, tod, label) { return kidId + '__' + tod + '__' + label; }
 
@@ -461,7 +400,7 @@ function isChecked(kidId, tod, label) {
 
 function handleChore(kidId, tod, label, el) {
   el.classList.add('confetti-pop');
-  setTimeout(function() { el.classList.remove('confetti-pop'); }, 300);
+  setTimeout(function() { el.classList.remove('confetti-pop'); }, 250);
   var k = choreKey(kidId, tod, label);
   if (!choreState[kidId]) choreState[kidId] = {};
   var was = choreState[kidId][k] && choreState[kidId][k].done;
@@ -471,41 +410,16 @@ function handleChore(kidId, tod, label, el) {
 }
 
 // =============================================
-// WHO SCREEN
-// =============================================
-function renderWhoScreen() {
-  document.getElementById('whoGrid').innerHTML = USERS.map(function(u) {
-    return '<button class="who-btn kid-' + u.id + (u.type === 'parent' ? ' parent-btn' : '') +
-      '" onclick="selectUser(\'' + u.id + '\')">' +
-      '<span class="emoji">' + u.emoji + '</span><span>' + u.name + '</span></button>';
-  }).join('');
-}
-
-function selectUser(userId) {
-  currentUser = USERS.find(function(u) { return u.id === userId; });
-  document.getElementById('who-screen').style.display = 'none';
-  document.getElementById('main-board').style.display = 'block';
-  document.getElementById('userEmoji').textContent = currentUser.emoji;
-  document.getElementById('userName').textContent   = currentUser.name;
-  document.getElementById('resetBtn').style.display = currentUser.type === 'parent' ? 'block' : 'none';
-  subscribe();
-}
-
-function switchUser() {
-  if (unsub) { unsub(); unsub = null; }
-  currentUser = null;
-  document.getElementById('who-screen').style.display = 'flex';
-  document.getElementById('main-board').style.display = 'none';
-}
-
-// =============================================
 // RENDER
 // =============================================
 function render() {
-  var isParent = currentUser && currentUser.type === 'parent';
-  var myId     = currentUser ? currentUser.id : null;
+  // Jump links
+  document.getElementById('jumpLinks').innerHTML = KIDS.map(function(kid) {
+    return '<a class="jump-link jump-' + kid.id + '" href="#card-' + kid.id + '">' +
+      kid.emoji + ' ' + kid.name.split(' ')[0] + '</a>';
+  }).join('');
 
-  // Summary — all chores across all kids
+  // Summary
   var totalDone = 0, totalAll = 0;
   for (var ki = 0; ki < KIDS.length; ki++) {
     var kc = getChoresForKid(KIDS[ki].id);
@@ -517,9 +431,9 @@ function render() {
   var pct = totalAll ? Math.round(totalDone / totalAll * 100) : 0;
   document.getElementById('summaryBar').innerHTML =
     '<div class="summary-item">📋 ' + totalDone + ' / ' + totalAll + ' done</div>' +
-    '<div class="summary-item">🏆 ' + pct + '% complete</div>';
+    '<div class="summary-item">🏆 ' + pct + '%</div>';
 
-  // Build each kid card
+  // Kid cards
   var gridHtml = '';
   for (var k = 0; k < KIDS.length; k++) {
     var kid    = KIDS[k];
@@ -530,58 +444,39 @@ function render() {
     }
     var kpct    = chores.length ? Math.round(doneCt / chores.length * 100) : 0;
     var allDone = chores.length > 0 && doneCt === chores.length;
-    var isMyCard = myId === kid.id;
-    var readonly = !isParent && !isMyCard;
 
-    var cardClass = 'kid-card kid-' + kid.id;
-    if (!isParent && !isMyCard) cardClass += ' dimmed';
-    if (!isParent && isMyCard)  cardClass += ' own-card';
-
-    // Build chore list grouped by tod then section
     var choreHtml = '<div class="chore-list">';
     for (var ti = 0; ti < TOD_ORDER.length; ti++) {
       var tod = TOD_ORDER[ti];
       var todChores = chores.filter(function(ch) { return ch.tod === tod; });
       if (todChores.length === 0) continue;
 
-      // TOD divider
       choreHtml += '<div class="tod-divider tod-' + tod + '">' +
         '<span class="tod-divider-label">' + TOD_LABELS[tod] + '</span>' +
         '<div class="tod-divider-line"></div></div>';
 
-      // Group by section within this tod
-      var secs = {}, secOrder = [];
-      for (var tc = 0; tc < todChores.length; tc++) {
-        var sec = todChores[tc].section;
-        if (!secs[sec]) { secs[sec] = []; secOrder.push(sec); }
-        secs[sec].push(todChores[tc]);
-      }
+      for (var ii = 0; ii < todChores.length; ii++) {
+        var ch     = todChores[ii];
+        var isDone = isChecked(kid.id, tod, ch.label);
+        var ck     = choreKey(kid.id, tod, ch.label);
+        var ts     = choreState[kid.id] && choreState[kid.id][ck] && choreState[kid.id][ck].ts;
+        var tStr   = ts ? new Date(ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) : '';
+        var safe   = ch.label.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
 
-      for (var si = 0; si < secOrder.length; si++) {
-        var items = secs[secOrder[si]];
-        for (var ii = 0; ii < items.length; ii++) {
-          var ch    = items[ii];
-          var isDone = isChecked(kid.id, tod, ch.label);
-          var ck     = choreKey(kid.id, tod, ch.label);
-          var ts     = choreState[kid.id] && choreState[kid.id][ck] && choreState[kid.id][ck].ts;
-          var tStr   = ts ? new Date(ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) : '';
-          var safe   = ch.label.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-
-          choreHtml +=
-            '<div class="chore-item' + (isDone ? ' done' : '') + (readonly ? ' readonly' : '') + '"' +
-            (readonly ? '' : ' onclick="handleChore(\'' + kid.id + '\',\'' + tod + '\',\'' + safe + '\',this)"') + '>' +
-            '<div class="chore-check">' + (isDone ? '✓' : '') + '</div>' +
-            '<span class="chore-icon">' + ch.icon + '</span>' +
-            '<div style="flex:1"><div class="chore-label">' + ch.label + '</div>' +
-            (isDone && tStr ? '<div class="chore-time">✓ ' + tStr + '</div>' : '') +
-            '</div></div>';
-        }
+        choreHtml +=
+          '<div class="chore-item' + (isDone ? ' done' : '') + '"' +
+          ' onclick="handleChore(\'' + kid.id + '\',\'' + tod + '\',\'' + safe + '\',this)">' +
+          '<div class="chore-check">' + (isDone ? '✓' : '') + '</div>' +
+          '<span class="chore-icon">' + ch.icon + '</span>' +
+          '<div style="flex:1"><div class="chore-label">' + ch.label + '</div>' +
+          (isDone && tStr ? '<div class="chore-time">✓ ' + tStr + '</div>' : '') +
+          '</div></div>';
       }
     }
     choreHtml += '</div>';
 
     gridHtml +=
-      '<div class="' + cardClass + '">' +
+      '<div class="kid-card kid-' + kid.id + '" id="card-' + kid.id + '">' +
         '<div class="kid-header">' +
           '<div class="kid-avatar">' + kid.emoji + '</div>' +
           '<div class="kid-info" style="flex:1">' +
@@ -604,10 +499,8 @@ function resetAll() {
   render();
 }
 
-// =============================================
-// BOOT
-// =============================================
-renderWhoScreen();
+// Boot
+subscribe();
 </script>
 </body>
 </html>
