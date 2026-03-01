@@ -22,9 +22,7 @@
     display: flex; align-items: center; justify-content: space-between;
     gap: 8px; flex-wrap: wrap; margin-bottom: 14px;
   }
-
   .jump-links { display: flex; gap: 6px; flex-wrap: wrap; }
-
   .jump-link {
     display: flex; align-items: center; gap: 5px;
     padding: 7px 13px; border-radius: 50px;
@@ -33,22 +31,16 @@
     transition: transform 0.15s, box-shadow 0.15s;
   }
   .jump-link:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
-
   .right-bar { display: flex; align-items: center; gap: 8px; }
-
   .day-badge {
-    font-family: 'Fredoka One', cursive;
-    font-size: 0.9rem; padding: 7px 14px;
-    border-radius: 50px; color: white;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    font-family: 'Fredoka One', cursive; font-size: 0.9rem; padding: 7px 14px;
+    border-radius: 50px; color: white; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
   }
   .day-badge.saturday { background: linear-gradient(135deg,#f7971e,#ffd200); color: #333; }
   .day-badge.sunday   { background: linear-gradient(135deg,#667eea,#764ba2); }
-
   .sync-indicator {
-    display: flex; align-items: center; gap: 7px;
-    font-size: 0.8rem; font-weight: 700; color: #aaa;
-    background: white; padding: 7px 14px; border-radius: 50px;
+    display: flex; align-items: center; gap: 7px; font-size: 0.8rem; font-weight: 700;
+    color: #aaa; background: white; padding: 7px 14px; border-radius: 50px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.07); white-space: nowrap;
   }
   .sync-indicator.syncing { color: #f7971e; }
@@ -64,33 +56,36 @@
     box-shadow: 0 2px 10px rgba(0,0,0,0.06); font-size: 0.88rem; font-weight: 700; color: #555;
   }
 
-  .kids-grid {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(300px,1fr));
-    gap: 18px; max-width: 1400px; margin: 0 auto;
-  }
+  .kids-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px,1fr)); gap: 18px; max-width: 1400px; margin: 0 auto; }
 
-  .kid-card {
-    background: var(--card-bg); border-radius: var(--radius);
-    box-shadow: var(--shadow); overflow: hidden; scroll-margin-top: 80px;
-  }
+  .kid-card { background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; scroll-margin-top: 80px; }
 
-  .kid-header {
-    padding: 16px 20px 12px; display: flex; align-items: center;
-    gap: 14px; position: relative;
-  }
+  .kid-header { padding: 16px 20px 12px; display: flex; align-items: center; gap: 14px; position: relative; }
+
+  /* Avatar - tappable */
   .kid-avatar {
-    width: 50px; height: 50px; border-radius: 50%;
+    width: 54px; height: 54px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    font-size: 1.5rem; flex-shrink: 0;
+    font-size: 1.6rem; flex-shrink: 0; cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    position: relative;
   }
+  .kid-avatar:hover { transform: scale(1.1); box-shadow: 0 4px 16px rgba(0,0,0,0.2); }
+  .kid-avatar:active { transform: scale(0.95); }
+  .avatar-edit-hint {
+    position: absolute; bottom: -2px; right: -2px;
+    background: white; border-radius: 50%; width: 18px; height: 18px;
+    font-size: 10px; display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  }
+
   .kid-info h2 { font-family: 'Fredoka One', cursive; font-size: 1.3rem; color: #2D2D2D; }
   .kid-age { font-size: 0.72rem; font-weight: 700; color: #999; text-transform: uppercase; letter-spacing: 1px; }
   .progress-bar-wrap { height: 7px; background: #F0F0F0; border-radius: 4px; overflow: hidden; margin-top: 7px; }
   .progress-bar { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
   .score-badge {
-    position: absolute; top: 16px; right: 16px;
-    font-family: 'Fredoka One', cursive; font-size: 1rem;
-    padding: 4px 12px; border-radius: 50px; color: white;
+    position: absolute; top: 16px; right: 16px; font-family: 'Fredoka One', cursive;
+    font-size: 1rem; padding: 4px 12px; border-radius: 50px; color: white;
   }
 
   .tod-divider { display: flex; align-items: center; gap: 8px; padding: 10px 14px 3px; }
@@ -113,8 +108,7 @@
   .chore-item:active { background: #F0F0F0; }
   .chore-item.done   { opacity: 0.45; }
   .chore-check {
-    width: 24px; height: 24px; border-radius: 50%;
-    border: 2.5px solid #DDD;
+    width: 24px; height: 24px; border-radius: 50%; border: 2.5px solid #DDD;
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0; transition: all 0.2s; font-size: 0.85rem; color: white;
   }
@@ -124,17 +118,65 @@
   .chore-time  { font-size: 0.65rem; color: #bbb; font-weight: 600; }
   .chore-icon  { font-size: 1rem; }
 
+  /* Section complete flash */
+  .tod-complete-flash { animation: sectionFlash 0.5s ease; }
+  @keyframes sectionFlash { 0%{background:#fff} 40%{background:#d4f5d4} 100%{background:#fff} }
+
   .reset-btn {
-    display: block; margin: 24px auto 32px;
-    padding: 10px 28px; border-radius: 50px;
-    border: 2px solid #DDD; background: white;
-    font-family: 'Nunito', sans-serif; font-weight: 700;
-    font-size: 0.9rem; cursor: pointer; color: #777; transition: all 0.2s;
+    display: block; margin: 24px auto 32px; padding: 10px 28px; border-radius: 50px;
+    border: 2px solid #DDD; background: white; font-family: 'Nunito', sans-serif;
+    font-weight: 700; font-size: 0.9rem; cursor: pointer; color: #777; transition: all 0.2s;
   }
   .reset-btn:hover { border-color: #aaa; color: #333; }
 
   .confetti-pop { animation: pop 0.25s ease; }
   @keyframes pop { 0%{transform:scale(1)} 50%{transform:scale(1.12)} 100%{transform:scale(1)} }
+
+  /* ---- AVATAR PICKER MODAL ---- */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; z-index: 999;
+    background: rgba(0,0,0,0.5); align-items: center; justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: white; border-radius: 24px; padding: 24px;
+    max-width: 380px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    animation: modalIn 0.2s ease;
+  }
+  @keyframes modalIn { from{transform:scale(0.85);opacity:0} to{transform:scale(1);opacity:1} }
+  .modal h3 { font-family: 'Fredoka One', cursive; font-size: 1.4rem; color: #2D2D2D; margin-bottom: 16px; text-align: center; }
+  .emoji-grid {
+    display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px;
+    max-height: 280px; overflow-y: auto; margin-bottom: 16px;
+  }
+  .emoji-opt {
+    font-size: 1.6rem; padding: 6px; border-radius: 12px; cursor: pointer;
+    text-align: center; transition: background 0.1s, transform 0.1s; border: 2.5px solid transparent;
+  }
+  .emoji-opt:hover  { background: #F0F0F0; transform: scale(1.15); }
+  .emoji-opt.picked { border-color: #667eea; background: #667eea18; }
+  .modal-close {
+    display: block; width: 100%; padding: 10px; border-radius: 50px;
+    border: 2px solid #EEE; background: white; font-family: 'Nunito', sans-serif;
+    font-weight: 700; font-size: 0.95rem; cursor: pointer; color: #888; transition: all 0.15s;
+  }
+  .modal-close:hover { border-color: #ccc; color: #555; }
+
+  /* ---- CELEBRATION OVERLAY ---- */
+  .celebration {
+    display: none; position: fixed; inset: 0; z-index: 998;
+    align-items: center; justify-content: center; pointer-events: none;
+  }
+  .celebration.show { display: flex; }
+  .celebration-inner {
+    text-align: center; animation: celebIn 0.4s ease;
+  }
+  @keyframes celebIn { from{transform:scale(0.5);opacity:0} to{transform:scale(1);opacity:1} }
+  .celebration-emoji { font-size: 5rem; display: block; }
+  .celebration-text  { font-family: 'Fredoka One', cursive; font-size: 2rem; color: white; text-shadow: 0 2px 10px rgba(0,0,0,0.4); }
+
+  .confetti-canvas { position: fixed; inset: 0; z-index: 997; pointer-events: none; }
 
   /* Kid color themes */
   .kid-theodore .kid-header { background: linear-gradient(135deg,#667eea22,#764ba222); }
@@ -202,6 +244,26 @@
 <div class="kids-grid" id="kidsGrid"></div>
 <button class="reset-btn" onclick="resetAll()">🔄 Reset All Chores</button>
 
+<!-- Avatar picker modal -->
+<div class="modal-overlay" id="avatarModal">
+  <div class="modal">
+    <h3 id="modalTitle">Pick your avatar!</h3>
+    <div class="emoji-grid" id="emojiGrid"></div>
+    <button class="modal-close" onclick="closeAvatarModal()">Done ✓</button>
+  </div>
+</div>
+
+<!-- Confetti canvas -->
+<canvas class="confetti-canvas" id="confettiCanvas"></canvas>
+
+<!-- Celebration overlay -->
+<div class="celebration" id="celebration">
+  <div class="celebration-inner">
+    <span class="celebration-emoji">🎉</span>
+    <div class="celebration-text" id="celebText"></div>
+  </div>
+</div>
+
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
@@ -213,43 +275,325 @@ firebase.initializeApp({
 var db = firebase.firestore();
 
 // =============================================
-// KIDS
+// KIDS & AVATARS
 // =============================================
 var KIDS = [
-  { id:'theodore', name:'Theodore', age:11, emoji:'🦁' },
-  { id:'alice',    name:'Alice',    age:9,  emoji:'🦋' },
-  { id:'andrew',   name:'Andrew',   age:8,  emoji:'🚀' },
-  { id:'felix',    name:'Felix',    age:6,  emoji:'🐸' },
-  { id:'lucy',     name:'Lucy',     age:5,  emoji:'🌸' },
-  { id:'leo',      name:'Leo',      age:3,  emoji:'🐻' },
+  { id:'theodore', name:'Theodore', age:11, defaultEmoji:'🦁' },
+  { id:'alice',    name:'Alice',    age:9,  defaultEmoji:'🦋' },
+  { id:'andrew',   name:'Andrew',   age:8,  defaultEmoji:'🚀' },
+  { id:'felix',    name:'Felix',    age:6,  defaultEmoji:'🐸' },
+  { id:'lucy',     name:'Lucy',     age:5,  defaultEmoji:'🌸' },
+  { id:'leo',      name:'Leo',      age:3,  defaultEmoji:'🐻' },
 ];
 
-var BIG_KIDS = ['theodore','alice','andrew','felix'];
+var AVATAR_EMOJIS = [
+  '🦁','🦋','🚀','🐸','🌸','🐻','🐶','🐱','🦊','🐼','🐨','🐯',
+  '🦄','🐲','👻','🤖','👽','🦸','🧙','🥷','🤠','🧟','🦖','🦕',
+  '🐙','🦑','🦩','🦚','🦜','🐊','🦧','🦣','🧸','🎃','🍕','🌮',
+  '🍦','🎮','⚽','🏆','🎸','🚗','🛸','🧨','🎯','🧃','🦷','💀',
+  '🫠','🤡','👾','🥸','🤪','😈','🧠','🫶','💥','🌈',
+];
 
+// avatars stored in localStorage for instant load, also synced to Firestore
+var avatars = {};
+
+function loadAvatars() {
+  try {
+    var stored = localStorage.getItem('hull_avatars');
+    if (stored) avatars = JSON.parse(stored);
+  } catch(e) {}
+}
+
+function saveAvatarLocal() {
+  try { localStorage.setItem('hull_avatars', JSON.stringify(avatars)); } catch(e) {}
+}
+
+function getEmoji(kidId) {
+  return avatars[kidId] || KIDS.find(function(k){ return k.id === kidId; }).defaultEmoji;
+}
+
+// Persist avatars to Firestore too so they sync across devices
+function saveAvatarsRemote() {
+  db.collection('meta').doc('avatars').set(avatars).catch(function(){});
+}
+
+function loadAvatarsRemote() {
+  db.collection('meta').doc('avatars').get().then(function(snap) {
+    if (snap.exists) {
+      var data = snap.data();
+      for (var k in data) { avatars[k] = data[k]; }
+      saveAvatarLocal();
+      render();
+    }
+  }).catch(function(){});
+}
+
+// =============================================
+// AVATAR PICKER
+// =============================================
+var pickingKidId = null;
+
+function openAvatarModal(kidId) {
+  pickingKidId = kidId;
+  var kid = KIDS.find(function(k){ return k.id === kidId; });
+  document.getElementById('modalTitle').textContent = kid.name + ', pick your avatar!';
+  var grid = document.getElementById('emojiGrid');
+  var current = getEmoji(kidId);
+  grid.innerHTML = AVATAR_EMOJIS.map(function(e) {
+    return '<div class="emoji-opt' + (e === current ? ' picked' : '') + '" onclick="pickEmoji(\'' + e + '\')">' + e + '</div>';
+  }).join('');
+  document.getElementById('avatarModal').classList.add('open');
+  soundPop();
+}
+
+function pickEmoji(emoji) {
+  if (!pickingKidId) return;
+  avatars[pickingKidId] = emoji;
+  saveAvatarLocal();
+  saveAvatarsRemote();
+  // Update picked highlight
+  var opts = document.querySelectorAll('.emoji-opt');
+  for (var i = 0; i < opts.length; i++) {
+    opts[i].classList.toggle('picked', opts[i].textContent === emoji);
+  }
+  // Update avatar in card immediately
+  var avatarEl = document.querySelector('#card-' + pickingKidId + ' .kid-avatar');
+  if (avatarEl) avatarEl.childNodes[0] && (avatarEl.innerHTML = emoji + '<div class="avatar-edit-hint">✏️</div>');
+  // Update jump link
+  render();
+  soundPop();
+}
+
+function closeAvatarModal() {
+  document.getElementById('avatarModal').classList.remove('open');
+  pickingKidId = null;
+}
+
+// Close modal on overlay click
+document.getElementById('avatarModal').addEventListener('click', function(e) {
+  if (e.target === this) closeAvatarModal();
+});
+
+// =============================================
+// SOUNDS (Web Audio API)
+// =============================================
+var audioCtx = null;
+
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+// High five slap sound
+function soundHighFive() {
+  try {
+    var ctx = getAudioCtx();
+    var bufSize = ctx.sampleRate * 0.15;
+    var buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+    var data = buf.getChannelData(0);
+    for (var i = 0; i < bufSize; i++) {
+      var t = i / ctx.sampleRate;
+      var env = Math.exp(-t * 30);
+      data[i] = (Math.random() * 2 - 1) * env * 0.8;
+      // Add a little smack tone
+      data[i] += Math.sin(2 * Math.PI * 200 * t) * Math.exp(-t * 40) * 0.3;
+    }
+    var src = ctx.createBufferSource();
+    src.buffer = buf;
+    var gain = ctx.createGain();
+    gain.gain.setValueAtTime(1, ctx.currentTime);
+    src.connect(gain); gain.connect(ctx.destination);
+    src.start();
+  } catch(e) {}
+}
+
+// Whoops - uncheck
+function soundUncheck() {
+  try {
+    var ctx = getAudioCtx();
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.frequency.setValueAtTime(400, ctx.currentTime);
+    osc.frequency.linearRampToValueAtTime(180, ctx.currentTime + 0.25);
+    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.25);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.25);
+  } catch(e) {}
+}
+
+// Section complete - air horn burst
+function soundSectionComplete() {
+  try {
+    var ctx = getAudioCtx();
+    var freqs = [466, 587, 698, 880];
+    freqs.forEach(function(f, i) {
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.value = f;
+      gain.gain.setValueAtTime(0, ctx.currentTime + i * 0.08);
+      gain.gain.linearRampToValueAtTime(0.18, ctx.currentTime + i * 0.08 + 0.05);
+      gain.gain.linearRampToValueAtTime(0, ctx.currentTime + i * 0.08 + 0.25);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(ctx.currentTime + i * 0.08);
+      osc.stop(ctx.currentTime + i * 0.08 + 0.3);
+    });
+  } catch(e) {}
+}
+
+// Card complete - fanfare
+function soundCardComplete() {
+  try {
+    var ctx = getAudioCtx();
+    var notes = [523, 659, 784, 1047];
+    notes.forEach(function(f, i) {
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.value = f;
+      gain.gain.setValueAtTime(0.0, ctx.currentTime + i * 0.12);
+      gain.gain.linearRampToValueAtTime(0.3, ctx.currentTime + i * 0.12 + 0.05);
+      gain.gain.linearRampToValueAtTime(0.0, ctx.currentTime + i * 0.12 + 0.35);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(ctx.currentTime + i * 0.12);
+      osc.stop(ctx.currentTime + i * 0.12 + 0.4);
+    });
+  } catch(e) {}
+}
+
+// ALL kids done - absolute chaos
+function soundAllDone() {
+  try {
+    var ctx = getAudioCtx();
+    // Siren sweep
+    for (var i = 0; i < 3; i++) {
+      (function(idx) {
+        var osc = ctx.createOscillator();
+        var gain = ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(600, ctx.currentTime + idx * 0.4);
+        osc.frequency.linearRampToValueAtTime(1200, ctx.currentTime + idx * 0.4 + 0.2);
+        osc.frequency.linearRampToValueAtTime(600, ctx.currentTime + idx * 0.4 + 0.4);
+        gain.gain.setValueAtTime(0.25, ctx.currentTime + idx * 0.4);
+        gain.gain.linearRampToValueAtTime(0, ctx.currentTime + idx * 0.4 + 0.4);
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.start(ctx.currentTime + idx * 0.4);
+        osc.stop(ctx.currentTime + idx * 0.4 + 0.4);
+      })(i);
+    }
+    // Ascending chime
+    var chimeNotes = [523,659,784,880,1047,1319];
+    chimeNotes.forEach(function(f, i) {
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = f;
+      gain.gain.setValueAtTime(0, ctx.currentTime + 1.2 + i * 0.1);
+      gain.gain.linearRampToValueAtTime(0.35, ctx.currentTime + 1.2 + i * 0.1 + 0.05);
+      gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 1.2 + i * 0.1 + 0.4);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(ctx.currentTime + 1.2 + i * 0.1);
+      osc.stop(ctx.currentTime + 1.2 + i * 0.1 + 0.5);
+    });
+  } catch(e) {}
+}
+
+// Generic pop for UI
+function soundPop() {
+  try {
+    var ctx = getAudioCtx();
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(800, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(400, ctx.currentTime + 0.1);
+    gain.gain.setValueAtTime(0.2, ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.1);
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.start(); osc.stop(ctx.currentTime + 0.1);
+  } catch(e) {}
+}
+
+// =============================================
+// CONFETTI
+// =============================================
+var confettiPieces = [];
+var confettiAnimating = false;
+
+function launchConfetti(intensity) {
+  var canvas = document.getElementById('confettiCanvas');
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+  var count = intensity === 'big' ? 200 : 80;
+  confettiPieces = [];
+  for (var i = 0; i < count; i++) {
+    confettiPieces.push({
+      x: Math.random() * canvas.width,
+      y: -10 - Math.random() * 100,
+      w: 8 + Math.random() * 8,
+      h: 4 + Math.random() * 6,
+      color: ['#667eea','#f093fb','#43e97b','#f7971e','#f5576c','#ffd200','#4facfe'][Math.floor(Math.random()*7)],
+      vx: (Math.random() - 0.5) * 4,
+      vy: 3 + Math.random() * 4,
+      rot: Math.random() * 360,
+      rotV: (Math.random() - 0.5) * 8,
+    });
+  }
+  if (!confettiAnimating) animateConfetti();
+}
+
+function animateConfetti() {
+  confettiAnimating = true;
+  var canvas = document.getElementById('confettiCanvas');
+  var ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  var alive = false;
+  for (var i = 0; i < confettiPieces.length; i++) {
+    var p = confettiPieces[i];
+    p.x  += p.vx; p.y += p.vy; p.rot += p.rotV; p.vy += 0.1;
+    if (p.y < canvas.height + 20) alive = true;
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    ctx.rotate(p.rot * Math.PI / 180);
+    ctx.fillStyle = p.color;
+    ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+    ctx.restore();
+  }
+  if (alive) { requestAnimationFrame(animateConfetti); }
+  else { confettiAnimating = false; ctx.clearRect(0,0,canvas.width,canvas.height); }
+}
+
+// =============================================
+// CELEBRATION
+// =============================================
+function showCelebration(text, emoji, intensity) {
+  var cel = document.getElementById('celebration');
+  document.getElementById('celebText').textContent = text;
+  cel.querySelector('.celebration-emoji').textContent = emoji;
+  cel.style.background = intensity === 'big'
+    ? 'radial-gradient(circle, rgba(102,126,234,0.85), rgba(118,75,162,0.85))'
+    : 'radial-gradient(circle, rgba(67,233,123,0.7), rgba(56,249,215,0.7))';
+  cel.classList.add('show');
+  launchConfetti(intensity);
+  setTimeout(function() { cel.classList.remove('show'); }, intensity === 'big' ? 3500 : 2000);
+}
+
+// =============================================
+// DATA
+// =============================================
+var BIG_KIDS = ['theodore','alice','andrew','felix'];
 var TOD_ORDER  = ['morning','afternoon','evening'];
 var TOD_LABELS = { morning:'🌅 Morning', afternoon:'☀️ Afternoon', evening:'🌆 Evening' };
 
-// =============================================
-// ROTATION
-// Day 0 = Sat Feb 28 2025 (existing saturday, no rotation)
-// Day 1 = Sun Mar 1 2025 — first rotation day
-//
-// Morning rotation (big kids): vacuum living room, vacuum front room, sophie, empty dishwasher
-// Sunday Day 1 start: theodore=vacuum living room, alice=vacuum front room, andrew=sophie, felix=empty dishwasher
-//
-// Evening rotation (big kids): wipe counter, wipe table, tineco floor, take out trash
-// Sunday Day 1 start: theodore=wipe counter, alice=wipe table, andrew=tineco, felix=trash
-// =============================================
-
-var ROTATION_EPOCH = new Date('2025-03-01T00:00:00'); // Day 1
-
+var ROTATION_EPOCH = new Date('2025-03-01T00:00:00');
 var MORNING_ROTATION = [
   { label:'Vacuum living room',            icon:'🧹' },
   { label:'Vacuum front room',             icon:'🧹' },
   { label:"Fill up Sophie's food & water", icon:'🐾' },
   { label:'Empty dishwasher',              icon:'🍽️' },
 ];
-
 var EVENING_ROTATION = [
   { label:'Wipe kitchen counter', icon:'🧽' },
   { label:'Wipe kitchen table',   icon:'🧹' },
@@ -257,167 +601,84 @@ var EVENING_ROTATION = [
   { label:'Take out trash',       icon:'🗑️' },
 ];
 
-// Returns 0-based rotation index for a given date (days since epoch mod 4)
 function getRotationIndex(dateObj) {
   var msPerDay = 24 * 60 * 60 * 1000;
   var diff = Math.floor((dateObj - ROTATION_EPOCH) / msPerDay);
-  if (diff < 0) diff = 0;
-  return diff % 4;
+  return ((diff % 4) + 4) % 4;
 }
 
-// For a big kid at BIG_KIDS index i, their chore on a given rotation index
-// kid 0 (theodore) gets rotation[rotIdx], kid 1 gets rotation[(rotIdx+1)%4], etc.
-function getRotatedChore(bigKidIndex, rotIdx, rotationArr) {
-  return rotationArr[(rotIdx + bigKidIndex) % 4];
+function getRotatedChore(bigKidIndex, rotIdx, arr) {
+  return arr[(rotIdx + bigKidIndex) % 4];
 }
-
-// =============================================
-// CHORE BUILDERS
-// =============================================
 
 function buildSaturdayChores(kidId) {
   var chores = [];
-
-  // Morning - everyone
-  var morningAll = [
-    { label:'Make bed',                    icon:'🛏️', section:'Everyone' },
-    { label:'Brush teeth',                 icon:'🪥', section:'Everyone' },
-    { label:'Get dressed',                 icon:'👕', section:'Everyone' },
-    { label:'Eat breakfast',               icon:'🥣', section:'Everyone' },
-    { label:'Bring plates to sink',        icon:'🫧', section:'Everyone' },
-  ];
-  for (var i = 0; i < morningAll.length; i++) {
-    chores.push({ tod:'morning', section:morningAll[i].section, label:morningAll[i].label, icon:morningAll[i].icon });
+  var everyoneMorning = ['Make bed','Brush teeth','Get dressed','Eat breakfast','Bring plates to sink'];
+  var morningIcons    = ['🛏️','🪥','👕','🥣','🫧'];
+  for (var i = 0; i < everyoneMorning.length; i++) {
+    chores.push({ tod:'morning', section:'Everyone', label:everyoneMorning[i], icon:morningIcons[i] });
   }
-
-  // Morning - family specific (saturday fixed assignments)
-  if (kidId === 'theodore') {
-    chores.push({ tod:'morning', section:'Family Chores', label:'Unload dishwasher',  icon:'🍽️' });
-    chores.push({ tod:'morning', section:'Family Chores', label:'Wipe bathroom sink',  icon:'🚿' });
-  }
-  if (kidId === 'alice' || kidId === 'lucy') {
-    chores.push({ tod:'morning', section:'Family Chores', label:'Wipe bathroom sink',  icon:'🚿' });
-  }
-  if (kidId === 'andrew' || kidId === 'felix') {
-    chores.push({ tod:'morning', section:'Family Chores', label:'Wipe bathroom sink',  icon:'🚿' });
-  }
-  if (kidId === 'leo') {
-    chores.push({ tod:'morning', section:'Family Chores', label:'Wipe bathroom sink',  icon:'🚿' });
-  }
-  if (kidId === 'alice')  chores.push({ tod:'morning', section:'Family Chores', label:'Vacuum living room',           icon:'🧹' });
-  if (kidId === 'andrew') chores.push({ tod:'morning', section:'Family Chores', label:'Vacuum front room',            icon:'🧹' });
-  if (kidId === 'lucy' || kidId === 'leo') chores.push({ tod:'morning', section:'Family Chores', label:'Put away blankets', icon:'🛋️' });
-  if (kidId === 'felix')  chores.push({ tod:'morning', section:'Family Chores', label:"Fill up Sophie's food & water", icon:'🐾' });
-
-  // Kiss Momma - everyone
-  chores.push({ tod:'morning', section:'❤️ Special', label:'Go kiss Momma good morning!', icon:'💋' });
-
-  // Afternoon - everyone
-  chores.push({ tod:'afternoon', section:'Everyone', label:'Eat lunch',                  icon:'🥪' });
-  chores.push({ tod:'afternoon', section:'Everyone', label:'Bring lunch plates to sink',  icon:'🫧' });
-  chores.push({ tod:'afternoon', section:'Everyone', label:'Help fold laundry',           icon:'👕' });
-  chores.push({ tod:'afternoon', section:'Everyone', label:'Put away lunch stuff',        icon:'🧹' });
-  if (kidId === 'andrew') {
-    chores.push({ tod:'afternoon', section:'Clean Up', label:'Load dishwasher',           icon:'🫧' });
-    chores.push({ tod:'afternoon', section:'Clean Up', label:'Take out recyclables',      icon:'♻️' });
-  }
-  if (kidId === 'theodore') chores.push({ tod:'afternoon', section:'Bathrooms', label:'Clean pool bathroom',     icon:'🚿' });
-  if (kidId === 'alice')    chores.push({ tod:'afternoon', section:'Bathrooms', label:'Clean front bathroom',    icon:'🚿' });
-  if (kidId === 'felix')    chores.push({ tod:'afternoon', section:'Bathrooms', label:'Clean basement bathroom', icon:'🚿' });
-
-  // Evening - everyone
-  chores.push({ tod:'evening', section:'Everyone', label:'Eat dinner',                  icon:'🍽️' });
-  chores.push({ tod:'evening', section:'Everyone', label:'Bring dinner plates to sink', icon:'🫧' });
-  chores.push({ tod:'evening', section:'Everyone', label:'Eat dessert',                 icon:'🍨' });
-  if (kidId === 'theodore') chores.push({ tod:'evening', section:'Clean Up', label:'Take out trash',        icon:'🗑️' });
-  if (kidId === 'alice')    chores.push({ tod:'evening', section:'Clean Up', label:'Wipe kitchen counter',  icon:'🧽' });
-  if (kidId === 'andrew')   chores.push({ tod:'evening', section:'Clean Up', label:'Take out recyclables',  icon:'♻️' });
-  if (kidId === 'felix')    chores.push({ tod:'evening', section:'Clean Up', label:'Load dishwasher',       icon:'🍽️' });
-  if (kidId === 'lucy')     chores.push({ tod:'evening', section:'Clean Up', label:'Wipe kitchen table',    icon:'🧹' });
-
+  if (kidId==='theodore') { chores.push({tod:'morning',section:'Family Chores',label:'Unload dishwasher',icon:'🍽️'}); chores.push({tod:'morning',section:'Family Chores',label:'Wipe bathroom sink',icon:'🚿'}); }
+  if (kidId==='alice'||kidId==='lucy')   chores.push({tod:'morning',section:'Family Chores',label:'Wipe bathroom sink',icon:'🚿'});
+  if (kidId==='andrew'||kidId==='felix') chores.push({tod:'morning',section:'Family Chores',label:'Wipe bathroom sink',icon:'🚿'});
+  if (kidId==='leo')    chores.push({tod:'morning',section:'Family Chores',label:'Wipe bathroom sink',icon:'🚿'});
+  if (kidId==='alice')  chores.push({tod:'morning',section:'Family Chores',label:'Vacuum living room',icon:'🧹'});
+  if (kidId==='andrew') chores.push({tod:'morning',section:'Family Chores',label:'Vacuum front room',icon:'🧹'});
+  if (kidId==='lucy'||kidId==='leo') chores.push({tod:'morning',section:'Family Chores',label:'Put away blankets',icon:'🛋️'});
+  if (kidId==='felix')  chores.push({tod:'morning',section:'Family Chores',label:"Fill up Sophie's food & water",icon:'🐾'});
+  chores.push({tod:'morning',section:'❤️ Special',label:'Go kiss Momma good morning!',icon:'💋'});
+  // Afternoon
+  chores.push({tod:'afternoon',section:'Everyone',label:'Eat lunch',icon:'🥪'});
+  chores.push({tod:'afternoon',section:'Everyone',label:'Bring lunch plates to sink',icon:'🫧'});
+  chores.push({tod:'afternoon',section:'Everyone',label:'Help fold laundry',icon:'👕'});
+  chores.push({tod:'afternoon',section:'Everyone',label:'Put away lunch stuff',icon:'🧹'});
+  if (kidId==='andrew') { chores.push({tod:'afternoon',section:'Clean Up',label:'Load dishwasher',icon:'🫧'}); chores.push({tod:'afternoon',section:'Clean Up',label:'Take out recyclables',icon:'♻️'}); }
+  if (kidId==='theodore') chores.push({tod:'afternoon',section:'Bathrooms',label:'Clean pool bathroom',icon:'🚿'});
+  if (kidId==='alice')    chores.push({tod:'afternoon',section:'Bathrooms',label:'Clean front bathroom',icon:'🚿'});
+  if (kidId==='felix')    chores.push({tod:'afternoon',section:'Bathrooms',label:'Clean basement bathroom',icon:'🚿'});
+  // Evening
+  chores.push({tod:'evening',section:'Everyone',label:'Eat dinner',icon:'🍽️'});
+  chores.push({tod:'evening',section:'Everyone',label:'Bring dinner plates to sink',icon:'🫧'});
+  chores.push({tod:'evening',section:'Everyone',label:'Eat dessert',icon:'🍨'});
+  if (kidId==='theodore') chores.push({tod:'evening',section:'Clean Up',label:'Take out trash',icon:'🗑️'});
+  if (kidId==='alice')    chores.push({tod:'evening',section:'Clean Up',label:'Wipe kitchen counter',icon:'🧽'});
+  if (kidId==='andrew')   chores.push({tod:'evening',section:'Clean Up',label:'Take out recyclables',icon:'♻️'});
+  if (kidId==='felix')    chores.push({tod:'evening',section:'Clean Up',label:'Load dishwasher',icon:'🍽️'});
+  if (kidId==='lucy')     chores.push({tod:'evening',section:'Clean Up',label:'Wipe kitchen table',icon:'🧹'});
   return chores;
 }
 
 function buildSundayChores(kidId, dateObj) {
   var chores = [];
-  var rotIdx = getRotationIndex(dateObj);
   var bigIdx = BIG_KIDS.indexOf(kidId);
-
-  // Morning - everyone
-  var morningAll = [
-    { label:'Make bed',          icon:'🛏️', section:'Everyone' },
-    { label:'Brush teeth',       icon:'🪥', section:'Everyone' },
-    { label:'Get dressed for church', icon:'⛪', section:'Everyone' },
-    { label:'Eat breakfast',     icon:'🥣', section:'Everyone' },
-    { label:'Bring plates to sink', icon:'🫧', section:'Everyone' },
-  ];
-  for (var i = 0; i < morningAll.length; i++) {
-    chores.push({ tod:'morning', section:morningAll[i].section, label:morningAll[i].label, icon:morningAll[i].icon });
+  var rotIdx = getRotationIndex(dateObj);
+  var everyoneMorning = ['Make bed','Brush teeth','Get dressed for church','Eat breakfast','Bring plates to sink'];
+  var morningIcons    = ['🛏️','🪥','⛪','🥣','🫧'];
+  for (var i = 0; i < everyoneMorning.length; i++) {
+    chores.push({ tod:'morning', section:'Everyone', label:everyoneMorning[i], icon:morningIcons[i] });
   }
-
-  // Morning rotation for big kids
-  if (bigIdx !== -1) {
-    var mc = getRotatedChore(bigIdx, rotIdx, MORNING_ROTATION);
-    chores.push({ tod:'morning', section:'Family Chores', label:mc.label, icon:mc.icon });
-  }
-
-  // Lucy & Leo put away blankets
-  if (kidId === 'lucy' || kidId === 'leo') {
-    chores.push({ tod:'morning', section:'Family Chores', label:'Put away blankets', icon:'🛋️' });
-  }
-
-  // Kiss Momma
-  chores.push({ tod:'morning', section:'❤️ Special', label:'Go kiss Momma good morning!', icon:'💋' });
-
-  // Afternoon - everyone
-  chores.push({ tod:'afternoon', section:'Everyone', label:'Eat lunch',                 icon:'🥪' });
-  chores.push({ tod:'afternoon', section:'Everyone', label:'Bring lunch plates to sink', icon:'🫧' });
-  chores.push({ tod:'afternoon', section:'Everyone', label:'Put away lunch stuff',       icon:'🧹' });
-
-  // Evening - everyone
-  chores.push({ tod:'evening', section:'Everyone', label:'Eat dinner',                  icon:'🍽️' });
-  chores.push({ tod:'evening', section:'Everyone', label:'Bring dinner plates to sink', icon:'🫧' });
-  chores.push({ tod:'evening', section:'Everyone', label:'Eat dessert',                 icon:'🍨' });
-
-  // Evening rotation for big kids
-  if (bigIdx !== -1) {
-    var ec = getRotatedChore(bigIdx, rotIdx, EVENING_ROTATION);
-    chores.push({ tod:'evening', section:'Clean Up', label:ec.label, icon:ec.icon });
-  }
-
+  if (bigIdx !== -1) { var mc = getRotatedChore(bigIdx, rotIdx, MORNING_ROTATION); chores.push({tod:'morning',section:'Family Chores',label:mc.label,icon:mc.icon}); }
+  if (kidId==='lucy'||kidId==='leo') chores.push({tod:'morning',section:'Family Chores',label:'Put away blankets',icon:'🛋️'});
+  chores.push({tod:'morning',section:'❤️ Special',label:'Go kiss Momma good morning!',icon:'💋'});
+  chores.push({tod:'afternoon',section:'Everyone',label:'Eat lunch',icon:'🥪'});
+  chores.push({tod:'afternoon',section:'Everyone',label:'Bring lunch plates to sink',icon:'🫧'});
+  chores.push({tod:'afternoon',section:'Everyone',label:'Put away lunch stuff',icon:'🧹'});
+  chores.push({tod:'evening',section:'Everyone',label:'Eat dinner',icon:'🍽️'});
+  chores.push({tod:'evening',section:'Everyone',label:'Bring dinner plates to sink',icon:'🫧'});
+  chores.push({tod:'evening',section:'Everyone',label:'Eat dessert',icon:'🍨'});
+  if (bigIdx !== -1) { var ec = getRotatedChore(bigIdx, rotIdx, EVENING_ROTATION); chores.push({tod:'evening',section:'Clean Up',label:ec.label,icon:ec.icon}); }
   return chores;
 }
 
-// =============================================
-// DAY DETECTION
-// =============================================
+function isSunday() { return new Date().getDay() === 0; }
+function getDateString(d) { return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate(); }
 function getTodayKey() {
   var d = new Date();
-  var day = d.getDay(); // 0=Sun, 6=Sat
-  if (day === 6) return 'saturday';
-  if (day === 0) return 'sunday_' + getDateString(d);
-  // Default to today's date key for any other day (extensible later)
+  if (d.getDay() === 6) return 'saturday';
   return 'sunday_' + getDateString(d);
 }
-
-function getDateString(d) {
-  return d.getFullYear() + '-' + (d.getMonth()+1) + '-' + d.getDate();
-}
-
-function isWeekend() {
-  var day = new Date().getDay();
-  return day === 6 || day === 0;
-}
-
-function isSunday() {
-  return new Date().getDay() === 0;
-}
-
 function getChoresToday(kidId) {
-  if (isSunday()) {
-    return buildSundayChores(kidId, new Date());
-  }
-  return buildSaturdayChores(kidId);
+  return isSunday() ? buildSundayChores(kidId, new Date()) : buildSaturdayChores(kidId);
 }
 
 // =============================================
@@ -449,39 +710,93 @@ function save() {
 function setSyncStatus(s) {
   document.getElementById('syncIndicator').className = 'sync-indicator ' + s;
   document.getElementById('syncDot').className = 'sync-dot' + (s === 'syncing' ? ' spinning' : '');
-  document.getElementById('syncLabel').textContent = s === 'syncing' ? 'Syncing...' : s === 'synced' ? 'Live' : 'Error';
+  document.getElementById('syncLabel').textContent = s==='syncing'?'Syncing...':s==='synced'?'Live':'Error';
 }
 
 // =============================================
-// TOGGLE
+// TOGGLE + SOUND LOGIC
 // =============================================
-function choreKey(kidId, tod, label) { return kidId + '__' + tod + '__' + label; }
-
+function choreKey(kidId, tod, label) { return kidId+'__'+tod+'__'+label; }
 function isChecked(kidId, tod, label) {
   var k = choreKey(kidId, tod, label);
   return !!(choreState[kidId] && choreState[kidId][k] && choreState[kidId][k].done);
 }
 
+// Track previous completion states for celebration triggers
+var prevKidDone = {};
+var prevAllDone = false;
+
 function handleChore(kidId, tod, label, el) {
   el.classList.add('confetti-pop');
-  setTimeout(function() { el.classList.remove('confetti-pop'); }, 250);
+  setTimeout(function(){ el.classList.remove('confetti-pop'); }, 250);
+
   var k = choreKey(kidId, tod, label);
   if (!choreState[kidId]) choreState[kidId] = {};
   var was = choreState[kidId][k] && choreState[kidId][k].done;
   choreState[kidId][k] = { done: !was, ts: Date.now() };
+
+  // Play sound
+  if (!was) { soundHighFive(); }
+  else       { soundUncheck(); }
+
+  // Check section completion
+  if (!was) {
+    var chores = getChoresToday(kidId);
+    var todChores = chores.filter(function(c){ return c.tod === tod; });
+    var allTodDone = todChores.every(function(c){ return isChecked(kidId, c.tod, c.label) || c.label === label; });
+    if (allTodDone && todChores.length > 0) {
+      setTimeout(function(){ soundSectionComplete(); }, 150);
+    }
+  }
+
   render();
   save();
+  checkCelebrations(kidId, was);
+}
+
+function checkCelebrations(justToggledKid, wasUncheck) {
+  if (wasUncheck) return; // only celebrate on check, not uncheck
+
+  var chores = getChoresToday(justToggledKid);
+  var kidDone = chores.every(function(c){ return isChecked(justToggledKid, c.tod, c.label); });
+
+  if (kidDone && !prevKidDone[justToggledKid]) {
+    prevKidDone[justToggledKid] = true;
+    var kid = KIDS.find(function(k){ return k.id === justToggledKid; });
+    setTimeout(function(){
+      soundCardComplete();
+      showCelebration(kid.name + ' finished! 🎉', getEmoji(justToggledKid), 'medium');
+    }, 200);
+  }
+
+  // Check if all kids done
+  var allDone = KIDS.every(function(k){
+    var kc = getChoresToday(k.id);
+    return kc.every(function(c){ return isChecked(k.id, c.tod, c.label); });
+  });
+
+  if (allDone && !prevAllDone) {
+    prevAllDone = true;
+    setTimeout(function(){
+      soundAllDone();
+      showCelebration('EVERYONE IS DONE! 🏆', '🏆', 'big');
+    }, 500);
+  }
+}
+
+// Reset celebration tracking when chores are reset
+function resetCelebrationState() {
+  prevKidDone = {};
+  prevAllDone = false;
 }
 
 // =============================================
 // RENDER
 // =============================================
 function render() {
-  var sunday = isSunday();
+  var sunday  = isSunday();
   var dayName = sunday ? 'Sunday' : 'Saturday';
-  var dayEmoji = sunday ? '⛪' : '🗓️';
-
-  document.getElementById('headerSubtitle').textContent = dayEmoji + ' ' + dayName + ' Chores';
+  document.getElementById('headerSubtitle').textContent = (sunday?'⛪':'🗓️') + ' ' + dayName + ' Chores';
   var badge = document.getElementById('dayBadge');
   badge.textContent = dayName;
   badge.className = 'day-badge ' + (sunday ? 'sunday' : 'saturday');
@@ -489,7 +804,7 @@ function render() {
   // Jump links
   document.getElementById('jumpLinks').innerHTML = KIDS.map(function(kid) {
     return '<a class="jump-link jump-' + kid.id + '" href="#card-' + kid.id + '">' +
-      kid.emoji + ' ' + kid.name.split(' ')[0] + '</a>';
+      getEmoji(kid.id) + ' ' + kid.name.split(' ')[0] + '</a>';
   }).join('');
 
   // Summary
@@ -501,7 +816,7 @@ function render() {
       if (isChecked(KIDS[ki].id, kc[ci].tod, kc[ci].label)) totalDone++;
     }
   }
-  var pct = totalAll ? Math.round(totalDone / totalAll * 100) : 0;
+  var pct = totalAll ? Math.round(totalDone/totalAll*100) : 0;
   document.getElementById('summaryBar').innerHTML =
     '<div class="summary-item">📋 ' + totalDone + ' / ' + totalAll + ' done</div>' +
     '<div class="summary-item">🏆 ' + pct + '%</div>';
@@ -515,13 +830,14 @@ function render() {
     for (var c = 0; c < chores.length; c++) {
       if (isChecked(kid.id, chores[c].tod, chores[c].label)) doneCt++;
     }
-    var kpct    = chores.length ? Math.round(doneCt / chores.length * 100) : 0;
+    var kpct    = chores.length ? Math.round(doneCt/chores.length*100) : 0;
     var allDone = chores.length > 0 && doneCt === chores.length;
+    var emoji   = getEmoji(kid.id);
 
     var choreHtml = '<div class="chore-list">';
     for (var ti = 0; ti < TOD_ORDER.length; ti++) {
       var tod = TOD_ORDER[ti];
-      var todChores = chores.filter(function(ch) { return ch.tod === tod; });
+      var todChores = chores.filter(function(ch){ return ch.tod === tod; });
       if (todChores.length === 0) continue;
 
       choreHtml += '<div class="tod-divider tod-' + tod + '">' +
@@ -535,14 +851,13 @@ function render() {
         var ts     = choreState[kid.id] && choreState[kid.id][ck] && choreState[kid.id][ck].ts;
         var tStr   = ts ? new Date(ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) : '';
         var safe   = ch.label.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-
         choreHtml +=
-          '<div class="chore-item' + (isDone ? ' done' : '') + '"' +
+          '<div class="chore-item' + (isDone?' done':'') + '"' +
           ' onclick="handleChore(\'' + kid.id + '\',\'' + tod + '\',\'' + safe + '\',this)">' +
-          '<div class="chore-check">' + (isDone ? '✓' : '') + '</div>' +
+          '<div class="chore-check">' + (isDone?'✓':'') + '</div>' +
           '<span class="chore-icon">' + ch.icon + '</span>' +
           '<div style="flex:1"><div class="chore-label">' + ch.label + '</div>' +
-          (isDone && tStr ? '<div class="chore-time">✓ ' + tStr + '</div>' : '') +
+          (isDone&&tStr ? '<div class="chore-time">✓ '+tStr+'</div>' : '') +
           '</div></div>';
       }
     }
@@ -551,10 +866,12 @@ function render() {
     gridHtml +=
       '<div class="kid-card kid-' + kid.id + '" id="card-' + kid.id + '">' +
         '<div class="kid-header">' +
-          '<div class="kid-avatar">' + kid.emoji + '</div>' +
+          '<div class="kid-avatar" onclick="openAvatarModal(\'' + kid.id + '\')">' +
+            emoji + '<div class="avatar-edit-hint">✏️</div>' +
+          '</div>' +
           '<div class="kid-info" style="flex:1">' +
             '<h2>' + kid.name + (allDone ? ' 🎉' : '') + '</h2>' +
-            '<div class="kid-age">Age ' + kid.age + '</div>' +
+            '<div class="kid-age">Age ' + kid.age + ' · tap avatar to change</div>' +
             '<div class="progress-bar-wrap"><div class="progress-bar" style="width:' + kpct + '%"></div></div>' +
           '</div>' +
           '<div class="score-badge">' + doneCt + '/' + chores.length + '</div>' +
@@ -568,11 +885,16 @@ function render() {
 function resetAll() {
   if (!confirm('Reset all chores for today?')) return;
   choreState = {};
+  resetCelebrationState();
   save();
   render();
 }
 
-// Boot
+// =============================================
+// BOOT
+// =============================================
+loadAvatars();
+loadAvatarsRemote();
 subscribe();
 </script>
 </body>
