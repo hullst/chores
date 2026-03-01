@@ -226,35 +226,237 @@ var KID = 'theodore';
 var TOD_LIST = ['morning', 'afternoon', 'evening'];
 var TOD_LABELS = { morning: '🌅 AM', afternoon: '☀️ PM', evening: '🌆 EVE' };
 
-var CHORES = {
-  morning: [
-    { s: 'Everyone',      label: 'Make bed',                   icon: '🛏️' },
-    { s: 'Everyone',      label: 'Brush teeth',                icon: '🪥' },
-    { s: 'Everyone',      label: 'Get dressed',                icon: '👕' },
-    { s: 'Everyone',      label: 'Eat breakfast',              icon: '🥣' },
-    { s: 'Everyone',      label: 'Bring plates to sink',       icon: '🫧' },
-    { s: 'Family Chores', label: 'Unload dishwasher',          icon: '🍽️' },
-    { s: 'Family Chores', label: 'Wipe bathroom sink',         icon: '🚿' },
-    { s: 'Family Chores', label: 'Help fold laundry',          icon: '👕' },
-    { s: '❤️ Special',    label: 'Go kiss Momma good morning!',icon: '💋' },
-  ],
-  afternoon: [
-    { s: 'Everyone',  label: 'Eat lunch',             icon: '🥪' },
-    { s: 'Everyone',  label: 'Bring lunch plates to sink', icon: '🫧' },
-    { s: 'Clean Up',  label: 'Clean pool bathroom',   icon: '🚿' },
-  ],
-  evening: [
-    { s: 'Everyone', label: 'Eat dinner',             icon: '🍽️' },
-    { s: 'Everyone', label: 'Bring dinner plates to sink', icon: '🫧' },
-    { s: 'Everyone', label: 'Eat dessert',            icon: '🍨' },
-  ]
-};
+var ROTATION_EPOCH = new Date('2025-03-01T00:00:00');
+var MORNING_ROTATION = [
+  { label:'Vacuum living room',            icon:'🧹' },
+  { label:'Vacuum front room',             icon:'🧹' },
+  { label:'Load dishwasher', icon:'🍽️' },
+  { label:'Empty dishwasher',              icon:'🍽️' },
+];
+var EVENING_ROTATION = [
+  { label:'Wipe kitchen counter', icon:'🧽' },
+  { label:'Wipe kitchen table',   icon:'🧹' },
+  { label:'Tineco kitchen floor', icon:'🤖' },
+  { label:'Take out trash',       icon:'🗑️' },
+];
 
-var currentTod = 'morning';
-var state = {};
-var unsub = null;
+function getRotationIndex(dateObj) {
+  var msPerDay = 24 * 60 * 60 * 1000;
+  var diff = Math.floor((dateObj - ROTATION_EPOCH) / msPerDay);
+  return ((diff % 4) + 4) % 4;
+}
 
-function docRef() { return db.collection('chores').doc('saturday'); }
+function getRotatedChore(bigKidIndex, rotIdx, arr) {
+  return arr[(rotIdx + bigKidIndex) % 4];
+}
+
+function buildSaturdayChores(kidId) {
+  var chores = [];
+  var everyoneMorning = ['Make bed','Brush teeth','Get dressed','Eat breakfast','Bring plates to sink'];
+  var morningIcons    = ['🛏️','🪥','👕','🥣','🫧'];
+  for (var i = 0; i < everyoneMorning.length; i++) {
+    chores.push({ tod:'morning', section:'Everyone', label:everyoneMorning[i], icon:morningIcons[i] });
+  }
+  if (kidId==='theodore') { chores.push({tod:'morning',section:'Family Chores',label:'Unload dishwasher',icon:'🍽️'}); chores.push({tod:'morning',section:'Family Chores',label:'Wipe bathroom sink',icon:'🚿'}); }
+  if (kidId==='alice'||kidId==='lucy')   chores.push({tod:'morning',section:'Family Chores',label:'Wipe bathroom sink',icon:'🚿'});
+  if (kidId==='andrew'||kidId==='felix') chores.push({tod:'morning',section:'Family Chores',label:'Wipe bathroom sink',icon:'🚿'});
+  if (kidId==='leo')    chores.push({tod:'morning',section:'Family Chores',label:'Wipe bathroom sink',icon:'🚿'});
+  if (kidId==='alice')  chores.push({tod:'morning',section:'Family Chores',label:'Vacuum living room',icon:'🧹'});
+  if (kidId==='andrew') chores.push({tod:'morning',section:'Family Chores',label:'Vacuum front room',icon:'🧹'});
+  if (kidId==='lucy'||kidId==='leo') chores.push({tod:'morning',section:'Family Chores',label:'Put away blankets',icon:'🛋️'});
+  if (kidId==='felix')  chores.push({tod:'morning',section:'Family Chores',label:"Fill up Sophie's food & water",icon:'🐾'});
+  chores.push({tod:'morning',section:'❤️ Special',label:'Go kiss Momma good morning!',icon:'💋'});
+  // Afternoon
+  chores.push({tod:'afternoon',section:'Everyone',label:'Eat lunch',icon:'🥪'});
+  chores.push({tod:'afternoon',section:'Everyone',label:'Bring lunch plates to sink',icon:'🫧'});
+  chores.push({tod:'afternoon',section:'Everyone',label:'Help fold laundry',icon:'👕'});
+  chores.push({tod:'afternoon',section:'Everyone',label:'Put away lunch stuff',icon:'🧹'});
+  if (kidId==='andrew') { chores.push({tod:'afternoon',section:'Clean Up',label:'Load dishwasher',icon:'🫧'}); chores.push({tod:'afternoon',section:'Clean Up',label:'Take out recyclables',icon:'♻️'}); }
+  if (kidId==='theodore') chores.push({tod:'afternoon',section:'Bathrooms',label:'Clean pool bathroom',icon:'🚿'});
+  if (kidId==='alice')    chores.push({tod:'afternoon',section:'Bathrooms',label:'Clean front bathroom',icon:'🚿'});
+  if (kidId==='felix')    chores.push({tod:'afternoon',section:'Bathrooms',label:'Clean basement bathroom',icon:'🚿'});
+  // Evening
+  chores.push({tod:'evening',section:'Everyone',label:'Eat dinner',icon:'🍽️'});
+  chores.push({tod:'evening',section:'Everyone',label:'Bring dinner plates to sink',icon:'🫧'});
+  chores.push({tod:'evening',section:'Everyone',label:'Eat dessert',icon:'🍨'});
+  if (kidId==='theodore') chores.push({tod:'evening',section:'Clean Up',label:'Take out trash',icon:'🗑️'});
+  if (kidId==='alice')    chores.push({tod:'evening',section:'Clean Up',label:'Load dishwasher',icon:'🍽️'});
+  if (kidId==='andrew')   chores.push({tod:'evening',section:'Clean Up',label:'Take out recyclables',icon:'♻️'});
+  if (kidId==='felix')    chores.push({tod:'evening',section:'Clean Up',label:'Load dishwasher',icon:'🍽️'});
+  if (kidId==='lucy')     chores.push({tod:'evening',section:'Clean Up',label:'Wipe kitchen table',icon:'🧹'});
+  return chores;
+}
+
+function buildSundayChores(kidId, dateObj) {
+  var chores = [];
+  var bigIdx = BIG_KIDS.indexOf(kidId);
+  var rotIdx = getRotationIndex(dateObj);
+  var everyoneMorning = ['Make bed','Brush teeth','Get dressed for church','Eat breakfast','Bring plates to sink'];
+  var morningIcons    = ['🛏️','🪥','⛪','🥣','🫧'];
+  for (var i = 0; i < everyoneMorning.length; i++) {
+    chores.push({ tod:'morning', section:'Everyone', label:everyoneMorning[i], icon:morningIcons[i] });
+  }
+  if (bigIdx !== -1) { var mc = getRotatedChore(bigIdx, rotIdx, MORNING_ROTATION); chores.push({tod:'morning',section:'Family Chores',label:mc.label,icon:mc.icon}); }
+  if (kidId==='lucy'||kidId==='leo') chores.push({tod:'morning',section:'Family Chores',label:'Put away blankets',icon:'🛋️'});
+  chores.push({tod:'morning',section:'❤️ Special',label:'Go kiss Momma good morning!',icon:'💋'});
+  chores.push({tod:'afternoon',section:'Everyone',label:'Eat lunch',icon:'🥪'});
+  chores.push({tod:'afternoon',section:'Everyone',label:'Bring lunch plates to sink',icon:'🫧'});
+  chores.push({tod:'afternoon',section:'Everyone',label:'Put away lunch stuff',icon:'🧹'});
+  chores.push({tod:'evening',section:'Everyone',label:'Eat dinner',icon:'🍽️'});
+  chores.push({tod:'evening',section:'Everyone',label:'Bring dinner plates to sink',icon:'🫧'});
+  chores.push({tod:'evening',section:'Everyone',label:'Eat dessert',icon:'🍨'});
+  if (bigIdx !== -1) { var ec = getRotatedChore(bigIdx, rotIdx, EVENING_ROTATION); chores.push({tod:'evening',section:'Clean Up',label:ec.label,icon:ec.icon}); }
+  return chores;
+}
+
+// URL override: ?day=sunday or ?day=saturday to force a view for testing
+function getUrlDayOverride() {
+  try { var p = new URLSearchParams(window.location.search).get('day'); if (p) return p.toLowerCase(); } catch(e) {}
+  return null;
+}
+var URL_OVERRIDE = getUrlDayOverride();
+
+function isSunday() {
+  if (URL_OVERRIDE) return URL_OVERRIDE === 'sunday';
+  return new Date().getDay() === 0;
+}
+function getDateString(d) { return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate(); }
+function getTodayKey() {
+  var d = new Date();
+  if (URL_OVERRIDE === 'sunday') return 'sunday_test';
+  if (URL_OVERRIDE === 'saturday') return 'saturday_' + getDateString(d);
+  if (d.getDay() === 6) return 'saturday_' + getDateString(d);
+  if (d.getDay() === 0) return 'sunday_' + getDateString(d);
+  return 'sunday_' + getDateString(d); // fallback
+}
+function getChoresToday(kidId) {
+  return isSunday() ? buildSundayChores(kidId, new Date()) : buildSaturdayChores(kidId);
+}
+
+// ── THEO-SPECIFIC ──
+// Build chores for Theodore using the shared functions above
+var CHORES = getChoresToday('theodore');
+
+
+function docRef() { return db.collection('chores').doc(getTodayKey()); }
+
+function subscribe() {
+  if (unsub) unsub();
+  setSyncing('syncing');
+  unsub = docRef().onSnapshot(function(snap) {
+    state = snap.exists ? (snap.data().state || {}) : {};
+    setSyncing('synced');
+    render();
+  }, function() { setSyncing('error'); });
+}
+
+function save() {
+  setSyncing('syncing');
+  docRef().set({ state: state, updatedAt: Date.now() })
+    .then(function() { setSyncing('synced'); })
+    .catch(function() { setSyncing('error'); });
+}
+
+function setSyncing(s) {
+  var el = document.getElementById('sync');
+  var dot = document.getElementById('dot');
+  var txt = document.getElementById('synctxt');
+  el.className = 'sync ' + s;
+  dot.className = 'dot' + (s === 'syncing' ? ' spin' : '');
+  txt.textContent = s === 'syncing' ? 'Syncing...' : s === 'synced' ? 'Synced' : 'Error';
+}
+
+function choreKey(tod, label) { return tod + '__' + KID + '__' + label; }
+
+function toggle(tod, label) {
+  var k = choreKey(tod, label);
+  if (!state[KID]) state[KID] = {};
+  var was = state[KID][k] && state[KID][k].done;
+  state[KID][k] = { done: !was, ts: Date.now() };
+  render();
+  save();
+}
+
+function selectTod(tod) {
+  currentTod = tod;
+  render();
+}
+
+function render() {
+  var tod = currentTod;
+  var chores = CHORES[tod];
+  var kidState = state[KID] || {};
+
+  // Progress across ALL sections today
+  var allDone = 0, allTotal = 0;
+  for (var t = 0; t < TOD_LIST.length; t++) {
+    var tc = CHORES[TOD_LIST[t]];
+    for (var i = 0; i < tc.length; i++) {
+      var tk = choreKey(TOD_LIST[t], tc[i].label);
+      allTotal++;
+      if (kidState[tk] && kidState[tk].done) allDone++;
+    }
+  }
+  document.getElementById('pFill').style.width = (allTotal ? Math.round(allDone/allTotal*100) : 0) + '%';
+  document.getElementById('pTxt').textContent = allDone + '/' + allTotal;
+
+  // TOD strip
+  var todHtml = '';
+  for (var ti = 0; ti < TOD_LIST.length; ti++) {
+    var t2 = TOD_LIST[ti];
+    todHtml += '<button class="tod-btn ' + t2 + (t2 === tod ? ' on' : '') +
+      '" onclick="selectTod(\'' + t2 + '\')">' + TOD_LABELS[t2] + '</button>';
+  }
+  document.getElementById('todStrip').innerHTML = todHtml;
+
+  // Current section chores
+  var doneCt = 0;
+  for (var ci = 0; ci < chores.length; ci++) {
+    var ck = choreKey(tod, chores[ci].label);
+    if (kidState[ck] && kidState[ck].done) doneCt++;
+  }
+  var secAllDone = doneCt === chores.length && chores.length > 0;
+  document.getElementById('doneMsg').className = 'done-msg' + (secAllDone ? ' show' : '');
+
+  // Group by section
+  var sections = {}, sectionOrder = [];
+  for (var sj = 0; sj < chores.length; sj++) {
+    var sec = chores[sj].s;
+    if (!sections[sec]) { sections[sec] = []; sectionOrder.push(sec); }
+    sections[sec].push(chores[sj]);
+  }
+
+  var html = '';
+  for (var si = 0; si < sectionOrder.length; si++) {
+    var sn = sectionOrder[si];
+    html += '<div class="sec-head">' + sn + '</div>';
+    var items = sections[sn];
+    for (var ii = 0; ii < items.length; ii++) {
+      var ch = items[ii];
+      var k = choreKey(tod, ch.label);
+      var isDone = kidState[k] && kidState[k].done;
+      var ts = kidState[k] && kidState[k].ts;
+      var timeStr = ts ? new Date(ts).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '';
+      var safe = ch.label.replace(/'/g,"\\'");
+      html += '<div class="row' + (isDone ? ' done' : '') + '" onclick="toggle(\'' + tod + '\',\'' + safe + '\')">' +
+        '<span class="ico">' + ch.icon + '</span>' +
+        '<div class="mid"><div class="lbl">' + ch.label + '</div>' +
+        (isDone && timeStr ? '<div class="tm">Done at ' + timeStr + '</div>' : '') +
+        '</div><div class="chk">' + (isDone ? '✓' : '') + '</div></div>';
+    }
+  }
+  document.getElementById('list').innerHTML = html;
+}
+
+// Boot
+document.getElementById('loading').style.display = 'none';
+document.getElementById('app').style.display = 'block';
+subscribe();
+</script>
+</body>
+</html>
+
+function docRef() { return db.collection('chores').doc(getTodayKey()); }
 
 function subscribe() {
   if (unsub) unsub();
