@@ -316,10 +316,11 @@ function loadAvatars() {
     var stored = localStorage.getItem('hull_avatars');
     if (stored) {
       var parsed = JSON.parse(stored);
-      // Purge any non-string values (old numeric index saves)
       avatars = {};
       for (var k in parsed) {
-        if (typeof parsed[k] === 'string') avatars[k] = parsed[k];
+        var v = parsed[k];
+        // Only keep proper SVG avatars - discard old emoji strings and numeric indexes
+        if (typeof v === 'string' && v.indexOf('<svg') === 0) avatars[k] = v;
       }
     }
   } catch(e) { avatars = {}; }
@@ -354,7 +355,9 @@ function loadAvatarsRemote() {
     if (snap.exists) {
       var data = snap.data();
       for (var k in data) {
-        if (typeof data[k] === 'string') avatars[k] = data[k];
+        var v = data[k];
+        // Only keep proper SVG avatars
+        if (typeof v === 'string' && v.indexOf('<svg') === 0) avatars[k] = v;
       }
       saveAvatarLocal();
       render();
