@@ -224,43 +224,43 @@ function getTodayKey() {
 function buildChores() {
   if (!isSunday()) {
     return [
-      { label:'Make bed',                    icon:'🛏️' },
-      { label:'Brush teeth',                 icon:'🪥' },
-      { label:'Get dressed',                 icon:'👕' },
-      { label:'Eat breakfast',               icon:'🥣' },
-      { label:'Bring plates to sink',        icon:'🫧' },
-      { label:'Unload dishwasher',           icon:'🍽️' },
-      { label:'Wipe bathroom sink',          icon:'🚿' },
-      { label:'Go kiss Momma good morning!', icon:'💋' },
-      { label:'Eat lunch',                   icon:'🥪' },
-      { label:'Bring lunch plates to sink',  icon:'🫧' },
-      { label:'Help fold laundry',           icon:'👕' },
-      { label:'Put away lunch stuff',        icon:'🧹' },
-      { label:'Clean pool bathroom',         icon:'🚿' },
-      { label:'Eat dinner',                  icon:'🍽️' },
-      { label:'Bring dinner plates to sink', icon:'🫧' },
-      { label:'Eat dessert',                 icon:'🍨' },
-      { label:'Take out trash',              icon:'🗑️' },
+      { tod:'morning',   label:'Make bed',                    icon:'🛏️' },
+      { tod:'morning',   label:'Brush teeth',                 icon:'🪥' },
+      { tod:'morning',   label:'Get dressed',                 icon:'👕' },
+      { tod:'morning',   label:'Eat breakfast',               icon:'🥣' },
+      { tod:'morning',   label:'Bring plates to sink',        icon:'🫧' },
+      { tod:'morning',   label:'Unload dishwasher',           icon:'🍽️' },
+      { tod:'morning',   label:'Wipe bathroom sink',          icon:'🚿' },
+      { tod:'morning',   label:'Go kiss Momma good morning!', icon:'💋' },
+      { tod:'afternoon', label:'Eat lunch',                   icon:'🥪' },
+      { tod:'afternoon', label:'Bring lunch plates to sink',  icon:'🫧' },
+      { tod:'afternoon', label:'Help fold laundry',           icon:'👕' },
+      { tod:'afternoon', label:'Put away lunch stuff',        icon:'🧹' },
+      { tod:'afternoon', label:'Clean pool bathroom',         icon:'🚿' },
+      { tod:'evening',   label:'Eat dinner',                  icon:'🍽️' },
+      { tod:'evening',   label:'Bring dinner plates to sink', icon:'🫧' },
+      { tod:'evening',   label:'Eat dessert',                 icon:'🍨' },
+      { tod:'evening',   label:'Take out trash',              icon:'🗑️' },
     ];
   }
   var r = getRotIdx();
   var mc = MORNING_ROTATION[r % 4];
   var ec = EVENING_ROTATION[r % 4];
   return [
-    { label:'Make bed',                    icon:'🛏️' },
-    { label:'Brush teeth',                 icon:'🪥' },
-    { label:'Get dressed for church',      icon:'⛪' },
-    { label:'Eat breakfast',               icon:'🥣' },
-    { label:'Bring plates to sink',        icon:'🫧' },
-    { label:mc.label,                      icon:mc.icon },
-    { label:'Go kiss Momma good morning!', icon:'💋' },
-    { label:'Eat lunch',                   icon:'🥪' },
-    { label:'Bring lunch plates to sink',  icon:'🫧' },
-    { label:'Put away lunch stuff',        icon:'🧹' },
-    { label:'Eat dinner',                  icon:'🍽️' },
-    { label:'Bring dinner plates to sink', icon:'🫧' },
-    { label:'Eat dessert',                 icon:'🍨' },
-    { label:ec.label,                      icon:ec.icon },
+    { tod:'morning',   label:'Make bed',                    icon:'🛏️' },
+    { tod:'morning',   label:'Brush teeth',                 icon:'🪥' },
+    { tod:'morning',   label:'Get dressed for church',      icon:'⛪' },
+    { tod:'morning',   label:'Eat breakfast',               icon:'🥣' },
+    { tod:'morning',   label:'Bring plates to sink',        icon:'🫧' },
+    { tod:'morning',   label:mc.label,                      icon:mc.icon },
+    { tod:'morning',   label:'Go kiss Momma good morning!', icon:'💋' },
+    { tod:'afternoon', label:'Eat lunch',                   icon:'🥪' },
+    { tod:'afternoon', label:'Bring lunch plates to sink',  icon:'🫧' },
+    { tod:'afternoon', label:'Put away lunch stuff',        icon:'🧹' },
+    { tod:'evening',   label:'Eat dinner',                  icon:'🍽️' },
+    { tod:'evening',   label:'Bring dinner plates to sink', icon:'🫧' },
+    { tod:'evening',   label:'Eat dessert',                 icon:'🍨' },
+    { tod:'evening',   label:ec.label,                      icon:ec.icon },
   ];
 }
 
@@ -305,10 +305,10 @@ function setSyncing(s) {
   txt.textContent = s === 'syncing' ? 'Syncing...' : s === 'synced' ? 'Synced' : 'Error';
 }
 
-function choreKey(label) { return 'morning__' + KID + '__' + label; }
+function choreKey(tod, label) { return KID + '__' + tod + '__' + label; }
 
-function toggle(label) {
-  var k = choreKey(label);
+function toggle(tod, label) {
+  var k = choreKey(tod, label);
   if (!state[KID]) state[KID] = {};
   var was = state[KID][k] && state[KID][k].done;
   state[KID][k] = { done: !was, ts: Date.now() };
@@ -323,13 +323,13 @@ function render() {
 
   for (var i = 0; i < CHORES.length; i++) {
     var ch = CHORES[i];
-    var k = choreKey(ch.label);
+    var k = choreKey(ch.tod, ch.label);
     var done = !!(kidState[k] && kidState[k].done);
     if (done) doneCt++;
     var ts = kidState[k] && kidState[k].ts;
     var tStr = ts ? new Date(ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) : '';
-    var safe = ch.label.replace(/'/g, "\'");
-    html += '<div class="row' + (done ? ' done' : '') + '" onclick="toggle(\'' + safe + '\')">' +
+    var safeLabel = ch.label.replace(/'/g, "\'");
+    html += '<div class="row' + (done ? ' done' : '') + '" onclick="toggle(\'' + ch.tod + '\',\'' + safeLabel + '\')">' +
       '<div class="chk">' + (done ? '✓' : '') + '</div>' +
       '<div class="ico">' + ch.icon + '</div>' +
       '<div class="mid">' +
