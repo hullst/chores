@@ -8,171 +8,94 @@
 <title>Hull Family Chore Board</title>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #FFF9F0;
-    --card-bg: #ffffff;
-    --shadow: 0 4px 20px rgba(0,0,0,0.08);
-    --radius: 20px;
-  }
-
+  :root { --bg: #FFF9F0; --card-bg: #fff; --shadow: 0 4px 20px rgba(0,0,0,0.08); --radius: 20px; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Nunito', sans-serif; background: var(--bg); min-height: 100vh; padding: 16px; }
 
-  body {
-    font-family: 'Nunito', sans-serif;
-    background: var(--bg);
-    min-height: 100vh;
-    padding: 16px;
-  }
-
-  header { text-align: center; margin-bottom: 16px; }
-  header h1 {
-    font-family: 'Fredoka One', cursive;
-    font-size: clamp(1.8rem, 4vw, 2.8rem);
-    color: #2D2D2D;
-  }
+  header { text-align: center; margin-bottom: 14px; }
+  header h1 { font-family: 'Fredoka One', cursive; font-size: clamp(1.8rem,4vw,2.8rem); color: #2D2D2D; }
   header .subtitle { font-size: 0.95rem; color: #888; font-weight: 600; margin-top: 4px; }
 
-  /* Sticky top bar with jump links */
   .top-bar {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    background: var(--bg);
-    padding: 8px 0 10px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-bottom: 16px;
+    position: sticky; top: 0; z-index: 100;
+    background: var(--bg); padding: 8px 0 10px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 8px; flex-wrap: wrap; margin-bottom: 14px;
   }
 
-  .jump-links {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-  }
+  .jump-links { display: flex; gap: 6px; flex-wrap: wrap; }
 
   .jump-link {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    padding: 7px 13px;
-    border-radius: 50px;
-    text-decoration: none;
-    font-weight: 800;
-    font-size: 0.85rem;
-    color: white;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    display: flex; align-items: center; gap: 5px;
+    padding: 7px 13px; border-radius: 50px;
+    text-decoration: none; font-weight: 800; font-size: 0.85rem;
+    color: white; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
     transition: transform 0.15s, box-shadow 0.15s;
   }
-
   .jump-link:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
 
-  .sync-indicator {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    font-size: 0.8rem;
-    font-weight: 700;
-    color: #aaa;
-    background: white;
-    padding: 7px 14px;
-    border-radius: 50px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.07);
-    white-space: nowrap;
-  }
+  .right-bar { display: flex; align-items: center; gap: 8px; }
 
+  .day-badge {
+    font-family: 'Fredoka One', cursive;
+    font-size: 0.9rem; padding: 7px 14px;
+    border-radius: 50px; color: white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+  .day-badge.saturday { background: linear-gradient(135deg,#f7971e,#ffd200); color: #333; }
+  .day-badge.sunday   { background: linear-gradient(135deg,#667eea,#764ba2); }
+
+  .sync-indicator {
+    display: flex; align-items: center; gap: 7px;
+    font-size: 0.8rem; font-weight: 700; color: #aaa;
+    background: white; padding: 7px 14px; border-radius: 50px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.07); white-space: nowrap;
+  }
   .sync-indicator.syncing { color: #f7971e; }
   .sync-indicator.synced  { color: #43e97b; }
   .sync-indicator.error   { color: #f5576c; }
-
   .sync-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
   .sync-dot.spinning { animation: pulse 0.8s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.8)} }
 
-  @keyframes pulse {
-    0%,100% { opacity:1; transform:scale(1); }
-    50% { opacity:0.4; transform:scale(0.8); }
-  }
-
-  .summary-bar {
-    display: flex;
-    justify-content: center;
-    gap: 12px;
-    flex-wrap: wrap;
-    margin-bottom: 20px;
-  }
-
+  .summary-bar { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
   .summary-item {
-    background: white;
-    padding: 7px 16px;
-    border-radius: 50px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
-    font-size: 0.88rem;
-    font-weight: 700;
-    color: #555;
+    background: white; padding: 7px 16px; border-radius: 50px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06); font-size: 0.88rem; font-weight: 700; color: #555;
   }
 
   .kids-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 18px;
-    max-width: 1400px;
-    margin: 0 auto;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(300px,1fr));
+    gap: 18px; max-width: 1400px; margin: 0 auto;
   }
 
   .kid-card {
-    background: var(--card-bg);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    overflow: hidden;
-    scroll-margin-top: 80px;
+    background: var(--card-bg); border-radius: var(--radius);
+    box-shadow: var(--shadow); overflow: hidden; scroll-margin-top: 80px;
   }
 
   .kid-header {
-    padding: 16px 20px 12px;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    position: relative;
+    padding: 16px 20px 12px; display: flex; align-items: center;
+    gap: 14px; position: relative;
   }
-
   .kid-avatar {
-    width: 50px; height: 50px;
-    border-radius: 50%;
+    width: 50px; height: 50px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
     font-size: 1.5rem; flex-shrink: 0;
   }
-
   .kid-info h2 { font-family: 'Fredoka One', cursive; font-size: 1.3rem; color: #2D2D2D; }
   .kid-age { font-size: 0.72rem; font-weight: 700; color: #999; text-transform: uppercase; letter-spacing: 1px; }
   .progress-bar-wrap { height: 7px; background: #F0F0F0; border-radius: 4px; overflow: hidden; margin-top: 7px; }
   .progress-bar { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
-
   .score-badge {
     position: absolute; top: 16px; right: 16px;
     font-family: 'Fredoka One', cursive; font-size: 1rem;
     padding: 4px 12px; border-radius: 50px; color: white;
   }
 
-  /* TOD dividers */
-  .tod-divider {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 14px 3px;
-  }
-
-  .tod-divider-label {
-    font-size: 0.7rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    white-space: nowrap;
-  }
-
-  .tod-divider-line { flex: 1; height: 1.5px; border-radius: 1px; }
-
+  .tod-divider { display: flex; align-items: center; gap: 8px; padding: 10px 14px 3px; }
+  .tod-divider-label { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; white-space: nowrap; }
+  .tod-divider-line  { flex: 1; height: 1.5px; border-radius: 1px; }
   .tod-morning   .tod-divider-label { color: #f7971e; }
   .tod-morning   .tod-divider-line  { background: #f7971e44; }
   .tod-afternoon .tod-divider-label { color: #38c172; }
@@ -181,25 +104,20 @@
   .tod-evening   .tod-divider-line  { background: #764ba244; }
 
   .chore-list { padding: 0 14px 14px; }
-
   .chore-item {
     display: flex; align-items: center; gap: 12px;
     padding: 9px 10px; border-radius: 12px; margin-bottom: 3px;
     cursor: pointer; transition: background 0.15s; user-select: none;
   }
-
-  .chore-item:hover { background: #F8F8F8; }
+  .chore-item:hover  { background: #F8F8F8; }
   .chore-item:active { background: #F0F0F0; }
-  .chore-item.done { opacity: 0.45; }
-
+  .chore-item.done   { opacity: 0.45; }
   .chore-check {
     width: 24px; height: 24px; border-radius: 50%;
     border: 2.5px solid #DDD;
     display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0; transition: all 0.2s; font-size: 0.85rem;
-    color: white;
+    flex-shrink: 0; transition: all 0.2s; font-size: 0.85rem; color: white;
   }
-
   .chore-item.done .chore-check { border-color: transparent; }
   .chore-item.done .chore-label { text-decoration: line-through; color: #AAA; }
   .chore-label { font-size: 0.88rem; font-weight: 700; color: #333; flex: 1; }
@@ -211,17 +129,12 @@
     padding: 10px 28px; border-radius: 50px;
     border: 2px solid #DDD; background: white;
     font-family: 'Nunito', sans-serif; font-weight: 700;
-    font-size: 0.9rem; cursor: pointer; color: #777;
-    transition: all 0.2s;
+    font-size: 0.9rem; cursor: pointer; color: #777; transition: all 0.2s;
   }
   .reset-btn:hover { border-color: #aaa; color: #333; }
 
   .confetti-pop { animation: pop 0.25s ease; }
-  @keyframes pop {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.12); }
-    100% { transform: scale(1); }
-  }
+  @keyframes pop { 0%{transform:scale(1)} 50%{transform:scale(1.12)} 100%{transform:scale(1)} }
 
   /* Kid color themes */
   .kid-theodore .kid-header { background: linear-gradient(135deg,#667eea22,#764ba222); }
@@ -271,14 +184,17 @@
 
 <header>
   <h1>⭐ Hull Family Chores</h1>
-  <p class="subtitle">🗓️ Saturday</p>
+  <p class="subtitle" id="headerSubtitle"></p>
 </header>
 
 <div class="top-bar">
   <div class="jump-links" id="jumpLinks"></div>
-  <div class="sync-indicator synced" id="syncIndicator">
-    <div class="sync-dot" id="syncDot"></div>
-    <span id="syncLabel">Live</span>
+  <div class="right-bar">
+    <div class="day-badge" id="dayBadge"></div>
+    <div class="sync-indicator synced" id="syncIndicator">
+      <div class="sync-dot" id="syncDot"></div>
+      <span id="syncLabel">Live</span>
+    </div>
   </div>
 </div>
 
@@ -297,7 +213,7 @@ firebase.initializeApp({
 var db = firebase.firestore();
 
 // =============================================
-// DATA
+// KIDS
 // =============================================
 var KIDS = [
   { id:'theodore', name:'Theodore', age:11, emoji:'🦁' },
@@ -308,52 +224,200 @@ var KIDS = [
   { id:'leo',      name:'Leo',      age:3,  emoji:'🐻' },
 ];
 
+var BIG_KIDS = ['theodore','alice','andrew','felix'];
+
 var TOD_ORDER  = ['morning','afternoon','evening'];
 var TOD_LABELS = { morning:'🌅 Morning', afternoon:'☀️ Afternoon', evening:'🌆 Evening' };
 
-var ALL_CHORES = [
-  // ---- MORNING ----
-  { tod:'morning', section:'Everyone',      label:'Make bed',                      icon:'🛏️', ids:'all' },
-  { tod:'morning', section:'Everyone',      label:'Brush teeth',                   icon:'🪥', ids:'all' },
-  { tod:'morning', section:'Everyone',      label:'Get dressed',                   icon:'👕', ids:'all' },
-  { tod:'morning', section:'Everyone',      label:'Eat breakfast',                 icon:'🥣', ids:'all' },
-  { tod:'morning', section:'Everyone',      label:'Bring plates to sink',          icon:'🫧', ids:'all' },
-  { tod:'morning', section:'Family Chores', label:'Unload dishwasher',             icon:'🍽️', ids:['theodore'] },
-  { tod:'morning', section:'Family Chores', label:'Wipe bathroom sink',            icon:'🚿', ids:['theodore','leo'] },
-  { tod:'morning', section:'Family Chores', label:'Wipe bathroom sink',            icon:'🚿', ids:['alice','lucy'] },
-  { tod:'morning', section:'Family Chores', label:'Wipe bathroom sink',            icon:'🚿', ids:['andrew','felix'] },
-  { tod:'morning', section:'Family Chores', label:'Vacuum living room',            icon:'🧹', ids:['alice'] },
-  { tod:'morning', section:'Family Chores', label:'Vacuum front room',             icon:'🧹', ids:['andrew'] },
-  { tod:'morning', section:'Family Chores', label:'Put away blankets',             icon:'🛋️', ids:['lucy','leo'] },
-  { tod:'morning', section:'Family Chores', label:"Fill up Sophie's food & water", icon:'🐾', ids:['felix'] },
-  { tod:'morning', section:'❤️ Special',    label:'Go kiss Momma good morning!',   icon:'💋', ids:'all' },
+// =============================================
+// ROTATION
+// Day 0 = Sat Feb 28 2025 (existing saturday, no rotation)
+// Day 1 = Sun Mar 1 2025 — first rotation day
+//
+// Morning rotation (big kids): vacuum living room, vacuum front room, sophie, empty dishwasher
+// Sunday Day 1 start: theodore=vacuum living room, alice=vacuum front room, andrew=sophie, felix=empty dishwasher
+//
+// Evening rotation (big kids): wipe counter, wipe table, tineco floor, take out trash
+// Sunday Day 1 start: theodore=wipe counter, alice=wipe table, andrew=tineco, felix=trash
+// =============================================
 
-  // ---- AFTERNOON ----
-  { tod:'afternoon', section:'Everyone', label:'Eat lunch',                  icon:'🥪', ids:'all' },
-  { tod:'afternoon', section:'Everyone', label:'Bring lunch plates to sink', icon:'🫧', ids:'all' },
-  { tod:'afternoon', section:'Everyone', label:'Help fold laundry',          icon:'👕', ids:'all' },
-  { tod:'afternoon', section:'Clean Up', label:'Load dishwasher',            icon:'🫧', ids:['andrew'] },
-  { tod:'afternoon', section:'Clean Up', label:'Put away lunch stuff',       icon:'🧹', ids:'all' },
-  { tod:'afternoon', section:'Clean Up', label:'Take out recyclables',       icon:'♻️', ids:['andrew'] },
-  { tod:'afternoon', section:'Bathrooms',label:'Clean pool bathroom',        icon:'🚿', ids:['theodore'] },
-  { tod:'afternoon', section:'Bathrooms',label:'Clean front bathroom',       icon:'🚿', ids:['alice'] },
-  { tod:'afternoon', section:'Bathrooms',label:'Clean basement bathroom',    icon:'🚿', ids:['felix'] },
+var ROTATION_EPOCH = new Date('2025-03-01T00:00:00'); // Day 1
 
-  // ---- EVENING ----
-  { tod:'evening', section:'Everyone', label:'Eat dinner',                   icon:'🍽️', ids:'all' },
-  { tod:'evening', section:'Everyone', label:'Bring dinner plates to sink',  icon:'🫧', ids:'all' },
-  { tod:'evening', section:'Everyone', label:'Eat dessert',                  icon:'🍨', ids:'all' },
-  { tod:'evening', section:'Clean Up', label:'Take out trash',               icon:'🗑️', ids:['theodore'] },
-  { tod:'evening', section:'Clean Up', label:'Load dishwasher',              icon:'🍽️', ids:['felix'] },
-  { tod:'evening', section:'Clean Up', label:'Take out recyclables',         icon:'♻️', ids:['andrew'] },
-  { tod:'evening', section:'Clean Up', label:'Wipe kitchen counter',         icon:'🧽', ids:['alice'] },
-  { tod:'evening', section:'Clean Up', label:'Wipe kitchen table',           icon:'🧹', ids:['lucy'] },
+var MORNING_ROTATION = [
+  { label:'Vacuum living room',            icon:'🧹' },
+  { label:'Vacuum front room',             icon:'🧹' },
+  { label:"Fill up Sophie's food & water", icon:'🐾' },
+  { label:'Empty dishwasher',              icon:'🍽️' },
 ];
 
-function getChoresForKid(kidId) {
-  return ALL_CHORES.filter(function(c) {
-    return c.ids === 'all' || c.ids.indexOf(kidId) !== -1;
-  });
+var EVENING_ROTATION = [
+  { label:'Wipe kitchen counter', icon:'🧽' },
+  { label:'Wipe kitchen table',   icon:'🧹' },
+  { label:'Tineco kitchen floor', icon:'🤖' },
+  { label:'Take out trash',       icon:'🗑️' },
+];
+
+// Returns 0-based rotation index for a given date (days since epoch mod 4)
+function getRotationIndex(dateObj) {
+  var msPerDay = 24 * 60 * 60 * 1000;
+  var diff = Math.floor((dateObj - ROTATION_EPOCH) / msPerDay);
+  if (diff < 0) diff = 0;
+  return diff % 4;
+}
+
+// For a big kid at BIG_KIDS index i, their chore on a given rotation index
+// kid 0 (theodore) gets rotation[rotIdx], kid 1 gets rotation[(rotIdx+1)%4], etc.
+function getRotatedChore(bigKidIndex, rotIdx, rotationArr) {
+  return rotationArr[(rotIdx + bigKidIndex) % 4];
+}
+
+// =============================================
+// CHORE BUILDERS
+// =============================================
+
+function buildSaturdayChores(kidId) {
+  var chores = [];
+
+  // Morning - everyone
+  var morningAll = [
+    { label:'Make bed',                    icon:'🛏️', section:'Everyone' },
+    { label:'Brush teeth',                 icon:'🪥', section:'Everyone' },
+    { label:'Get dressed',                 icon:'👕', section:'Everyone' },
+    { label:'Eat breakfast',               icon:'🥣', section:'Everyone' },
+    { label:'Bring plates to sink',        icon:'🫧', section:'Everyone' },
+  ];
+  for (var i = 0; i < morningAll.length; i++) {
+    chores.push({ tod:'morning', section:morningAll[i].section, label:morningAll[i].label, icon:morningAll[i].icon });
+  }
+
+  // Morning - family specific (saturday fixed assignments)
+  if (kidId === 'theodore') {
+    chores.push({ tod:'morning', section:'Family Chores', label:'Unload dishwasher',  icon:'🍽️' });
+    chores.push({ tod:'morning', section:'Family Chores', label:'Wipe bathroom sink',  icon:'🚿' });
+  }
+  if (kidId === 'alice' || kidId === 'lucy') {
+    chores.push({ tod:'morning', section:'Family Chores', label:'Wipe bathroom sink',  icon:'🚿' });
+  }
+  if (kidId === 'andrew' || kidId === 'felix') {
+    chores.push({ tod:'morning', section:'Family Chores', label:'Wipe bathroom sink',  icon:'🚿' });
+  }
+  if (kidId === 'leo') {
+    chores.push({ tod:'morning', section:'Family Chores', label:'Wipe bathroom sink',  icon:'🚿' });
+  }
+  if (kidId === 'alice')  chores.push({ tod:'morning', section:'Family Chores', label:'Vacuum living room',           icon:'🧹' });
+  if (kidId === 'andrew') chores.push({ tod:'morning', section:'Family Chores', label:'Vacuum front room',            icon:'🧹' });
+  if (kidId === 'lucy' || kidId === 'leo') chores.push({ tod:'morning', section:'Family Chores', label:'Put away blankets', icon:'🛋️' });
+  if (kidId === 'felix')  chores.push({ tod:'morning', section:'Family Chores', label:"Fill up Sophie's food & water", icon:'🐾' });
+
+  // Kiss Momma - everyone
+  chores.push({ tod:'morning', section:'❤️ Special', label:'Go kiss Momma good morning!', icon:'💋' });
+
+  // Afternoon - everyone
+  chores.push({ tod:'afternoon', section:'Everyone', label:'Eat lunch',                  icon:'🥪' });
+  chores.push({ tod:'afternoon', section:'Everyone', label:'Bring lunch plates to sink',  icon:'🫧' });
+  chores.push({ tod:'afternoon', section:'Everyone', label:'Help fold laundry',           icon:'👕' });
+  chores.push({ tod:'afternoon', section:'Everyone', label:'Put away lunch stuff',        icon:'🧹' });
+  if (kidId === 'andrew') {
+    chores.push({ tod:'afternoon', section:'Clean Up', label:'Load dishwasher',           icon:'🫧' });
+    chores.push({ tod:'afternoon', section:'Clean Up', label:'Take out recyclables',      icon:'♻️' });
+  }
+  if (kidId === 'theodore') chores.push({ tod:'afternoon', section:'Bathrooms', label:'Clean pool bathroom',     icon:'🚿' });
+  if (kidId === 'alice')    chores.push({ tod:'afternoon', section:'Bathrooms', label:'Clean front bathroom',    icon:'🚿' });
+  if (kidId === 'felix')    chores.push({ tod:'afternoon', section:'Bathrooms', label:'Clean basement bathroom', icon:'🚿' });
+
+  // Evening - everyone
+  chores.push({ tod:'evening', section:'Everyone', label:'Eat dinner',                  icon:'🍽️' });
+  chores.push({ tod:'evening', section:'Everyone', label:'Bring dinner plates to sink', icon:'🫧' });
+  chores.push({ tod:'evening', section:'Everyone', label:'Eat dessert',                 icon:'🍨' });
+  if (kidId === 'theodore') chores.push({ tod:'evening', section:'Clean Up', label:'Take out trash',        icon:'🗑️' });
+  if (kidId === 'alice')    chores.push({ tod:'evening', section:'Clean Up', label:'Wipe kitchen counter',  icon:'🧽' });
+  if (kidId === 'andrew')   chores.push({ tod:'evening', section:'Clean Up', label:'Take out recyclables',  icon:'♻️' });
+  if (kidId === 'felix')    chores.push({ tod:'evening', section:'Clean Up', label:'Load dishwasher',       icon:'🍽️' });
+  if (kidId === 'lucy')     chores.push({ tod:'evening', section:'Clean Up', label:'Wipe kitchen table',    icon:'🧹' });
+
+  return chores;
+}
+
+function buildSundayChores(kidId, dateObj) {
+  var chores = [];
+  var rotIdx = getRotationIndex(dateObj);
+  var bigIdx = BIG_KIDS.indexOf(kidId);
+
+  // Morning - everyone
+  var morningAll = [
+    { label:'Make bed',          icon:'🛏️', section:'Everyone' },
+    { label:'Brush teeth',       icon:'🪥', section:'Everyone' },
+    { label:'Get dressed for church', icon:'⛪', section:'Everyone' },
+    { label:'Eat breakfast',     icon:'🥣', section:'Everyone' },
+    { label:'Bring plates to sink', icon:'🫧', section:'Everyone' },
+  ];
+  for (var i = 0; i < morningAll.length; i++) {
+    chores.push({ tod:'morning', section:morningAll[i].section, label:morningAll[i].label, icon:morningAll[i].icon });
+  }
+
+  // Morning rotation for big kids
+  if (bigIdx !== -1) {
+    var mc = getRotatedChore(bigIdx, rotIdx, MORNING_ROTATION);
+    chores.push({ tod:'morning', section:'Family Chores', label:mc.label, icon:mc.icon });
+  }
+
+  // Lucy & Leo put away blankets
+  if (kidId === 'lucy' || kidId === 'leo') {
+    chores.push({ tod:'morning', section:'Family Chores', label:'Put away blankets', icon:'🛋️' });
+  }
+
+  // Kiss Momma
+  chores.push({ tod:'morning', section:'❤️ Special', label:'Go kiss Momma good morning!', icon:'💋' });
+
+  // Afternoon - everyone
+  chores.push({ tod:'afternoon', section:'Everyone', label:'Eat lunch',                 icon:'🥪' });
+  chores.push({ tod:'afternoon', section:'Everyone', label:'Bring lunch plates to sink', icon:'🫧' });
+  chores.push({ tod:'afternoon', section:'Everyone', label:'Put away lunch stuff',       icon:'🧹' });
+
+  // Evening - everyone
+  chores.push({ tod:'evening', section:'Everyone', label:'Eat dinner',                  icon:'🍽️' });
+  chores.push({ tod:'evening', section:'Everyone', label:'Bring dinner plates to sink', icon:'🫧' });
+  chores.push({ tod:'evening', section:'Everyone', label:'Eat dessert',                 icon:'🍨' });
+
+  // Evening rotation for big kids
+  if (bigIdx !== -1) {
+    var ec = getRotatedChore(bigIdx, rotIdx, EVENING_ROTATION);
+    chores.push({ tod:'evening', section:'Clean Up', label:ec.label, icon:ec.icon });
+  }
+
+  return chores;
+}
+
+// =============================================
+// DAY DETECTION
+// =============================================
+function getTodayKey() {
+  var d = new Date();
+  var day = d.getDay(); // 0=Sun, 6=Sat
+  if (day === 6) return 'saturday';
+  if (day === 0) return 'sunday_' + getDateString(d);
+  // Default to today's date key for any other day (extensible later)
+  return 'sunday_' + getDateString(d);
+}
+
+function getDateString(d) {
+  return d.getFullYear() + '-' + (d.getMonth()+1) + '-' + d.getDate();
+}
+
+function isWeekend() {
+  var day = new Date().getDay();
+  return day === 6 || day === 0;
+}
+
+function isSunday() {
+  return new Date().getDay() === 0;
+}
+
+function getChoresToday(kidId) {
+  if (isSunday()) {
+    return buildSundayChores(kidId, new Date());
+  }
+  return buildSaturdayChores(kidId);
 }
 
 // =============================================
@@ -361,8 +425,9 @@ function getChoresForKid(kidId) {
 // =============================================
 var choreState = {};
 var unsub = null;
+var TODAY_KEY = getTodayKey();
 
-function docRef() { return db.collection('chores').doc('saturday'); }
+function docRef() { return db.collection('chores').doc(TODAY_KEY); }
 
 function subscribe() {
   if (unsub) unsub();
@@ -384,8 +449,7 @@ function save() {
 function setSyncStatus(s) {
   document.getElementById('syncIndicator').className = 'sync-indicator ' + s;
   document.getElementById('syncDot').className = 'sync-dot' + (s === 'syncing' ? ' spinning' : '');
-  document.getElementById('syncLabel').textContent =
-    s === 'syncing' ? 'Syncing...' : s === 'synced' ? 'Live' : 'Error';
+  document.getElementById('syncLabel').textContent = s === 'syncing' ? 'Syncing...' : s === 'synced' ? 'Live' : 'Error';
 }
 
 // =============================================
@@ -413,6 +477,15 @@ function handleChore(kidId, tod, label, el) {
 // RENDER
 // =============================================
 function render() {
+  var sunday = isSunday();
+  var dayName = sunday ? 'Sunday' : 'Saturday';
+  var dayEmoji = sunday ? '⛪' : '🗓️';
+
+  document.getElementById('headerSubtitle').textContent = dayEmoji + ' ' + dayName + ' Chores';
+  var badge = document.getElementById('dayBadge');
+  badge.textContent = dayName;
+  badge.className = 'day-badge ' + (sunday ? 'sunday' : 'saturday');
+
   // Jump links
   document.getElementById('jumpLinks').innerHTML = KIDS.map(function(kid) {
     return '<a class="jump-link jump-' + kid.id + '" href="#card-' + kid.id + '">' +
@@ -422,7 +495,7 @@ function render() {
   // Summary
   var totalDone = 0, totalAll = 0;
   for (var ki = 0; ki < KIDS.length; ki++) {
-    var kc = getChoresForKid(KIDS[ki].id);
+    var kc = getChoresToday(KIDS[ki].id);
     totalAll += kc.length;
     for (var ci = 0; ci < kc.length; ci++) {
       if (isChecked(KIDS[ki].id, kc[ci].tod, kc[ci].label)) totalDone++;
@@ -437,7 +510,7 @@ function render() {
   var gridHtml = '';
   for (var k = 0; k < KIDS.length; k++) {
     var kid    = KIDS[k];
-    var chores = getChoresForKid(kid.id);
+    var chores = getChoresToday(kid.id);
     var doneCt = 0;
     for (var c = 0; c < chores.length; c++) {
       if (isChecked(kid.id, chores[c].tod, chores[c].label)) doneCt++;
@@ -493,7 +566,7 @@ function render() {
 }
 
 function resetAll() {
-  if (!confirm('Reset ALL chores for everyone?')) return;
+  if (!confirm('Reset all chores for today?')) return;
   choreState = {};
   save();
   render();
