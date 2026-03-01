@@ -842,6 +842,7 @@ function resetCelebrationState() {
 // RENDER
 // =============================================
 function render() {
+  try {
   var sunday  = isSunday();
   var dayName = sunday ? 'Sunday' : 'Saturday';
   document.getElementById('headerSubtitle').textContent = (sunday?'⛪':'🗓️') + ' ' + dayName + ' Chores';
@@ -937,6 +938,7 @@ function render() {
     var avEl = document.getElementById('avatar-' + KIDS[av].id);
     if (avEl) avEl.innerHTML = renderAvatarContent(KIDS[av].id);
   }
+  } catch(e) { document.getElementById('kidsGrid').innerHTML = '<div style="color:red;padding:20px;font-family:monospace">RENDER ERROR: ' + e.message + '<br>' + e.stack + '</div>'; }
 }
 
 function resetAll() {
