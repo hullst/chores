@@ -362,8 +362,13 @@ function openAvatarModal(kidId) {
   var grid = document.getElementById('emojiGrid');
   var current = getEmoji(kidId);
   var currentVal = avatars[kidId] || '';
+  // Find which index is currently selected
+  var currentIdx = -1;
+  for (var ci = 0; ci < AVATAR_EMOJIS.length; ci++) {
+    if (AVATAR_EMOJIS[ci].d === currentVal) { currentIdx = ci; break; }
+  }
   grid.innerHTML = AVATAR_EMOJIS.map(function(a, idx) {
-    var isSelected = (currentVal === a.d);
+    var isSelected = (idx === currentIdx);
     return '<div class="emoji-opt' + (isSelected ? ' picked' : '') + '" data-idx="' + idx + '" onclick="pickEmoji(' + idx + ')">' +
       '<div style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;margin:0 auto">' + a.d + '</div>' +
       '<div style="font-size:7px;color:#999;margin-top:2px;font-family:Nunito,sans-serif;font-weight:700;overflow:hidden;white-space:nowrap;max-width:68px;text-overflow:ellipsis">' + a.l + '</div>' +
@@ -373,21 +378,23 @@ function openAvatarModal(kidId) {
   soundPop();
 }
 
-function pickEmoji(emoji) {
+function pickEmoji(idx) {
   if (!pickingKidId) return;
-  avatars[pickingKidId] = emoji;
+  var a = AVATAR_EMOJIS[idx];
+  if (!a) return;
+  // Save the SVG string
+  avatars[pickingKidId] = a.d;
   saveAvatarLocal();
   saveAvatarsRemote();
-  // Update picked highlight
+  // Update picked highlight in grid
   var opts = document.querySelectorAll('.emoji-opt');
   for (var i = 0; i < opts.length; i++) {
-    var firstDiv = opts[i].querySelector('div');
-    opts[i].classList.toggle('picked', firstDiv && firstDiv.textContent.trim() === emoji.trim());
+    opts[i].classList.toggle('picked', parseInt(opts[i].getAttribute('data-idx')) === idx);
   }
   // Update avatar in card immediately
   var avatarEl = document.querySelector('#card-' + pickingKidId + ' .kid-avatar');
-  if (avatarEl) avatarEl.childNodes[0] && (avatarEl.innerHTML = emoji);
-  // Update jump link
+  if (avatarEl) avatarEl.innerHTML = renderAvatarContent(pickingKidId);
+  // Update jump links
   render();
   soundPop();
 }
