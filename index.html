@@ -383,8 +383,11 @@ function setAvatarEl(el, kidId) {
   var idx = avatars[kidId];
   if (typeof idx === 'number' && AVATAR_SVGS[idx]) {
     el.innerHTML = AVATAR_SVGS[idx];
+    // Make SVG fill the container exactly
+    var svg = el.querySelector('svg');
+    if (svg) { svg.style.width = '100%'; svg.style.height = '100%'; svg.style.display = 'block'; }
   } else {
-    el.innerHTML = ''; // just show the colored circle from CSS
+    el.innerHTML = '';
   }
 }
 
