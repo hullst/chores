@@ -335,7 +335,17 @@ function getChoresToday(kidId) {
 
 // ── THEO-SPECIFIC ──
 // Build chores for Theodore using the shared functions above
-var CHORES = getChoresToday('theodore');
+var CHORES = {};
+// getChoresToday returns flat array - convert to {morning,afternoon,evening} object
+(function() {
+  var flat = getChoresToday('theodore');
+  var grouped = { morning: [], afternoon: [], evening: [] };
+  for (var i = 0; i < flat.length; i++) {
+    var c = flat[i];
+    if (grouped[c.tod]) grouped[c.tod].push({ s: c.section || 'Everyone', label: c.label, icon: c.icon });
+  }
+  CHORES = grouped;
+})();
 
 
 function docRef() { return db.collection('chores').doc(getTodayKey()); }
