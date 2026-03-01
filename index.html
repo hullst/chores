@@ -349,7 +349,7 @@ var avatars = {}; // kidId -> index number
 
 function loadAvatars() {
   try {
-    var s = localStorage.getItem('hull_avatars_v2');
+    var s = localStorage.getItem('hull_avatars_v3');
     if (s) {
       var p = JSON.parse(s);
       for (var k in p) {
@@ -360,22 +360,22 @@ function loadAvatars() {
 }
 
 function saveAvatars() {
-  try { localStorage.setItem('hull_avatars_v2', JSON.stringify(avatars)); } catch(e) {}
+  try { localStorage.setItem('hull_avatars_v3', JSON.stringify(avatars)); } catch(e) {}
   console.log('AVATAR SAVE:', JSON.stringify(avatars));
-  db.collection('meta').doc('avatars_v2').set(avatars, { merge: true })
+  db.collection('chores').doc('avatars').set(avatars, { merge: true })
     .then(function(){ console.log('AVATAR SAVE OK'); })
     .catch(function(e){ console.log('AVATAR SAVE ERROR:', e.message); });
 }
 
 function loadAvatarsRemote() {
-  db.collection('meta').doc('avatars_v2').onSnapshot(function(snap) {
+  db.collection('chores').doc('avatars').onSnapshot(function(snap) {
     console.log('AVATAR SNAPSHOT exists:', snap.exists, snap.exists ? JSON.stringify(snap.data()) : 'empty');
     if (!snap.exists) return;
     var data = snap.data();
     for (var k in data) {
       if (typeof data[k] === 'number') avatars[k] = data[k];
     }
-    try { localStorage.setItem('hull_avatars_v2', JSON.stringify(avatars)); } catch(e) {}
+    try { localStorage.setItem('hull_avatars_v3', JSON.stringify(avatars)); } catch(e) {}
     for (var av = 0; av < KIDS.length; av++) {
       setAvatarEl(document.getElementById('avatar-' + KIDS[av].id), KIDS[av].id);
       setAvatarEl(document.getElementById('jav-' + KIDS[av].id), KIDS[av].id);
@@ -677,7 +677,7 @@ var ROTATION_EPOCH = new Date('2025-03-01T00:00:00');
 var MORNING_ROTATION = [
   { label:'Vacuum living room',            icon:'🧹' },
   { label:'Vacuum front room',             icon:'🧹' },
-  { label:"Fill up Sophie's food & water", icon:'🐾' },
+  { label:'Load dishwasher', icon:'🍽️' },
   { label:'Empty dishwasher',              icon:'🍽️' },
 ];
 var EVENING_ROTATION = [
@@ -727,7 +727,7 @@ function buildSaturdayChores(kidId) {
   chores.push({tod:'evening',section:'Everyone',label:'Bring dinner plates to sink',icon:'🫧'});
   chores.push({tod:'evening',section:'Everyone',label:'Eat dessert',icon:'🍨'});
   if (kidId==='theodore') chores.push({tod:'evening',section:'Clean Up',label:'Take out trash',icon:'🗑️'});
-  if (kidId==='alice')    chores.push({tod:'evening',section:'Clean Up',label:'Wipe kitchen counter',icon:'🧽'});
+  if (kidId==='alice')    chores.push({tod:'evening',section:'Clean Up',label:'Load dishwasher',icon:'🍽️'});
   if (kidId==='andrew')   chores.push({tod:'evening',section:'Clean Up',label:'Take out recyclables',icon:'♻️'});
   if (kidId==='felix')    chores.push({tod:'evening',section:'Clean Up',label:'Load dishwasher',icon:'🍽️'});
   if (kidId==='lucy')     chores.push({tod:'evening',section:'Clean Up',label:'Wipe kitchen table',icon:'🧹'});
