@@ -851,10 +851,15 @@ function render() {
 
   // Jump links
   document.getElementById('jumpLinks').innerHTML = KIDS.map(function(kid) {
-    var av = getEmoji(kid.id); var jumpIcon = isSvgAvatar(av) ? '<span style="display:inline-block;width:20px;height:20px;vertical-align:middle">' + av + '</span>' : av;
     return '<a class="jump-link jump-' + kid.id + '" href="#card-' + kid.id + '">' +
-      jumpIcon + ' ' + kid.name.split(' ')[0] + '</a>';
+      '<span id="jav-' + kid.id + '" style="display:inline-block;width:20px;height:20px;vertical-align:middle;margin-right:3px"></span>' +
+      kid.name.split(' ')[0] + '</a>';
   }).join('');
+  // Inject jump avatars via DOM
+  for (var jav = 0; jav < KIDS.length; jav++) {
+    var javEl = document.getElementById('jav-' + KIDS[jav].id);
+    if (javEl) javEl.innerHTML = renderAvatarContent(KIDS[jav].id);
+  }
 
   // Summary
   var totalDone = 0, totalAll = 0;
@@ -881,7 +886,7 @@ function render() {
     }
     var kpct    = chores.length ? Math.round(doneCt/chores.length*100) : 0;
     var allDone = chores.length > 0 && doneCt === chores.length;
-    var emoji   = getEmoji(kid.id);
+    // avatar injected after render via DOM to avoid SVG double-quote escaping issues
 
     var choreHtml = '<div class="chore-list">';
     for (var ti = 0; ti < TOD_ORDER.length; ti++) {
@@ -915,9 +920,7 @@ function render() {
     gridHtml +=
       '<div class="kid-card kid-' + kid.id + '" id="card-' + kid.id + '">' +
         '<div class="kid-header">' +
-          '<div class="kid-avatar" onclick="openAvatarModal(\'' + kid.id + '\')">' +
-            emoji +
-          '</div>' +
+          '<div class="kid-avatar" onclick="openAvatarModal(\'' + kid.id + '\')" id="avatar-' + kid.id + '"></div>' +
           '<div class="kid-info" style="flex:1">' +
             '<h2>' + kid.name + (allDone ? ' 🎉' : '') + '</h2>' +
             '<div class="kid-age">Age ' + kid.age + '</div>' +
@@ -929,6 +932,11 @@ function render() {
       '</div>';
   }
   document.getElementById('kidsGrid').innerHTML = gridHtml;
+  // Inject avatars via DOM (safe - avoids SVG double-quote issues in string concat)
+  for (var av = 0; av < KIDS.length; av++) {
+    var avEl = document.getElementById('avatar-' + KIDS[av].id);
+    if (avEl) avEl.innerHTML = renderAvatarContent(KIDS[av].id);
+  }
 }
 
 function resetAll() {
