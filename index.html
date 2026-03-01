@@ -360,26 +360,27 @@ function loadAvatars() {
 }
 
 function saveAvatars() {
-  // Use merge:true so we only update the one kid, never wipe others
   try { localStorage.setItem('hull_avatars_v2', JSON.stringify(avatars)); } catch(e) {}
-  db.collection('meta').doc('avatars_v2').set(avatars, { merge: true }).catch(function(){});
+  console.log('AVATAR SAVE:', JSON.stringify(avatars));
+  db.collection('meta').doc('avatars_v2').set(avatars, { merge: true })
+    .then(function(){ console.log('AVATAR SAVE OK'); })
+    .catch(function(e){ console.log('AVATAR SAVE ERROR:', e.message); });
 }
 
 function loadAvatarsRemote() {
   db.collection('meta').doc('avatars_v2').onSnapshot(function(snap) {
+    console.log('AVATAR SNAPSHOT exists:', snap.exists, snap.exists ? JSON.stringify(snap.data()) : 'empty');
     if (!snap.exists) return;
     var data = snap.data();
-    // Accept all numeric values from Firestore - they are the source of truth
     for (var k in data) {
       if (typeof data[k] === 'number') avatars[k] = data[k];
     }
     try { localStorage.setItem('hull_avatars_v2', JSON.stringify(avatars)); } catch(e) {}
-    // Always update all avatar elements
     for (var av = 0; av < KIDS.length; av++) {
       setAvatarEl(document.getElementById('avatar-' + KIDS[av].id), KIDS[av].id);
       setAvatarEl(document.getElementById('jav-' + KIDS[av].id), KIDS[av].id);
     }
-  }, function(err) { console.log('avatar sync error', err); });
+  }, function(err) { console.log('AVATAR SNAPSHOT ERROR:', err.code, err.message); });
 }
 
 // Set the avatar element for a kid directly via DOM - NEVER via string concat
