@@ -314,8 +314,15 @@ var avatars = {};
 function loadAvatars() {
   try {
     var stored = localStorage.getItem('hull_avatars');
-    if (stored) avatars = JSON.parse(stored);
-  } catch(e) {}
+    if (stored) {
+      var parsed = JSON.parse(stored);
+      // Purge any non-string values (old numeric index saves)
+      avatars = {};
+      for (var k in parsed) {
+        if (typeof parsed[k] === 'string') avatars[k] = parsed[k];
+      }
+    }
+  } catch(e) { avatars = {}; }
 }
 
 function saveAvatarLocal() {
@@ -323,10 +330,13 @@ function saveAvatarLocal() {
 }
 
 function getEmoji(kidId) {
-  return avatars[kidId] || KIDS.find(function(k){ return k.id === kidId; }).defaultEmoji;
+  var stored = avatars[kidId];
+  // Guard: if stored is not a string (e.g. old numeric index), discard it
+  if (stored && typeof stored !== 'string') { delete avatars[kidId]; stored = null; }
+  return stored || KIDS.find(function(k){ return k.id === kidId; }).defaultEmoji;
 }
 // Returns true if the stored avatar is an SVG string
-function isSvgAvatar(val) { return val && val.indexOf('<svg') === 0; }
+function isSvgAvatar(val) { return typeof val === 'string' && val.indexOf('<svg') === 0; }
 // Render avatar content - SVG or emoji text
 function renderAvatarContent(kidId) {
   var val = getEmoji(kidId);
@@ -343,7 +353,9 @@ function loadAvatarsRemote() {
   db.collection('meta').doc('avatars').get().then(function(snap) {
     if (snap.exists) {
       var data = snap.data();
-      for (var k in data) { avatars[k] = data[k]; }
+      for (var k in data) {
+        if (typeof data[k] === 'string') avatars[k] = data[k];
+      }
       saveAvatarLocal();
       render();
     }
@@ -391,10 +403,7 @@ function pickEmoji(idx) {
   for (var i = 0; i < opts.length; i++) {
     opts[i].classList.toggle('picked', parseInt(opts[i].getAttribute('data-idx')) === idx);
   }
-  // Update avatar in card immediately
-  var avatarEl = document.querySelector('#card-' + pickingKidId + ' .kid-avatar');
-  if (avatarEl) avatarEl.innerHTML = renderAvatarContent(pickingKidId);
-  // Update jump links
+  // Re-render everything so both card and jump link update
   render();
   soundPop();
 }
@@ -813,7 +822,7 @@ function checkCelebrations(justToggledKid, wasUncheck) {
     var kid = KIDS.find(function(k){ return k.id === justToggledKid; });
     setTimeout(function(){
       soundCardComplete();
-      showCelebration(kid.name + ' finished! 🎉', getEmoji(justToggledKid), 'medium');
+      showCelebration(kid.name + ' finished! 🎉', '🎉', 'medium');
     }, 200);
   }
 
