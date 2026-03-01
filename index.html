@@ -72,12 +72,6 @@
   }
   .kid-avatar:hover { transform: scale(1.1); box-shadow: 0 4px 16px rgba(0,0,0,0.2); }
   .kid-avatar:active { transform: scale(0.95); }
-  .avatar-edit-hint {
-    position: absolute; bottom: -2px; right: -2px;
-    background: white; border-radius: 50%; width: 18px; height: 18px;
-    font-size: 10px; display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
-  }
 
   .kid-info h2 { font-family: 'Fredoka One', cursive; font-size: 1.3rem; color: #2D2D2D; }
   .kid-age { font-size: 0.72rem; font-weight: 700; color: #999; text-transform: uppercase; letter-spacing: 1px; }
@@ -122,12 +116,6 @@
   .tod-complete-flash { animation: sectionFlash 0.5s ease; }
   @keyframes sectionFlash { 0%{background:#fff} 40%{background:#d4f5d4} 100%{background:#fff} }
 
-  .reset-btn {
-    display: block; margin: 24px auto 32px; padding: 10px 28px; border-radius: 50px;
-    border: 2px solid #DDD; background: white; font-family: 'Nunito', sans-serif;
-    font-weight: 700; font-size: 0.9rem; cursor: pointer; color: #777; transition: all 0.2s;
-  }
-  .reset-btn:hover { border-color: #aaa; color: #333; }
 
   .confetti-pop { animation: pop 0.25s ease; }
   @keyframes pop { 0%{transform:scale(1)} 50%{transform:scale(1.12)} 100%{transform:scale(1)} }
@@ -141,18 +129,19 @@
   .modal-overlay.open { display: flex; }
   .modal {
     background: white; border-radius: 24px; padding: 24px;
-    max-width: 380px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    max-width: 420px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
     animation: modalIn 0.2s ease;
   }
   @keyframes modalIn { from{transform:scale(0.85);opacity:0} to{transform:scale(1);opacity:1} }
   .modal h3 { font-family: 'Fredoka One', cursive; font-size: 1.4rem; color: #2D2D2D; margin-bottom: 16px; text-align: center; }
   .emoji-grid {
-    display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px;
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px;
     max-height: 280px; overflow-y: auto; margin-bottom: 16px;
   }
   .emoji-opt {
-    font-size: 1.6rem; padding: 6px; border-radius: 12px; cursor: pointer;
+    font-size: 1.3rem; padding: 6px 4px; border-radius: 12px; cursor: pointer;
     text-align: center; transition: background 0.1s, transform 0.1s; border: 2.5px solid transparent;
+    line-height: 1.2;
   }
   .emoji-opt:hover  { background: #F0F0F0; transform: scale(1.15); }
   .emoji-opt.picked { border-color: #667eea; background: #667eea18; }
@@ -242,7 +231,7 @@
 
 <div class="summary-bar" id="summaryBar"></div>
 <div class="kids-grid" id="kidsGrid"></div>
-<button class="reset-btn" onclick="resetAll()">🔄 Reset All Chores</button>
+
 
 <!-- Avatar picker modal -->
 <div class="modal-overlay" id="avatarModal">
@@ -286,12 +275,69 @@ var KIDS = [
   { id:'leo',      name:'Leo',      age:3,  defaultEmoji:'🐻' },
 ];
 
+// Each avatar is { d: display emoji, l: funny label }
 var AVATAR_EMOJIS = [
-  '🦁','🦋','🚀','🐸','🌸','🐻','🐶','🐱','🦊','🐼','🐨','🐯',
-  '🦄','🐲','👻','🤖','👽','🦸','🧙','🥷','🤠','🧟','🦖','🦕',
-  '🐙','🦑','🦩','🦚','🦜','🐊','🦧','🦣','🧸','🎃','🍕','🌮',
-  '🍦','🎮','⚽','🏆','🎸','🚗','🛸','🧨','🎯','🧃','🦷','💀',
-  '🫠','🤡','👾','🥸','🤪','😈','🧠','🫶','💥','🌈',
+  // Animals being ridiculous
+  { d:'🐸🕶️', l:'Cool Frog' },
+  { d:'🐻🎩', l:'Top Hat Bear' },
+  { d:'🦊🤠', l:'Cowboy Fox' },
+  { d:'🐱👑', l:'Queen Cat' },
+  { d:'🐶🥸', l:'Disguised Dog' },
+  { d:'🐼🎸', l:'Rockstar Panda' },
+  { d:'🐨😤', l:'Angry Koala' },
+  { d:'🦄🤪', l:'Crazy Unicorn' },
+  { d:'🐯💅', l:'Fancy Tiger' },
+  { d:'🦁😴', l:'Sleepy Lion' },
+  { d:'🐮🍔', l:'Burger Cow' },
+  { d:'🐔🥚', l:'Confused Chicken' },
+  { d:'🐸🎤', l:'Singing Frog' },
+  { d:'🦊🍕', l:'Pizza Fox' },
+  { d:'🐻‍❄️🕶️', l:'Polar Bear Cool' },
+  // Food gone wrong
+  { d:'🍕🕶️', l:'Pizza Boss' },
+  { d:'🌮🤠', l:'Cowboy Taco' },
+  { d:'🍦😈', l:'Evil Ice Cream' },
+  { d:'🧀🕶️', l:'Cheese w Sunglasses' },
+  { d:'🍌🤠', l:'Banana Cowboy' },
+  { d:'🍩👑', l:'Donut King' },
+  { d:'🥦😤', l:'Angry Broccoli' },
+  { d:'🍎🥊', l:'Boxing Apple' },
+  { d:'🌽😎', l:'Cool Corn' },
+  { d:'🥑🎩', l:'Fancy Avocado' },
+  { d:'🍇🕺', l:'Dancing Grapes' },
+  { d:'🥕🥷', l:'Carrot Ninja' },
+  { d:'🍓💅', l:'Fancy Strawberry' },
+  { d:'🥐🎸', l:'Croissant Rockstar' },
+  // Weird creatures
+  { d:'👻🕶️', l:'Cool Ghost' },
+  { d:'🤖🤠', l:'Robot Cowboy' },
+  { d:'👽🎩', l:'Fancy Alien' },
+  { d:'🧟🍕', l:'Zombie w Pizza' },
+  { d:'🤡🚀', l:'Clown Astronaut' },
+  { d:'👾😴', l:'Sleepy Space Bug' },
+  { d:'💀🎸', l:'Skull Guitarist' },
+  { d:'🎃🕶️', l:'Cool Pumpkin' },
+  { d:'🦖🍦', l:'Dino w Ice Cream' },
+  { d:'🦕🤠', l:'Cowboy Dinosaur' },
+  { d:'🐙🎩', l:'Fancy Octopus' },
+  { d:'🦑🕶️', l:'Squid w Shades' },
+  // Just chaotic
+  { d:'🧠🕶️', l:'Brain w Shades' },
+  { d:'💩👑', l:'King Poop' },
+  { d:'🌈🤠', l:'Cowboy Rainbow' },
+  { d:'🔥😎', l:'Cool Fire' },
+  { d:'💥🎩', l:'Fancy Explosion' },
+  { d:'🎯🕶️', l:'Cool Target' },
+  { d:'🚗🤠', l:'Cowboy Car' },
+  { d:'🛸😈', l:'Evil UFO' },
+  { d:'🏆😤', l:'Angry Trophy' },
+  { d:'🧨🕶️', l:'Cool Firecracker' },
+  { d:'⚡🎸', l:'Lightning Guitar' },
+  { d:'🌮💅', l:'Fancy Taco' },
+  { d:'🍕😤', l:'Angry Pizza' },
+  { d:'🥷🍦', l:'Ninja Ice Cream' },
+  { d:'🤠🍕', l:'Pizza Cowboy' },
+  { d:'🧙🍔', l:'Burger Wizard' },
 ];
 
 // avatars stored in localStorage for instant load, also synced to Firestore
@@ -336,7 +382,7 @@ var pickingKidId = null;
 function openAvatarModal(kidId) {
   pickingKidId = kidId;
   var kid = KIDS.find(function(k){ return k.id === kidId; });
-  document.getElementById('modalTitle').textContent = kid.name + ', pick your avatar!';
+  document.getElementById('modalTitle').textContent = '🎨 ' + kid.name + ', pick your vibe!';
   var grid = document.getElementById('emojiGrid');
   var current = getEmoji(kidId);
   grid.innerHTML = AVATAR_EMOJIS.map(function(e) {
@@ -354,11 +400,12 @@ function pickEmoji(emoji) {
   // Update picked highlight
   var opts = document.querySelectorAll('.emoji-opt');
   for (var i = 0; i < opts.length; i++) {
-    opts[i].classList.toggle('picked', opts[i].textContent === emoji);
+    var firstDiv = opts[i].querySelector('div');
+    opts[i].classList.toggle('picked', firstDiv && firstDiv.textContent === emoji);
   }
   // Update avatar in card immediately
   var avatarEl = document.querySelector('#card-' + pickingKidId + ' .kid-avatar');
-  if (avatarEl) avatarEl.childNodes[0] && (avatarEl.innerHTML = emoji + '<div class="avatar-edit-hint">✏️</div>');
+  if (avatarEl) avatarEl.childNodes[0] && (avatarEl.innerHTML = emoji);
   // Update jump link
   render();
   soundPop();
@@ -670,12 +717,25 @@ function buildSundayChores(kidId, dateObj) {
   return chores;
 }
 
-function isSunday() { return new Date().getDay() === 0; }
+// URL override: ?day=sunday or ?day=saturday to force a view for testing
+function getUrlDayOverride() {
+  try { var p = new URLSearchParams(window.location.search).get('day'); if (p) return p.toLowerCase(); } catch(e) {}
+  return null;
+}
+var URL_OVERRIDE = getUrlDayOverride();
+
+function isSunday() {
+  if (URL_OVERRIDE) return URL_OVERRIDE === 'sunday';
+  return new Date().getDay() === 0;
+}
 function getDateString(d) { return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate(); }
 function getTodayKey() {
   var d = new Date();
-  if (d.getDay() === 6) return 'saturday';
-  return 'sunday_' + getDateString(d);
+  if (URL_OVERRIDE === 'sunday') return 'sunday_test';
+  if (URL_OVERRIDE === 'saturday') return 'saturday_' + getDateString(d);
+  if (d.getDay() === 6) return 'saturday_' + getDateString(d);
+  if (d.getDay() === 0) return 'sunday_' + getDateString(d);
+  return 'sunday_' + getDateString(d); // fallback
 }
 function getChoresToday(kidId) {
   return isSunday() ? buildSundayChores(kidId, new Date()) : buildSaturdayChores(kidId);
@@ -867,11 +927,11 @@ function render() {
       '<div class="kid-card kid-' + kid.id + '" id="card-' + kid.id + '">' +
         '<div class="kid-header">' +
           '<div class="kid-avatar" onclick="openAvatarModal(\'' + kid.id + '\')">' +
-            emoji + '<div class="avatar-edit-hint">✏️</div>' +
+            emoji +
           '</div>' +
           '<div class="kid-info" style="flex:1">' +
             '<h2>' + kid.name + (allDone ? ' 🎉' : '') + '</h2>' +
-            '<div class="kid-age">Age ' + kid.age + ' · tap avatar to change</div>' +
+            '<div class="kid-age">Age ' + kid.age + '</div>' +
             '<div class="progress-bar-wrap"><div class="progress-bar" style="width:' + kpct + '%"></div></div>' +
           '</div>' +
           '<div class="score-badge">' + doneCt + '/' + chores.length + '</div>' +

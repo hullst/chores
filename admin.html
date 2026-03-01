@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hull Chores — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root { --bg: #0f0f1a; --card: #1a1a2e; --accent: #667eea; --radius: 16px; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Nunito', sans-serif; background: var(--bg); color: #e0e0e0; min-height: 100vh; padding: 24px 16px; }
+
+  /* ---- PIN SCREEN ---- */
+  #pin-screen {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    min-height: 100vh; gap: 20px;
+  }
+  #pin-screen h1 { font-family: 'Fredoka One', cursive; font-size: 2rem; color: #fff; }
+  #pin-screen p  { color: #888; font-size: 0.95rem; }
+  .pin-dots { display: flex; gap: 14px; margin: 8px 0; }
+  .pin-dot {
+    width: 18px; height: 18px; border-radius: 50%;
+    border: 2.5px solid #444; background: transparent; transition: all 0.15s;
+  }
+  .pin-dot.filled { background: var(--accent); border-color: var(--accent); }
+  .pin-pad { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; max-width: 260px; width: 100%; }
+  .pin-btn {
+    padding: 18px; border-radius: 14px; border: none;
+    background: #1e1e30; color: #fff; font-family: 'Fredoka One', cursive;
+    font-size: 1.4rem; cursor: pointer; transition: background 0.15s, transform 0.1s;
+  }
+  .pin-btn:hover  { background: #2a2a40; }
+  .pin-btn:active { transform: scale(0.94); background: var(--accent); }
+  .pin-btn.clear  { background: #2a1a1a; color: #f5576c; }
+  .pin-error { color: #f5576c; font-weight: 700; font-size: 0.9rem; animation: shake 0.3s ease; }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+
+  /* ---- ADMIN BOARD ---- */
+  #admin-board { display: none; }
+
+  .page-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 28px; flex-wrap: wrap; gap: 12px;
+  }
+  .page-header h1 { font-family: 'Fredoka One', cursive; font-size: clamp(1.6rem,4vw,2.4rem); color: #fff; }
+  .page-header a {
+    padding: 8px 18px; border-radius: 50px; background: #1e1e30;
+    color: #aaa; text-decoration: none; font-weight: 700; font-size: 0.85rem;
+    transition: background 0.15s;
+  }
+  .page-header a:hover { background: #2a2a40; color: #fff; }
+
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px,1fr)); gap: 18px; margin-bottom: 28px; }
+
+  .stat-card {
+    background: var(--card); border-radius: var(--radius);
+    padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+  .stat-card h3 { font-family: 'Fredoka One', cursive; font-size: 1.1rem; color: #ccc; margin-bottom: 14px; }
+
+  .big-stat { font-family: 'Fredoka One', cursive; font-size: 3rem; color: #fff; line-height: 1; }
+  .big-stat-label { font-size: 0.8rem; color: #666; font-weight: 700; margin-top: 4px; }
+
+  /* Kid completion bars */
+  .kid-bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .kid-bar-name { font-size: 0.85rem; font-weight: 800; color: #ccc; width: 70px; flex-shrink: 0; }
+  .kid-bar-track { flex: 1; height: 10px; background: #2a2a3a; border-radius: 5px; overflow: hidden; }
+  .kid-bar-fill  { height: 100%; border-radius: 5px; transition: width 0.6s ease; }
+  .kid-bar-pct   { font-size: 0.8rem; font-weight: 800; color: #888; width: 36px; text-align: right; flex-shrink: 0; }
+
+  /* Weekly trend chart */
+  .trend-wrap { overflow-x: auto; }
+  .trend-chart { display: flex; align-items: flex-end; gap: 6px; min-height: 120px; padding-bottom: 24px; position: relative; min-width: max-content; }
+  .trend-bar-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .trend-bar {
+    width: 32px; border-radius: 6px 6px 0 0;
+    background: linear-gradient(180deg, #667eea, #764ba2);
+    transition: height 0.5s ease; min-height: 2px; position: relative; cursor: pointer;
+  }
+  .trend-bar:hover::after {
+    content: attr(data-tip);
+    position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%);
+    background: #333; color: #fff; font-size: 10px; font-weight: 700;
+    padding: 3px 7px; border-radius: 6px; white-space: nowrap; margin-bottom: 4px;
+  }
+  .trend-bar.saturday { background: linear-gradient(180deg,#f7971e,#ffd200); }
+  .trend-bar.sunday   { background: linear-gradient(180deg,#667eea,#764ba2); }
+  .trend-label { font-size: 9px; font-weight: 700; color: #555; text-align: center; }
+
+  /* Per-chore completion */
+  .chore-stat-row {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 7px;
+    padding: 6px 8px; border-radius: 8px; background: #13131f;
+  }
+  .chore-stat-icon { font-size: 1rem; flex-shrink: 0; }
+  .chore-stat-label { flex: 1; font-size: 0.82rem; font-weight: 700; color: #bbb; }
+  .chore-stat-bar-track { width: 80px; height: 6px; background: #2a2a3a; border-radius: 3px; overflow: hidden; flex-shrink: 0; }
+  .chore-stat-bar-fill  { height: 100%; border-radius: 3px; background: #43e97b; }
+  .chore-stat-pct { font-size: 0.75rem; font-weight: 800; color: #666; width: 32px; text-align: right; flex-shrink: 0; }
+
+  /* Streaks */
+  .streak-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .streak-name { font-size: 0.9rem; font-weight: 800; color: #ccc; }
+  .streak-val  { font-family: 'Fredoka One', cursive; font-size: 1.3rem; color: #f7971e; }
+  .streak-fire { font-size: 1rem; }
+
+  /* Reset section */
+  .danger-zone { background: #1a0f0f; border: 1px solid #3a1a1a; border-radius: var(--radius); padding: 20px; margin-top: 8px; }
+  .danger-zone h3 { font-family: 'Fredoka One', cursive; color: #f5576c; margin-bottom: 12px; }
+  .danger-zone p  { font-size: 0.85rem; color: #888; margin-bottom: 14px; }
+  .reset-select { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid #3a1a1a; background: #120808; color: #ccc; font-family: 'Nunito', sans-serif; font-weight: 700; margin-bottom: 10px; }
+  .reset-btn-danger {
+    padding: 10px 22px; border-radius: 50px; border: none;
+    background: linear-gradient(135deg,#f5576c,#c0392b); color: white;
+    font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.9rem;
+    cursor: pointer; transition: opacity 0.15s;
+  }
+  .reset-btn-danger:hover { opacity: 0.85; }
+
+  .loading-msg { text-align: center; color: #555; font-weight: 700; padding: 40px; }
+
+  /* Section headers */
+  .section-title {
+    font-family: 'Fredoka One', cursive; font-size: 1.3rem; color: #fff;
+    margin: 28px 0 14px; display: flex; align-items: center; gap: 8px;
+  }
+  .section-title::after { content: ''; flex: 1; height: 1px; background: #2a2a3a; }
+
+  /* Kid color map */
+  .bar-theodore { background: linear-gradient(90deg,#667eea,#764ba2); }
+  .bar-alice    { background: linear-gradient(90deg,#f093fb,#f5576c); }
+  .bar-andrew   { background: linear-gradient(90deg,#4facfe,#00f2fe); }
+  .bar-felix    { background: linear-gradient(90deg,#43e97b,#38f9d7); }
+  .bar-lucy     { background: linear-gradient(90deg,#fa709a,#fee140); }
+  .bar-leo      { background: linear-gradient(90deg,#f7971e,#ffd200); }
+</style>
+</head>
+<body>
+
+<!-- PIN SCREEN -->
+<div id="pin-screen">
+  <h1>🔐 Admin Access</h1>
+  <p>Enter your PIN to continue</p>
+  <div class="pin-dots" id="pinDots">
+    <div class="pin-dot" id="dot0"></div>
+    <div class="pin-dot" id="dot1"></div>
+    <div class="pin-dot" id="dot2"></div>
+    <div class="pin-dot" id="dot3"></div>
+  </div>
+  <div id="pinError" class="pin-error" style="visibility:hidden">Wrong PIN, try again</div>
+  <div class="pin-pad">
+    <button class="pin-btn" onclick="pinPress('1')">1</button>
+    <button class="pin-btn" onclick="pinPress('2')">2</button>
+    <button class="pin-btn" onclick="pinPress('3')">3</button>
+    <button class="pin-btn" onclick="pinPress('4')">4</button>
+    <button class="pin-btn" onclick="pinPress('5')">5</button>
+    <button class="pin-btn" onclick="pinPress('6')">6</button>
+    <button class="pin-btn" onclick="pinPress('7')">7</button>
+    <button class="pin-btn" onclick="pinPress('8')">8</button>
+    <button class="pin-btn" onclick="pinPress('9')">9</button>
+    <button class="pin-btn clear" onclick="pinClear()">⌫</button>
+    <button class="pin-btn" onclick="pinPress('0')">0</button>
+    <button class="pin-btn clear" onclick="pinReset()">✕</button>
+  </div>
+</div>
+
+<!-- ADMIN BOARD -->
+<div id="admin-board">
+  <div class="page-header">
+    <h1>📊 Hull Chores Admin</h1>
+    <a href="index.html">← Back to Board</a>
+  </div>
+
+  <div id="loadingMsg" class="loading-msg">Loading all-time data...</div>
+  <div id="statsContent" style="display:none">
+
+    <!-- Overview stats -->
+    <div class="stats-grid" id="overviewGrid"></div>
+
+    <!-- Weekly trend -->
+    <div class="section-title">📈 Weekly Completion Trend</div>
+    <div class="stat-card" style="margin-bottom:28px">
+      <div class="trend-wrap"><div class="trend-chart" id="trendChart"></div></div>
+    </div>
+
+    <!-- Per-kid breakdown -->
+    <div class="section-title">👦 Completion by Kid</div>
+    <div class="stats-grid" id="kidGrid"></div>
+
+    <!-- Top & bottom chores -->
+    <div class="section-title">✅ Chore Completion Rates</div>
+    <div class="stats-grid" id="choreGrid"></div>
+
+    <!-- Streaks -->
+    <div class="section-title">🔥 Best Streaks (Full Day Complete)</div>
+    <div class="stat-card" id="streakCard"></div>
+
+    <!-- Danger zone -->
+    <div class="section-title">⚠️ Reset</div>
+    <div class="danger-zone">
+      <h3>🗑️ Reset a Specific Day</h3>
+      <p>This permanently deletes all chore data for the selected day. Use only if data is corrupted.</p>
+      <select class="reset-select" id="resetSelect"><option value="">Select a day to reset...</option></select>
+      <br>
+      <button class="reset-btn-danger" onclick="resetDay()">Reset This Day</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
+firebase.initializeApp({
+  apiKey: "AIzaSyBImvAIHP_3S9aDl0_yjhwtGG5pf1e5Z7k",
+  authDomain: "hull-chores.firebaseapp.com",
+  projectId: "hull-chores"
+});
+var db = firebase.firestore();
+
+// =============================================
+// PIN
+// =============================================
+var CORRECT_PIN = '5718';
+var pinEntry = '';
+
+function pinPress(d) {
+  if (pinEntry.length >= 4) return;
+  pinEntry += d;
+  updatePinDots();
+  if (pinEntry.length === 4) {
+    setTimeout(function() {
+      if (pinEntry === CORRECT_PIN) {
+        document.getElementById('pin-screen').style.display = 'none';
+        document.getElementById('admin-board').style.display = 'block';
+        loadStats();
+      } else {
+        var err = document.getElementById('pinError');
+        err.style.visibility = 'visible';
+        err.style.animation = 'none';
+        setTimeout(function(){ err.style.animation = 'shake 0.3s ease'; }, 10);
+        pinEntry = '';
+        updatePinDots();
+      }
+    }, 150);
+  }
+}
+
+function pinClear() { pinEntry = pinEntry.slice(0,-1); updatePinDots(); }
+function pinReset() { pinEntry = ''; updatePinDots(); }
+
+function updatePinDots() {
+  document.getElementById('pinError').style.visibility = 'hidden';
+  for (var i = 0; i < 4; i++) {
+    document.getElementById('dot'+i).classList.toggle('filled', i < pinEntry.length);
+  }
+}
+
+// =============================================
+// KIDS & CHORE DEFINITIONS (mirrored from main)
+// =============================================
+var KIDS = [
+  { id:'theodore', name:'Theodore', emoji:'🦁' },
+  { id:'alice',    name:'Alice',    emoji:'🦋' },
+  { id:'andrew',   name:'Andrew',   emoji:'🚀' },
+  { id:'felix',    name:'Felix',    emoji:'🐸' },
+  { id:'lucy',     name:'Lucy',     emoji:'🌸' },
+  { id:'leo',      name:'Leo',      emoji:'🐻' },
+];
+
+var KID_COLORS = {
+  theodore:'#667eea', alice:'#f093fb', andrew:'#4facfe',
+  felix:'#43e97b', lucy:'#fa709a', leo:'#f7971e'
+};
+
+// =============================================
+// LOAD ALL STATS
+// =============================================
+var allDays = []; // { key, dayType, date, state, completionByKid, overallPct }
+
+function loadStats() {
+  db.collection('chores').get().then(function(snap) {
+    allDays = [];
+    snap.forEach(function(doc) {
+      var key = doc.id;
+      if (key === 'sunday_test') return; // skip test doc
+      var data = doc.data();
+      var state = data.state || {};
+      var dayType = key.startsWith('saturday') ? 'saturday' : 'sunday';
+      var dateStr = key.replace('saturday_','').replace('sunday_','');
+      var date = dateStr ? new Date(dateStr) : null;
+
+      // Calculate per-kid completion — count unique chore keys
+      var kidCompletion = {};
+      var totalDone = 0, totalChores = 0;
+      KIDS.forEach(function(kid) {
+        var kidState = state[kid.id] || {};
+        var keys = Object.keys(kidState);
+        var done = keys.filter(function(k){ return kidState[k] && kidState[k].done; }).length;
+        kidCompletion[kid.id] = { done: done, total: keys.length, pct: keys.length ? Math.round(done/keys.length*100) : 0 };
+        totalDone += done;
+        totalChores += keys.length;
+      });
+
+      allDays.push({
+        key: key,
+        dayType: dayType,
+        date: date,
+        state: state,
+        kidCompletion: kidCompletion,
+        overallPct: totalChores ? Math.round(totalDone/totalChores*100) : 0,
+        totalDone: totalDone,
+        totalChores: totalChores,
+      });
+    });
+
+    // Sort by date
+    allDays.sort(function(a,b) {
+      if (!a.date) return 1; if (!b.date) return -1;
+      return a.date - b.date;
+    });
+
+    renderStats();
+  }).catch(function(e) {
+    document.getElementById('loadingMsg').textContent = 'Error loading data: ' + e.message;
+  });
+}
+
+// =============================================
+// RENDER STATS
+// =============================================
+function renderStats() {
+  document.getElementById('loadingMsg').style.display = 'none';
+  document.getElementById('statsContent').style.display = 'block';
+
+  renderOverview();
+  renderTrend();
+  renderKidBreakdown();
+  renderChoreBreakdown();
+  renderStreaks();
+  renderResetSelect();
+}
+
+function renderOverview() {
+  var totalDays = allDays.length;
+  var perfectDays = allDays.filter(function(d){ return d.overallPct === 100; }).length;
+  var avgPct = totalDays ? Math.round(allDays.reduce(function(s,d){ return s+d.overallPct; },0)/totalDays) : 0;
+  var satDays = allDays.filter(function(d){ return d.dayType==='saturday'; });
+  var sunDays = allDays.filter(function(d){ return d.dayType==='sunday'; });
+
+  document.getElementById('overviewGrid').innerHTML =
+    statBox('📅', totalDays, 'Total days tracked') +
+    statBox('💯', perfectDays, 'Perfect days (100%)') +
+    statBox('📊', avgPct + '%', 'Average completion') +
+    statBox('⛪', sunDays.length + ' / 🗓️ ' + satDays.length, 'Sundays / Saturdays');
+}
+
+function statBox(icon, val, label) {
+  return '<div class="stat-card">' +
+    '<div class="big-stat">' + icon + ' ' + val + '</div>' +
+    '<div class="big-stat-label">' + label + '</div>' +
+    '</div>';
+}
+
+function renderTrend() {
+  if (!allDays.length) { document.getElementById('trendChart').innerHTML = '<div class="loading-msg">No data yet</div>'; return; }
+  var maxH = 100;
+  var html = '';
+  allDays.forEach(function(d) {
+    var h = Math.max(2, Math.round(d.overallPct / 100 * maxH));
+    var label = d.date ? (d.date.getMonth()+1)+'/'+(d.date.getDate()) : d.key;
+    var tip = label + ' — ' + d.overallPct + '%';
+    html += '<div class="trend-bar-wrap">' +
+      '<div class="trend-bar ' + d.dayType + '" style="height:' + h + 'px" data-tip="' + tip + '"></div>' +
+      '<div class="trend-label">' + label + '</div>' +
+      '</div>';
+  });
+  document.getElementById('trendChart').innerHTML = html;
+}
+
+function renderKidBreakdown() {
+  var kidTotals = {};
+  KIDS.forEach(function(k){ kidTotals[k.id] = { done:0, total:0, perfect:0, days:0 }; });
+
+  allDays.forEach(function(d) {
+    KIDS.forEach(function(k) {
+      var kc = d.kidCompletion[k.id];
+      if (kc && kc.total > 0) {
+        kidTotals[k.id].done  += kc.done;
+        kidTotals[k.id].total += kc.total;
+        kidTotals[k.id].days++;
+        if (kc.pct === 100) kidTotals[k.id].perfect++;
+      }
+    });
+  });
+
+  // Overall completion per kid
+  var overallHtml = '<div class="stat-card"><h3>Overall Completion Rate</h3>';
+  KIDS.forEach(function(k) {
+    var t = kidTotals[k.id];
+    var pct = t.total ? Math.round(t.done/t.total*100) : 0;
+    overallHtml += kidBar(k, pct);
+  });
+  overallHtml += '</div>';
+
+  // Perfect days per kid
+  var perfectHtml = '<div class="stat-card"><h3>Perfect Day Rate</h3>';
+  KIDS.forEach(function(k) {
+    var t = kidTotals[k.id];
+    var pct = t.days ? Math.round(t.perfect/t.days*100) : 0;
+    perfectHtml += kidBar(k, pct);
+  });
+  perfectHtml += '</div>';
+
+  document.getElementById('kidGrid').innerHTML = overallHtml + perfectHtml;
+}
+
+function kidBar(kid, pct) {
+  return '<div class="kid-bar-row">' +
+    '<div class="kid-bar-name">' + kid.emoji + ' ' + kid.name.split(' ')[0] + '</div>' +
+    '<div class="kid-bar-track"><div class="kid-bar-fill bar-' + kid.id + '" style="width:' + pct + '%"></div></div>' +
+    '<div class="kid-bar-pct">' + pct + '%</div>' +
+    '</div>';
+}
+
+function renderChoreBreakdown() {
+  // Aggregate chore completion across all days
+  var choreCounts = {}; // label -> { done, total, icon }
+
+  allDays.forEach(function(d) {
+    KIDS.forEach(function(k) {
+      var kidState = d.state[k.id] || {};
+      Object.keys(kidState).forEach(function(fullKey) {
+        // key format: kidId__tod__label
+        var parts = fullKey.split('__');
+        if (parts.length < 3) return;
+        var label = parts.slice(2).join('__');
+        if (!choreCounts[label]) choreCounts[label] = { done:0, total:0 };
+        choreCounts[label].total++;
+        if (kidState[fullKey] && kidState[fullKey].done) choreCounts[label].done++;
+      });
+    });
+  });
+
+  var chores = Object.keys(choreCounts).map(function(l) {
+    var c = choreCounts[l];
+    return { label:l, pct: c.total ? Math.round(c.done/c.total*100) : 0, total:c.total };
+  }).filter(function(c){ return c.total >= 2; }); // only show chores with enough data
+
+  chores.sort(function(a,b){ return b.pct - a.pct; });
+
+  var topHtml = '<div class="stat-card"><h3>🏆 Most Completed</h3>';
+  chores.slice(0,8).forEach(function(c) {
+    topHtml += choreBar(c);
+  });
+  topHtml += '</div>';
+
+  var botHtml = '<div class="stat-card"><h3>😬 Least Completed</h3>';
+  chores.slice(-8).reverse().forEach(function(c) {
+    botHtml += choreBar(c, true);
+  });
+  botHtml += '</div>';
+
+  document.getElementById('choreGrid').innerHTML = chores.length ? topHtml + botHtml : '<div class="stat-card"><p style="color:#666">Not enough data yet</p></div>';
+}
+
+function choreBar(c, low) {
+  var color = low ? '#f5576c' : '#43e97b';
+  return '<div class="chore-stat-row">' +
+    '<div class="chore-stat-label">' + c.label + '</div>' +
+    '<div class="chore-stat-bar-track"><div class="chore-stat-bar-fill" style="width:' + c.pct + '%;background:' + color + '"></div></div>' +
+    '<div class="chore-stat-pct">' + c.pct + '%</div>' +
+    '</div>';
+}
+
+function renderStreaks() {
+  // Calculate longest streak of perfect days per kid
+  var streaks = {};
+  KIDS.forEach(function(k) {
+    var cur = 0, best = 0;
+    allDays.forEach(function(d) {
+      var kc = d.kidCompletion[k.id];
+      if (kc && kc.pct === 100 && kc.total > 0) { cur++; best = Math.max(best,cur); }
+      else cur = 0;
+    });
+    streaks[k.id] = best;
+  });
+
+  // Family streak (all kids perfect same day)
+  var famCur = 0, famBest = 0;
+  allDays.forEach(function(d) {
+    var allPerfect = KIDS.every(function(k){ var kc = d.kidCompletion[k.id]; return kc && kc.pct===100 && kc.total>0; });
+    if (allPerfect) { famCur++; famBest = Math.max(famBest,famCur); } else famCur=0;
+  });
+
+  var html = '<div class="streak-row"><div class="streak-name">👨‍👩‍👧‍👦 Whole Family</div><div class="streak-val">' + famBest + ' <span class="streak-fire">🔥</span></div></div>';
+  KIDS.forEach(function(k) {
+    html += '<div class="streak-row"><div class="streak-name">' + k.emoji + ' ' + k.name.split(' ')[0] + '</div><div class="streak-val">' + streaks[k.id] + ' <span class="streak-fire">🔥</span></div></div>';
+  });
+  document.getElementById('streakCard').innerHTML = html;
+}
+
+function renderResetSelect() {
+  var opts = '<option value="">Select a day to reset...</option>';
+  allDays.slice().reverse().forEach(function(d) {
+    var label = d.date ? (d.dayType === 'saturday' ? '🗓️ Sat' : '⛪ Sun') + ' ' + (d.date.getMonth()+1)+'/'+(d.date.getDate())+'/'+d.date.getFullYear() : d.key;
+    opts += '<option value="' + d.key + '">' + label + ' (' + d.overallPct + '% done)</option>';
+  });
+  document.getElementById('resetSelect').innerHTML = opts;
+}
+
+function resetDay() {
+  var key = document.getElementById('resetSelect').value;
+  if (!key) { alert('Please select a day first'); return; }
+  if (!confirm('Delete ALL chore data for ' + key + '? This cannot be undone.')) return;
+  db.collection('chores').doc(key).delete().then(function() {
+    alert('Deleted! Reloading stats...');
+    loadStats();
+  }).catch(function(e){ alert('Error: ' + e.message); });
+}
+</script>
+</body>
+</html>
