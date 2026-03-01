@@ -385,8 +385,12 @@ function openAvatarModal(kidId) {
   document.getElementById('modalTitle').textContent = '🎨 ' + kid.name + ', pick your vibe!';
   var grid = document.getElementById('emojiGrid');
   var current = getEmoji(kidId);
-  grid.innerHTML = AVATAR_EMOJIS.map(function(e) {
-    return '<div class="emoji-opt' + (e === current ? ' picked' : '') + '" onclick="pickEmoji(\'' + e + '\')">' + e + '</div>';
+  grid.innerHTML = AVATAR_EMOJIS.map(function(a) {
+    var disp = a.d; var lbl = a.l;
+    return '<div class="emoji-opt' + (disp === current ? ' picked' : '') + '" onclick="pickEmoji(\'' + disp.replace(/'/g,"\\'" ) + '\')">' +
+      '<div style="font-size:1.3rem;line-height:1.2">' + disp + '</div>' +
+      '<div style="font-size:7px;color:#aaa;margin-top:1px;font-family:Nunito,sans-serif;font-weight:700;line-height:1.1;overflow:hidden;white-space:nowrap">' + lbl + '</div>' +
+    '</div>';
   }).join('');
   document.getElementById('avatarModal').classList.add('open');
   soundPop();
@@ -401,7 +405,7 @@ function pickEmoji(emoji) {
   var opts = document.querySelectorAll('.emoji-opt');
   for (var i = 0; i < opts.length; i++) {
     var firstDiv = opts[i].querySelector('div');
-    opts[i].classList.toggle('picked', firstDiv && firstDiv.textContent === emoji);
+    opts[i].classList.toggle('picked', firstDiv && firstDiv.textContent.trim() === emoji.trim());
   }
   // Update avatar in card immediately
   var avatarEl = document.querySelector('#card-' + pickingKidId + ' .kid-avatar');
