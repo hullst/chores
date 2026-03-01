@@ -20,9 +20,15 @@
     position: sticky; top: 0; z-index: 100;
     background: var(--bg); padding: 8px 0 10px;
     display: flex; align-items: center; justify-content: space-between;
-    gap: 8px; flex-wrap: wrap; margin-bottom: 14px;
+    gap: 8px; flex-wrap: nowrap; margin-bottom: 14px;
   }
-  .jump-links { display: flex; gap: 6px; flex-wrap: wrap; }
+  .jump-links { 
+    display: flex; gap: 6px; flex-wrap: nowrap;
+    overflow-x: auto; -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; -ms-overflow-style: none;
+    max-width: calc(100vw - 120px);
+  }
+  .jump-links::-webkit-scrollbar { display: none; }
   .jump-link {
     display: flex; align-items: center; gap: 5px;
     padding: 7px 13px; border-radius: 50px;
@@ -58,7 +64,7 @@
 
   .kids-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px,1fr)); gap: 18px; max-width: 1400px; margin: 0 auto; }
 
-  .kid-card { background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; scroll-margin-top: 80px; }
+  .kid-card { background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; scroll-margin-top: 70px; }
 
   .kid-header { padding: 16px 20px 12px; display: flex; align-items: center; gap: 14px; position: relative; }
 
