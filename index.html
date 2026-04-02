@@ -710,7 +710,13 @@ function buildWeekdayChores(kidId, dateObj) {
   var isBig = BIG_KIDS.indexOf(kidId) !== -1;
   var bigIdx = BIG_KIDS.indexOf(kidId);
   var rotIdx = getRotationIndex(dateObj);
-  var dow = dateObj.getDay(); // 1=Mon,2=Tue,3=Wed,4=Thu,5=Fri
+  var dow = dateObj.getDay();
+
+  // Special dates
+  var dateStr = getDateString(dateObj);
+  var isApr2  = dateStr === '2026-4-2';
+  var isApr3  = dateStr === '2026-4-3';
+  var isSpecial = isApr2 || isApr3;
 
   // ── MORNING: everyone ──
   chores.push({ tod:'morning', label:'Make bed',                    icon:'🛏️' });
@@ -725,30 +731,58 @@ function buildWeekdayChores(kidId, dateObj) {
     chores.push({ tod:'morning', label:'Empty dishwasher', icon:'🍽️' });
   }
 
-  // ── MORNING: big 4 pack lunch ──
-  if (isBig) {
-    chores.push({ tod:'morning', label:'Pack lunch', icon:'🥪' });
+  // ── MORNING: pack lunch & snack (skip on special days - home from school) ──
+  if (!isSpecial) {
+    if (isBig) {
+      chores.push({ tod:'morning', label:'Pack lunch', icon:'🥪' });
+    }
+    var lucyLeoDay = (dow === 1 || dow === 3 || dow === 5);
+    if (kidId === 'lucy' || kidId === 'leo') {
+      if (lucyLeoDay) chores.push({ tod:'morning', label:'Pack snack', icon:'🍎' });
+    } else {
+      chores.push({ tod:'morning', label:'Pack snack', icon:'🍎' });
+    }
   }
 
-  // ── MORNING: pack snack ──
-  // Lucy & Leo: Mon/Wed/Fri only; everyone else: every weekday
-  var lucyLeoDay = (dow === 1 || dow === 3 || dow === 5);
-  if (kidId === 'lucy' || kidId === 'leo') {
-    if (lucyLeoDay) chores.push({ tod:'morning', label:'Pack snack', icon:'🍎' });
-  } else {
-    chores.push({ tod:'morning', label:'Pack snack', icon:'🍎' });
+  // ── MORNING: Apr 2 only - clean & vacuum bedroom ──
+  if (isApr2) {
+    chores.push({ tod:'morning', label:'Clean & vacuum bedroom', icon:'🧹' });
+  }
+
+  // ── AFTERNOON: Apr 2 - everyone cleans their bathroom ──
+  if (isApr2) {
+    chores.push({ tod:'afternoon', label:'Clean your bathroom', icon:'🚿' });
+  }
+
+  // ── AFTERNOON: Apr 3 - specific bathroom assignments ──
+  if (isApr3) {
+    if (kidId === 'theodore' || kidId === 'leo') {
+      chores.push({ tod:'afternoon', label:'Clean pool bathroom', icon:'🚿' });
+    } else if (kidId === 'felix' || kidId === 'andrew') {
+      chores.push({ tod:'afternoon', label:'Clean front bathroom', icon:'🚿' });
+    } else if (kidId === 'alice' || kidId === 'lucy') {
+      chores.push({ tod:'afternoon', label:'Clean basement bathroom', icon:'🚿' });
+    }
+  }
+
+  // ── AFTERNOON: Apr 3 - specific vacuuming ──
+  if (isApr3) {
+    if (kidId === 'theodore') chores.push({ tod:'afternoon', label:'Vacuum front room',               icon:'🧹' });
+    if (kidId === 'felix')    chores.push({ tod:'afternoon', label:'Vacuum living room',              icon:'🧹' });
+    if (kidId === 'andrew')   chores.push({ tod:'afternoon', label:'Vacuum kitchen & dining room rugs', icon:'🧹' });
+    if (kidId === 'alice')    chores.push({ tod:'afternoon', label:'Tineco kitchen floor',            icon:'🤖' });
   }
 
   // ── EVENING: everyone ──
   chores.push({ tod:'evening', label:'Eat dinner',                  icon:'🍽️' });
   chores.push({ tod:'evening', label:'Bring dinner plates to sink', icon:'🫧' });
 
-  // ── EVENING: big 4 rotate 3 cleanup chores ──
+  // ── EVENING: big 4 rotate cleanup ──
   var WEEKDAY_EVENING_ROTATION = [
-    { label:'Load dishwasher',       icon:'🍽️' },
+    { label:'Load dishwasher',           icon:'🍽️' },
     { label:'Wipe down kitchen table',   icon:'🧹' },
     { label:'Wipe down kitchen counter', icon:'🧽' },
-    { label:'Load dishwasher',       icon:'🍽️' }, // 4th slot repeats load dishwasher
+    { label:'Load dishwasher',           icon:'🍽️' },
   ];
   if (isBig) {
     var ec = WEEKDAY_EVENING_ROTATION[(rotIdx + bigIdx) % 4];
