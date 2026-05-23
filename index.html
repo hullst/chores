@@ -278,8 +278,6 @@ firebase.initializeApp({
   projectId: "hull-chores"
 });
 var db = firebase.firestore();
-// Keep working through brief wifi drops (kitchen tablet).
-try { db.enablePersistence({ synchronizeTabs: true }).catch(function(){}); } catch(e) {}
 
 // =============================================
 // KIDS & AVATARS  (roster comes from chore-engine.js)
@@ -738,7 +736,7 @@ function subscribe() {
     awayKids       = data.away || [];
     setSyncStatus('synced');
     render();
-  }, function() { setSyncStatus('error'); });
+  }, function() { setSyncStatus('error'); render(); });
 }
 
 function save() {
@@ -969,6 +967,7 @@ function startDayWatcher() {
 // BOOT
 // =============================================
 loadAvatars();
+render();          // show the board immediately; snapshots just update it
 loadAvatarsRemote();
 subscribeTemplates();
 subscribe();

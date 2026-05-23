@@ -45,6 +45,15 @@ admin, parent login, and an installable/offline experience.
 - **theo.html** — its generator had drifted out of sync and was buggy on
   weekdays; replaced by the generic per-kid kiosk view.
 
+### Fixed
+- **Blank board on mobile / admin chores not loading.** Firestore offline
+  persistence could stall the first read on some mobile browsers, and the
+  board only rendered inside the snapshot success callback — so if that read
+  hung, the page was blank below the header. Removed offline persistence,
+  render the board immediately at boot (and on snapshot error), and bumped the
+  service-worker cache to flush stale assets. Desktop was unaffected because
+  its persistence init succeeded.
+
 ### Firebase / Google Cloud setup (one-time — recorded so we don't rediscover it)
 - **Authentication → Sign-in method → Google**: Enabled, with a project
   support email selected.

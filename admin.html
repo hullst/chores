@@ -450,7 +450,6 @@ firebase.initializeApp({
   projectId: "hull-chores"
 });
 var db = firebase.firestore();
-try { db.enablePersistence({ synchronizeTabs: true }).catch(function(){}); } catch(e) {}
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); });
 }

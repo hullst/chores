@@ -5,7 +5,7 @@
 //   - known static CDNs (Firebase SDK, SortableJS, fonts): cache-first.
 //   - everything else (notably Firestore's API/streaming): left untouched
 //     so realtime sync is never intercepted.
-var CACHE = 'hull-chores-v1';
+var CACHE = 'hull-chores-v2';
 var SHELL = ['./', 'index.html', 'admin.html', 'chore-engine.js', 'manifest.json', 'icon.svg'];
 var CDN_HOSTS = ['www.gstatic.com', 'cdn.jsdelivr.net', 'fonts.googleapis.com', 'fonts.gstatic.com'];
 
