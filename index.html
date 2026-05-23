@@ -265,6 +265,7 @@
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="chore-engine.js"></script>
 <script>
 firebase.initializeApp({
   apiKey: "AIzaSyBImvAIHP_3S9aDl0_yjhwtGG5pf1e5Z7k",
@@ -274,16 +275,9 @@ firebase.initializeApp({
 var db = firebase.firestore();
 
 // =============================================
-// KIDS & AVATARS
+// KIDS & AVATARS  (roster comes from chore-engine.js)
 // =============================================
-var KIDS = [
-  { id:'theodore', name:'Theodore', age:11 },
-  { id:'alice',    name:'Alice',    age:9 },
-  { id:'andrew',   name:'Andrew',   age:8 },
-  { id:'felix',    name:'Felix',    age:6 },
-  { id:'lucy',     name:'Lucy',     age:5 },
-  { id:'leo',      name:'Leo',      age:3 },
-];
+var KIDS = ChoreEngine.KIDS;
 
 // Each avatar is { d: display emoji, l: funny label }
 var AVATAR_SVGS = [
@@ -675,215 +669,24 @@ function showCelebration(text, emoji, intensity) {
 }
 
 // =============================================
-// DATA
+// DATA  (generation lives in chore-engine.js)
 // =============================================
-var BIG_KIDS = ['theodore','alice','andrew','felix'];
-var TOD_ORDER  = ['morning','afternoon','evening'];
-var TOD_LABELS = { morning:'🌅 Morning', afternoon:'☀️ Afternoon', evening:'🌆 Evening' };
+var TOD_ORDER  = ChoreEngine.TOD_ORDER;
+var TOD_LABELS = ChoreEngine.TOD_LABELS;
 
-var ROTATION_EPOCH = new Date('2025-03-01T00:00:00');
-var MORNING_ROTATION = [
-  { label:'Vacuum living room',            icon:'🧹' },
-  { label:'Vacuum front room',             icon:'🧹' },
-  { label:'Load dishwasher', icon:'🍽️' },
-  { label:'Empty dishwasher',              icon:'🍽️' },
-];
-var EVENING_ROTATION = [
-  { label:'Wipe kitchen counter', icon:'🧽' },
-  { label:'Wipe kitchen table',   icon:'🧹' },
-  { label:'Tineco kitchen floor', icon:'🤖' },
-  { label:'Take out trash',       icon:'🗑️' },
-];
+function getDayType()     { return ChoreEngine.getDayType(); }
+function isSunday()       { return ChoreEngine.isSunday(); }
+function getDateString(d) { return ChoreEngine.getDateString(d); }
+function getTodayKey()    { return ChoreEngine.getTodayKey(); }
 
-function getRotationIndex(dateObj) {
-  var msPerDay = 24 * 60 * 60 * 1000;
-  var diff = Math.floor((dateObj - ROTATION_EPOCH) / msPerDay);
-  return ((diff % 4) + 4) % 4;
-}
+// Per-day overrides loaded from Firestore. When a day has saved
+// assignments we use those; otherwise we auto-generate the defaults.
+var dayAssignments = null;  // { kidId: [ {tod,label,icon} ] }
+var awayKids = [];          // [ kidId ]
 
-function getRotatedChore(bigKidIndex, rotIdx, arr) {
-  return arr[(rotIdx + bigKidIndex) % 4];
-}
-
-function buildWeekdayChores(kidId, dateObj) {
-  var chores = [];
-  var isBig = BIG_KIDS.indexOf(kidId) !== -1;
-  var bigIdx = BIG_KIDS.indexOf(kidId);
-  var rotIdx = getRotationIndex(dateObj);
-  var dow = dateObj.getDay();
-
-  // Special dates
-  var dateStr = getDateString(dateObj);
-  var isApr2  = dateStr === '2026-4-2';
-  var isApr3  = dateStr === '2026-4-3';
-  var isSpecial = isApr2 || isApr3;
-
-  // ── MORNING: everyone ──
-  chores.push({ tod:'morning', label:'Make bed',                    icon:'🛏️' });
-  chores.push({ tod:'morning', label:'Brush teeth',                 icon:'🪥' });
-  chores.push({ tod:'morning', label:'Eat breakfast',               icon:'🥣' });
-  chores.push({ tod:'morning', label:'Bring plates to sink',        icon:'🫧' });
-  chores.push({ tod:'morning', label:'Go kiss Momma good morning!', icon:'💋' });
-
-  // ── MORNING: one big kid rotates empty dishwasher ──
-  var WEEKDAY_MORNING_ROTATION = ['theodore','alice','andrew','felix'];
-  if (kidId === WEEKDAY_MORNING_ROTATION[rotIdx % 4]) {
-    chores.push({ tod:'morning', label:'Empty dishwasher', icon:'🍽️' });
-  }
-
-  // ── MORNING: pack lunch & snack (skip on special days - home from school) ──
-  if (!isSpecial) {
-    if (isBig) {
-      chores.push({ tod:'morning', label:'Pack lunch', icon:'🥪' });
-    }
-    var lucyLeoDay = (dow === 1 || dow === 3 || dow === 5);
-    if (kidId === 'lucy' || kidId === 'leo') {
-      if (lucyLeoDay) chores.push({ tod:'morning', label:'Pack snack', icon:'🍎' });
-    } else {
-      chores.push({ tod:'morning', label:'Pack snack', icon:'🍎' });
-    }
-  }
-
-  // ── MORNING: Apr 2 only - clean & vacuum bedroom ──
-  if (isApr2) {
-    chores.push({ tod:'morning', label:'Clean & vacuum bedroom', icon:'🧹' });
-  }
-
-  // ── AFTERNOON: Apr 2 - everyone cleans their bathroom ──
-  if (isApr2) {
-    chores.push({ tod:'afternoon', label:'Clean your bathroom', icon:'🚿' });
-  }
-
-  // ── AFTERNOON: Apr 3 - specific bathroom assignments ──
-  if (isApr3) {
-    if (kidId === 'theodore' || kidId === 'leo') {
-      chores.push({ tod:'afternoon', label:'Clean pool bathroom', icon:'🚿' });
-    } else if (kidId === 'felix' || kidId === 'andrew') {
-      chores.push({ tod:'afternoon', label:'Clean front bathroom', icon:'🚿' });
-    } else if (kidId === 'alice' || kidId === 'lucy') {
-      chores.push({ tod:'afternoon', label:'Clean basement bathroom', icon:'🚿' });
-    }
-  }
-
-  // ── AFTERNOON: Apr 3 - specific vacuuming ──
-  if (isApr3) {
-    if (kidId === 'theodore') chores.push({ tod:'afternoon', label:'Vacuum front room',               icon:'🧹' });
-    if (kidId === 'felix')    chores.push({ tod:'afternoon', label:'Vacuum living room',              icon:'🧹' });
-    if (kidId === 'andrew')   chores.push({ tod:'afternoon', label:'Vacuum kitchen & dining room rugs', icon:'🧹' });
-    if (kidId === 'alice')    chores.push({ tod:'afternoon', label:'Tineco kitchen floor',            icon:'🤖' });
-  }
-
-  // ── EVENING: everyone ──
-  chores.push({ tod:'evening', label:'Eat dinner',                  icon:'🍽️' });
-  chores.push({ tod:'evening', label:'Bring dinner plates to sink', icon:'🫧' });
-
-  // ── EVENING: big 4 rotate cleanup ──
-  var WEEKDAY_EVENING_ROTATION = [
-    { label:'Load dishwasher',           icon:'🍽️' },
-    { label:'Wipe down kitchen table',   icon:'🧹' },
-    { label:'Wipe down kitchen counter', icon:'🧽' },
-    { label:'Load dishwasher',           icon:'🍽️' },
-  ];
-  if (isBig) {
-    var ec = WEEKDAY_EVENING_ROTATION[(rotIdx + bigIdx) % 4];
-    chores.push({ tod:'evening', label:ec.label, icon:ec.icon });
-  }
-
-  // ── EVENING: Felix and Andrew read ──
-  if (kidId === 'felix' || kidId === 'andrew') {
-    chores.push({ tod:'evening', label:'Read', icon:'📖' });
-  }
-
-  return chores;
-}
-
-function buildSaturdayChores(kidId) {
-  var chores = [];
-  var everyoneMorning = ['Make bed','Brush teeth','Get dressed','Eat breakfast','Bring plates to sink'];
-  var morningIcons    = ['🛏️','🪥','👕','🥣','🫧'];
-  for (var i = 0; i < everyoneMorning.length; i++) {
-    chores.push({ tod:'morning', section:'Everyone', label:everyoneMorning[i], icon:morningIcons[i] });
-  }
-  if (kidId==='theodore') { chores.push({tod:'morning',section:'Family Chores',label:'Unload dishwasher',icon:'🍽️'}); chores.push({tod:'morning',section:'Family Chores',label:'Wipe bathroom sink',icon:'🚿'}); }
-  if (kidId==='alice'||kidId==='lucy')   chores.push({tod:'morning',section:'Family Chores',label:'Wipe bathroom sink',icon:'🚿'});
-  if (kidId==='andrew'||kidId==='felix') chores.push({tod:'morning',section:'Family Chores',label:'Wipe bathroom sink',icon:'🚿'});
-  if (kidId==='leo')    chores.push({tod:'morning',section:'Family Chores',label:'Wipe bathroom sink',icon:'🚿'});
-  if (kidId==='alice')  chores.push({tod:'morning',section:'Family Chores',label:'Vacuum living room',icon:'🧹'});
-  if (kidId==='andrew') chores.push({tod:'morning',section:'Family Chores',label:'Vacuum front room',icon:'🧹'});
-  if (kidId==='lucy'||kidId==='leo') chores.push({tod:'morning',section:'Family Chores',label:'Put away blankets',icon:'🛋️'});
-  if (kidId==='felix')  chores.push({tod:'morning',section:'Family Chores',label:"Fill up Sophie's food & water",icon:'🐾'});
-  chores.push({tod:'morning',section:'❤️ Special',label:'Go kiss Momma good morning!',icon:'💋'});
-  // Afternoon
-  chores.push({tod:'afternoon',section:'Everyone',label:'Eat lunch',icon:'🥪'});
-  chores.push({tod:'afternoon',section:'Everyone',label:'Bring lunch plates to sink',icon:'🫧'});
-  chores.push({tod:'afternoon',section:'Everyone',label:'Help fold laundry',icon:'👕'});
-  chores.push({tod:'afternoon',section:'Everyone',label:'Put away lunch stuff',icon:'🧹'});
-  if (kidId==='andrew') { chores.push({tod:'afternoon',section:'Clean Up',label:'Load dishwasher',icon:'🫧'}); chores.push({tod:'afternoon',section:'Clean Up',label:'Take out recyclables',icon:'♻️'}); }
-  if (kidId==='theodore') chores.push({tod:'afternoon',section:'Bathrooms',label:'Clean pool bathroom',icon:'🚿'});
-  if (kidId==='alice')    chores.push({tod:'afternoon',section:'Bathrooms',label:'Clean front bathroom',icon:'🚿'});
-  if (kidId==='felix')    chores.push({tod:'afternoon',section:'Bathrooms',label:'Clean basement bathroom',icon:'🚿'});
-  // Evening
-  chores.push({tod:'evening',section:'Everyone',label:'Eat dinner',icon:'🍽️'});
-  chores.push({tod:'evening',section:'Everyone',label:'Bring dinner plates to sink',icon:'🫧'});
-  chores.push({tod:'evening',section:'Everyone',label:'Eat dessert',icon:'🍨'});
-  if (kidId==='theodore') chores.push({tod:'evening',section:'Clean Up',label:'Take out trash',icon:'🗑️'});
-  if (kidId==='alice')    chores.push({tod:'evening',section:'Clean Up',label:'Load dishwasher',icon:'🍽️'});
-  if (kidId==='andrew')   chores.push({tod:'evening',section:'Clean Up',label:'Take out recyclables',icon:'♻️'});
-  if (kidId==='felix')    chores.push({tod:'evening',section:'Clean Up',label:'Load dishwasher',icon:'🍽️'});
-  if (kidId==='lucy')     chores.push({tod:'evening',section:'Clean Up',label:'Wipe kitchen table',icon:'🧹'});
-  return chores;
-}
-
-function buildSundayChores(kidId, dateObj) {
-  var chores = [];
-  var bigIdx = BIG_KIDS.indexOf(kidId);
-  var rotIdx = getRotationIndex(dateObj);
-  var everyoneMorning = ['Make bed','Brush teeth','Get dressed for church','Eat breakfast','Bring plates to sink'];
-  var morningIcons    = ['🛏️','🪥','⛪','🥣','🫧'];
-  for (var i = 0; i < everyoneMorning.length; i++) {
-    chores.push({ tod:'morning', section:'Everyone', label:everyoneMorning[i], icon:morningIcons[i] });
-  }
-  if (bigIdx !== -1) { var mc = getRotatedChore(bigIdx, rotIdx, MORNING_ROTATION); chores.push({tod:'morning',section:'Family Chores',label:mc.label,icon:mc.icon}); }
-  if (kidId==='lucy'||kidId==='leo') chores.push({tod:'morning',section:'Family Chores',label:'Put away blankets',icon:'🛋️'});
-  chores.push({tod:'morning',section:'❤️ Special',label:'Go kiss Momma good morning!',icon:'💋'});
-  chores.push({tod:'afternoon',section:'Everyone',label:'Eat lunch',icon:'🥪'});
-  chores.push({tod:'afternoon',section:'Everyone',label:'Bring lunch plates to sink',icon:'🫧'});
-  chores.push({tod:'afternoon',section:'Everyone',label:'Put away lunch stuff',icon:'🧹'});
-  chores.push({tod:'evening',section:'Everyone',label:'Eat dinner',icon:'🍽️'});
-  chores.push({tod:'evening',section:'Everyone',label:'Bring dinner plates to sink',icon:'🫧'});
-  chores.push({tod:'evening',section:'Everyone',label:'Eat dessert',icon:'🍨'});
-  if (bigIdx !== -1) { var ec = getRotatedChore(bigIdx, rotIdx, EVENING_ROTATION); chores.push({tod:'evening',section:'Clean Up',label:ec.label,icon:ec.icon}); }
-  return chores;
-}
-
-// URL override: ?day=sunday or ?day=saturday to force a view for testing
-function getUrlDayOverride() {
-  try { var p = new URLSearchParams(window.location.search).get('day'); if (p) return p.toLowerCase(); } catch(e) {}
-  return null;
-}
-var URL_OVERRIDE = getUrlDayOverride();
-
-function getDayType() {
-  if (URL_OVERRIDE) return URL_OVERRIDE; // saturday, sunday, weekday
-  var d = new Date().getDay();
-  if (d === 6) return 'saturday';
-  if (d === 0) return 'sunday';
-  return 'weekday';
-}
-function isSunday() { return getDayType() === 'sunday'; }
-function getDateString(d) { return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate(); }
-function getTodayKey() {
-  var d = new Date();
-  var dt = getDayType();
-  if (dt === 'sunday')   return 'sunday_'   + (URL_OVERRIDE === 'sunday'   ? 'test' : getDateString(d));
-  if (dt === 'saturday') return 'saturday_' + (URL_OVERRIDE === 'saturday' ? 'test' : getDateString(d));
-  return 'weekday_' + getDateString(d);
-}
 function getChoresToday(kidId) {
-  var dt = getDayType();
-  if (dt === 'sunday')   return buildSundayChores(kidId, new Date());
-  if (dt === 'saturday') return buildSaturdayChores(kidId);
-  return buildWeekdayChores(kidId, new Date());
+  if (dayAssignments && dayAssignments[kidId]) return dayAssignments[kidId];
+  return ChoreEngine.generate(kidId);
 }
 
 // =============================================
@@ -899,7 +702,10 @@ function subscribe() {
   if (unsub) unsub();
   setSyncStatus('syncing');
   unsub = docRef().onSnapshot(function(snap) {
-    choreState = snap.exists ? (snap.data().state || {}) : {};
+    var data = snap.exists ? snap.data() : {};
+    choreState     = data.state || {};
+    dayAssignments = data.assignments || null;
+    awayKids       = data.away || [];
     setSyncStatus('synced');
     render();
   }, function() { setSyncStatus('error'); });
@@ -907,7 +713,10 @@ function subscribe() {
 
 function save() {
   setSyncStatus('syncing');
-  docRef().set({ state: choreState, updatedAt: Date.now() })
+  var payload = { state: choreState, updatedAt: Date.now() };
+  if (dayAssignments) payload.assignments = dayAssignments;
+  if (awayKids && awayKids.length) payload.away = awayKids;
+  docRef().set(payload)
     .then(function() { setSyncStatus('synced'); })
     .catch(function() { setSyncStatus('error'); });
 }
@@ -1046,7 +855,11 @@ function render() {
     var allDone = chores.length > 0 && doneCt === chores.length;
     // avatar injected after render via DOM to avoid SVG double-quote escaping issues
 
+    var isAway = awayKids.indexOf(kid.id) !== -1;
     var choreHtml = '<div class="chore-list">';
+    if (isAway && chores.length === 0) {
+      choreHtml += '<div style="padding:24px;text-align:center;color:#888;font-size:1.1em">🏠 Away today</div>';
+    }
     for (var ti = 0; ti < TOD_ORDER.length; ti++) {
       var tod = TOD_ORDER[ti];
       var todChores = chores.filter(function(ch){ return ch.tod === tod; });
@@ -1080,7 +893,7 @@ function render() {
         '<div class="kid-header">' +
           '<div class="kid-avatar" id="avatar-' + kid.id + '" onclick="openAvatarModal(\'' + kid.id + '\')"></div>' +
           '<div class="kid-info" style="flex:1">' +
-            '<h2>' + kid.name + (allDone ? ' 🎉' : '') + '</h2>' +
+            '<h2>' + kid.name + (isAway ? ' 🏠' : (allDone ? ' 🎉' : '')) + '</h2>' +
             '<div class="kid-age">Age ' + kid.age + '</div>' +
             '<div class="progress-bar-wrap"><div class="progress-bar" style="width:' + kpct + '%"></div></div>' +
           '</div>' +

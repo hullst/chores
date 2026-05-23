@@ -133,6 +133,85 @@
   .bar-felix    { background: linear-gradient(90deg,#43e97b,#38f9d7); }
   .bar-lucy     { background: linear-gradient(90deg,#fa709a,#fee140); }
   .bar-leo      { background: linear-gradient(90deg,#f7971e,#ffd200); }
+
+  /* ---- MANAGE / DRAG-AND-DROP ---- */
+  .manage-controls { display:flex; flex-wrap:wrap; align-items:center; gap:12px; margin-bottom:14px; }
+  .manage-controls select {
+    padding:9px 12px; border-radius:10px; border:1px solid #2a2a3a;
+    background:#13131f; color:#ddd; font-family:'Nunito',sans-serif; font-weight:700;
+  }
+  #manageStatus { font-size:0.82rem; font-weight:800; color:#888; }
+  #manageStatus.dirty { color:#f7971e; }
+  #manageStatus.saved { color:#43e97b; }
+
+  .away-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px; }
+  .away-chip {
+    display:flex; align-items:center; gap:6px; padding:7px 13px; border-radius:50px;
+    background:#1e1e30; color:#bbb; font-weight:800; font-size:0.85rem; cursor:pointer;
+    border:1px solid #2a2a3a; user-select:none; transition:all 0.15s;
+  }
+  .away-chip:hover { background:#2a2a40; }
+  .away-chip.away { background:#3a2a10; color:#f7971e; border-color:#5a3a10; }
+
+  .manage-board { display:flex; gap:14px; overflow-x:auto; padding-bottom:10px; }
+  .kid-col {
+    background:var(--card); border-radius:var(--radius); padding:14px;
+    min-width:230px; width:230px; flex-shrink:0; display:flex; flex-direction:column; gap:10px;
+  }
+  .kid-col-head { display:flex; align-items:center; gap:8px; font-weight:800; color:#fff; font-size:1rem; }
+  .kid-col-head .ct { margin-left:auto; font-size:0.78rem; color:#777; font-weight:800; }
+  .kid-col.col-theodore { border-top:3px solid #667eea; }
+  .kid-col.col-alice    { border-top:3px solid #f093fb; }
+  .kid-col.col-andrew   { border-top:3px solid #4facfe; }
+  .kid-col.col-felix    { border-top:3px solid #43e97b; }
+  .kid-col.col-lucy     { border-top:3px solid #fa709a; }
+  .kid-col.col-leo      { border-top:3px solid #f7971e; }
+
+  .card-list { display:flex; flex-direction:column; gap:7px; min-height:40px; }
+  .card-list:empty::after {
+    content:'Drop chores here'; display:block; text-align:center; color:#555;
+    font-size:0.78rem; font-weight:700; padding:14px 4px; border:1px dashed #2a2a3a; border-radius:10px;
+  }
+  .chore-card {
+    display:flex; align-items:center; gap:8px; padding:9px 10px; border-radius:10px;
+    background:#13131f; border:1px solid #232336; cursor:grab; touch-action:none;
+  }
+  .chore-card:active { cursor:grabbing; }
+  .chore-card .cc-icon { font-size:1.1rem; flex-shrink:0; }
+  .chore-card .cc-label { flex:1; font-size:0.85rem; font-weight:700; color:#ddd; line-height:1.2; }
+  .chore-card .cc-tod {
+    font-size:0.62rem; font-weight:800; text-transform:uppercase; letter-spacing:0.04em;
+    padding:2px 6px; border-radius:6px; background:#2a2a3a; color:#9aa; flex-shrink:0;
+  }
+  .chore-card .cc-tod.morning   { background:#2a2410; color:#f7c54e; }
+  .chore-card .cc-tod.afternoon { background:#10242a; color:#4fd0fe; }
+  .chore-card .cc-tod.evening   { background:#1a1030; color:#a98bff; }
+  .chore-card .cc-del {
+    border:none; background:transparent; color:#666; font-size:1rem; cursor:pointer;
+    padding:0 2px; flex-shrink:0;
+  }
+  .chore-card .cc-del:hover { color:#f5576c; }
+  .sortable-ghost { opacity:0.4; }
+  .sortable-chosen { box-shadow:0 0 0 2px var(--accent); }
+
+  .add-chore-btn {
+    border:1px dashed #2a2a3a; background:transparent; color:#888; border-radius:10px;
+    padding:8px; font-weight:800; font-size:0.8rem; cursor:pointer; font-family:'Nunito',sans-serif;
+  }
+  .add-chore-btn:hover { color:#fff; border-color:var(--accent); }
+
+  .manage-actions { display:flex; flex-wrap:wrap; gap:10px; margin-top:16px; }
+  .save-btn {
+    padding:11px 26px; border-radius:50px; border:none; cursor:pointer;
+    background:linear-gradient(135deg,#43e97b,#38a169); color:#06210f;
+    font-family:'Nunito',sans-serif; font-weight:800; font-size:0.92rem;
+  }
+  .save-btn:hover { opacity:0.9; }
+  .ghost-btn {
+    padding:11px 22px; border-radius:50px; border:1px solid #2a2a3a; cursor:pointer;
+    background:#1a1a2a; color:#aaa; font-family:'Nunito',sans-serif; font-weight:800; font-size:0.88rem;
+  }
+  .ghost-btn:hover { background:#24243a; color:#fff; }
 </style>
 </head>
 <body>
@@ -169,6 +248,23 @@
   <div class="page-header">
     <h1>📊 Hull Chores Admin</h1>
     <a href="index.html">← Back to Board</a>
+  </div>
+
+  <!-- MANAGE ASSIGNMENTS -->
+  <div class="section-title">🗂️ Manage Assignments</div>
+  <div class="manage-controls">
+    <select id="manageDaySelect" onchange="loadManage(this.value)"></select>
+    <span id="manageStatus"></span>
+  </div>
+  <p style="font-size:0.82rem;color:#777;margin:-4px 0 14px">
+    Tap a child to mark them <b>away</b> (their chores get split among whoever's home). Drag cards between columns to reassign. Changes only take effect once you press Save.
+  </p>
+  <div class="away-row" id="awayRow"></div>
+  <div class="manage-board" id="manageBoard"></div>
+  <div class="manage-actions">
+    <button class="save-btn" onclick="saveManage()">💾 Save changes</button>
+    <button class="ghost-btn" onclick="loadManage(manageKey)">⟲ Discard</button>
+    <button class="ghost-btn" onclick="resetManage()">↺ Reset to defaults</button>
   </div>
 
   <div id="loadingMsg" class="loading-msg">Loading all-time data...</div>
@@ -209,6 +305,8 @@
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+<script src="chore-engine.js"></script>
 <script>
 firebase.initializeApp({
   apiKey: "AIzaSyBImvAIHP_3S9aDl0_yjhwtGG5pf1e5Z7k",
@@ -233,6 +331,7 @@ function pinPress(d) {
         document.getElementById('pin-screen').style.display = 'none';
         document.getElementById('admin-board').style.display = 'block';
         loadStats();
+        initManage();
       } else {
         var err = document.getElementById('pinError');
         err.style.visibility = 'visible';
@@ -256,16 +355,9 @@ function updatePinDots() {
 }
 
 // =============================================
-// KIDS & CHORE DEFINITIONS (mirrored from main)
+// KIDS  (roster comes from chore-engine.js)
 // =============================================
-var KIDS = [
-  { id:'theodore', name:'Theodore', emoji:'🦁' },
-  { id:'alice',    name:'Alice',    emoji:'🦋' },
-  { id:'andrew',   name:'Andrew',   emoji:'🚀' },
-  { id:'felix',    name:'Felix',    emoji:'🐸' },
-  { id:'lucy',     name:'Lucy',     emoji:'🌸' },
-  { id:'leo',      name:'Leo',      emoji:'🐻' },
-];
+var KIDS = ChoreEngine.KIDS;
 
 var KID_COLORS = {
   theodore:'#667eea', alice:'#f093fb', andrew:'#4facfe',
@@ -285,9 +377,9 @@ function loadStats() {
       if (key === 'sunday_test') return; // skip test doc
       var data = doc.data();
       var state = data.state || {};
-      var dayType = key.startsWith('saturday') ? 'saturday' : 'sunday';
-      var dateStr = key.replace('saturday_','').replace('sunday_','');
-      var date = dateStr ? new Date(dateStr) : null;
+      var info = ChoreEngine.parseKey(key);
+      var dayType = info.dayType;
+      var date = info.date;
 
       // Calculate per-kid completion — count unique chore keys
       var kidCompletion = {};
@@ -338,6 +430,7 @@ function renderStats() {
   renderChoreBreakdown();
   renderStreaks();
   renderResetSelect();
+  renderManageSelect();
 }
 
 function renderOverview() {
@@ -502,7 +595,8 @@ function renderStreaks() {
 function renderResetSelect() {
   var opts = '<option value="">Select a day to reset...</option>';
   allDays.slice().reverse().forEach(function(d) {
-    var label = d.date ? (d.dayType === 'saturday' ? '🗓️ Sat' : '⛪ Sun') + ' ' + (d.date.getMonth()+1)+'/'+(d.date.getDate())+'/'+d.date.getFullYear() : d.key;
+    var icon = d.dayType === 'saturday' ? '🗓️ Sat' : d.dayType === 'sunday' ? '⛪ Sun' : '📚 Weekday';
+    var label = d.date ? icon + ' ' + (d.date.getMonth()+1)+'/'+(d.date.getDate())+'/'+d.date.getFullYear() : d.key;
     opts += '<option value="' + d.key + '">' + label + ' (' + d.overallPct + '% done)</option>';
   });
   document.getElementById('resetSelect').innerHTML = opts;
@@ -516,6 +610,228 @@ function resetDay() {
     alert('Deleted! Reloading stats...');
     loadStats();
   }).catch(function(e){ alert('Error: ' + e.message); });
+}
+
+// =============================================
+// MANAGE ASSIGNMENTS (drag-and-drop)
+// =============================================
+var manageKey = null;        // day-doc id currently being edited
+var working = {};            // { kidId: [ {tod,label,icon} ] }
+var workingAway = [];        // [ kidId ]
+var sortables = [];          // active SortableJS instances
+var TOD_OPTS = ['morning', 'afternoon', 'evening'];
+
+function prettyKey(key) {
+  var info = ChoreEngine.parseKey(key);
+  var icon = info.dayType === 'sunday' ? '⛪' : info.dayType === 'saturday' ? '🗓️' : '📚';
+  var name = info.dayType.charAt(0).toUpperCase() + info.dayType.slice(1);
+  var d = info.date;
+  var dateStr = d ? ' ' + (d.getMonth() + 1) + '/' + d.getDate() : '';
+  return icon + ' ' + name + dateStr;
+}
+
+function initManage() {
+  manageKey = ChoreEngine.getTodayKey();
+  renderManageSelect();
+  loadManage(manageKey);
+}
+
+function renderManageSelect() {
+  var sel = document.getElementById('manageDaySelect');
+  if (!sel) return;
+  var today = ChoreEngine.getTodayKey();
+  var keys = [today];
+  allDays.forEach(function (d) { if (keys.indexOf(d.key) === -1) keys.push(d.key); });
+  var current = manageKey || today;
+  if (keys.indexOf(current) === -1) keys.unshift(current);
+  sel.innerHTML = keys.map(function (k) {
+    var lbl = (k === today ? 'Today — ' : '') + prettyKey(k);
+    return '<option value="' + k + '"' + (k === current ? ' selected' : '') + '>' + lbl + '</option>';
+  }).join('');
+}
+
+function loadManage(key) {
+  manageKey = key;
+  setManageStatus('Loading…', '');
+  db.collection('chores').doc(key).get().then(function (snap) {
+    var data = snap.exists ? snap.data() : {};
+    workingAway = (data.away || []).slice();
+    if (data.assignments) {
+      working = JSON.parse(JSON.stringify(data.assignments));
+      // ensure every kid has an entry
+      KIDS.forEach(function (k) { if (!working[k.id]) working[k.id] = []; });
+    } else {
+      working = ChoreEngine.generateAllForKey(key);
+    }
+    renderManage();
+    setManageStatus(data.assignments ? 'Custom assignments saved for this day' : 'Showing auto-generated defaults', '');
+    renderManageSelect();
+  }).catch(function (e) {
+    setManageStatus('Load error: ' + e.message, '');
+  });
+}
+
+function setManageStatus(text, cls) {
+  var el = document.getElementById('manageStatus');
+  if (!el) return;
+  el.textContent = text;
+  el.className = cls || '';
+}
+
+function destroySortables() {
+  sortables.forEach(function (s) { try { s.destroy(); } catch (e) {} });
+  sortables = [];
+}
+
+function presentKids() {
+  return KIDS.filter(function (k) { return workingAway.indexOf(k.id) === -1; });
+}
+
+function renderManage() {
+  destroySortables();
+
+  // Away chips (all kids; away ones highlighted)
+  document.getElementById('awayRow').innerHTML = KIDS.map(function (k) {
+    var away = workingAway.indexOf(k.id) !== -1;
+    return '<div class="away-chip' + (away ? ' away' : '') + '" onclick="toggleAway(\'' + k.id + '\')">' +
+      (k.emoji || '') + ' ' + k.name + (away ? ' · 🏠 away' : '') + '</div>';
+  }).join('');
+
+  // Columns for present kids
+  var board = document.getElementById('manageBoard');
+  board.innerHTML = presentKids().map(function (k) {
+    var list = working[k.id] || [];
+    var cards = list.map(function (c, i) { return choreCardHtml(k.id, c, i); }).join('');
+    return '<div class="kid-col col-' + k.id + '">' +
+        '<div class="kid-col-head">' + (k.emoji || '') + ' ' + k.name +
+          '<span class="ct">' + list.length + '</span></div>' +
+        '<div class="card-list" id="col-' + k.id + '">' + cards + '</div>' +
+        '<button class="add-chore-btn" onclick="addChore(\'' + k.id + '\')">+ Add chore</button>' +
+      '</div>';
+  }).join('');
+
+  // Init drag-and-drop on each present column
+  presentKids().forEach(function (k) {
+    var el = document.getElementById('col-' + k.id);
+    if (!el) return;
+    sortables.push(new Sortable(el, {
+      group: 'chores',
+      animation: 150,
+      ghostClass: 'sortable-ghost',
+      chosenClass: 'sortable-chosen',
+      onEnd: function () { syncFromDOM(); markDirty(); }
+    }));
+  });
+}
+
+function choreCardHtml(kidId, c, i) {
+  var safeTod = (c.tod || 'morning');
+  return '<div class="chore-card" data-tod="' + escAttr(safeTod) + '" data-label="' + escAttr(c.label) + '" data-icon="' + escAttr(c.icon || '📝') + '">' +
+      '<span class="cc-icon" onclick="editChore(\'' + kidId + '\',' + i + ')">' + (c.icon || '📝') + '</span>' +
+      '<span class="cc-label" onclick="editChore(\'' + kidId + '\',' + i + ')">' + escHtml(c.label) + '</span>' +
+      '<span class="cc-tod ' + safeTod + '">' + safeTod.slice(0, 3) + '</span>' +
+      '<button class="cc-del" onclick="removeChore(\'' + kidId + '\',' + i + ')">✕</button>' +
+    '</div>';
+}
+
+function escHtml(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+function escAttr(s) { return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
+
+// Rebuild `working` from the current DOM (after a drag).
+function syncFromDOM() {
+  presentKids().forEach(function (k) {
+    var el = document.getElementById('col-' + k.id);
+    if (!el) return;
+    var cards = el.querySelectorAll('.chore-card');
+    var arr = [];
+    for (var i = 0; i < cards.length; i++) {
+      arr.push({
+        tod: cards[i].getAttribute('data-tod'),
+        label: cards[i].getAttribute('data-label'),
+        icon: cards[i].getAttribute('data-icon')
+      });
+    }
+    working[k.id] = arr;
+  });
+}
+
+function markDirty() { setManageStatus('Unsaved changes', 'dirty'); }
+
+function toggleAway(kidId) {
+  syncFromDOM();
+  var idx = workingAway.indexOf(kidId);
+  if (idx === -1) {
+    // Mark away: split this kid's chores round-robin among present kids.
+    var pool = KIDS.map(function (k) { return k.id; })
+      .filter(function (id) { return id !== kidId && workingAway.indexOf(id) === -1; });
+    var theirs = working[kidId] || [];
+    if (pool.length) {
+      theirs.forEach(function (c, i) { working[pool[i % pool.length]].push(c); });
+    }
+    working[kidId] = [];
+    workingAway.push(kidId);
+  } else {
+    // Bring back: regenerate this kid's defaults for the day.
+    workingAway.splice(idx, 1);
+    var info = ChoreEngine.parseKey(manageKey);
+    working[kidId] = ChoreEngine.generate(kidId, info.dayType, info.date);
+  }
+  renderManage();
+  markDirty();
+}
+
+function addChore(kidId) {
+  syncFromDOM();
+  var label = prompt('Chore name:');
+  if (!label) return;
+  var icon = prompt('Emoji icon (optional):', '📝') || '📝';
+  var tod = (prompt('When? morning / afternoon / evening', 'morning') || 'morning').toLowerCase().trim();
+  if (TOD_OPTS.indexOf(tod) === -1) tod = 'morning';
+  working[kidId].push({ tod: tod, label: label, icon: icon });
+  renderManage();
+  markDirty();
+}
+
+function editChore(kidId, i) {
+  syncFromDOM();
+  var c = working[kidId][i];
+  if (!c) return;
+  var label = prompt('Chore name:', c.label);
+  if (label === null) return;
+  if (!label) { return; }
+  var icon = prompt('Emoji icon:', c.icon || '📝') || c.icon || '📝';
+  c.label = label; c.icon = icon;
+  renderManage();
+  markDirty();
+}
+
+function removeChore(kidId, i) {
+  syncFromDOM();
+  working[kidId].splice(i, 1);
+  renderManage();
+  markDirty();
+}
+
+function saveManage() {
+  syncFromDOM();
+  var payload = { assignments: working, away: workingAway, updatedAt: Date.now() };
+  setManageStatus('Saving…', '');
+  db.collection('chores').doc(manageKey).set(payload, { merge: true }).then(function () {
+    setManageStatus('Saved ✓', 'saved');
+  }).catch(function (e) {
+    setManageStatus('Save error: ' + e.message, 'dirty');
+  });
+}
+
+function resetManage() {
+  if (!confirm('Clear custom assignments for ' + prettyKey(manageKey) + ' and go back to the auto-generated defaults?')) return;
+  var del = firebase.firestore.FieldValue.delete();
+  db.collection('chores').doc(manageKey).set({ assignments: del, away: del }, { merge: true }).then(function () {
+    loadManage(manageKey);
+    setManageStatus('Reset to defaults ✓', 'saved');
+  }).catch(function (e) {
+    setManageStatus('Reset error: ' + e.message, 'dirty');
+  });
 }
 </script>
 </body>
