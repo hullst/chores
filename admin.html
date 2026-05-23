@@ -287,6 +287,40 @@
   }
   .modal-actions { display:flex; gap:10px; margin-top:20px; }
   .small-note { font-size:0.74rem; color:#666; margin-top:6px; line-height:1.4; }
+
+  /* ---- QUICK ADD ---- */
+  .quick-add { display:flex; gap:8px; align-items:stretch; }
+  .quick-add input {
+    flex:1; min-width:0; padding:13px 14px; border-radius:12px; border:1px solid #2a2a3a;
+    background:#13131f; color:#eee; font-family:'Nunito',sans-serif; font-weight:700; font-size:1rem;
+  }
+  .qa-mic, .qa-go {
+    border:none; border-radius:12px; cursor:pointer; font-family:'Nunito',sans-serif; font-weight:800;
+    padding:0 16px; font-size:1rem; flex-shrink:0;
+  }
+  .qa-mic { background:#1e1e30; color:#ccc; font-size:1.3rem; min-width:52px; }
+  .qa-mic.listening { background:#3a1530; color:#ff6ba8; animation:pulse 1s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+  .qa-go { background:linear-gradient(135deg,#43e97b,#38a169); color:#06210f; }
+  .qa-msg { font-size:0.85rem; font-weight:800; margin-top:8px; min-height:1.2em; }
+  .qa-msg.ok { color:#43e97b; }
+  .qa-msg.err { color:#f7971e; }
+
+  /* ---- MOBILE ---- */
+  @media (max-width: 600px) {
+    body { padding:16px 12px; }
+    .page-header { margin-bottom:18px; }
+    .manage-board { flex-direction:column; overflow-x:visible; }
+    .kid-col { width:100%; min-width:0; }
+    .card-list { min-height:30px; }
+    .chore-card { padding:12px 12px; }
+    .chore-card .cc-del { font-size:1.4rem; padding:0 8px; }
+    .rule-row { padding:11px; }
+    .rule-row .rr-btn { font-size:1.2rem; padding:6px 8px; }
+    .dt-tab { flex:1; text-align:center; }
+    .stats-grid { grid-template-columns:1fr; }
+    .modal { padding:18px; }
+  }
 </style>
 </head>
 <body>
@@ -312,6 +346,17 @@
       <a href="#" onclick="signOut();return false;">Sign out</a>
     </div>
   </div>
+
+  <!-- QUICK ADD -->
+  <div class="section-title">⚡ Quick Add to Today</div>
+  <div class="quick-add">
+    <input type="text" id="quickAddInput" placeholder="e.g. Theodore take out trash"
+           autocomplete="off" autocapitalize="sentences"
+           onkeydown="if(event.key==='Enter')quickAddSubmit()">
+    <button class="qa-mic" id="qaMic" onclick="startVoice()" title="Speak" style="display:none">🎤</button>
+    <button class="qa-go" onclick="quickAddSubmit()">Add</button>
+  </div>
+  <div id="quickAddMsg" class="qa-msg"></div>
 
   <!-- MANAGE ASSIGNMENTS -->
   <div class="section-title">🗂️ Manage Assignments</div>
@@ -970,6 +1015,8 @@ function loadTemplates() {
       editConfig = ChoreEngine.getDefaultConfig();
       setTemplStatus('Using the built-in defaults', '');
     }
+    // Seed day generation (manage board + quick-add) from the saved templates.
+    ChoreEngine.setConfig(data);
     renderRules();
   }).catch(function (e) {
     editConfig = ChoreEngine.getDefaultConfig();
@@ -1230,6 +1277,7 @@ function saveTemplates() {
   editConfig.version = (editConfig.version || 1);
   setTemplStatus('Saving…', '');
   db.collection('chores').doc('templates').set(editConfig).then(function () {
+    ChoreEngine.setConfig(editConfig);
     setTemplStatus('Saved ✓ — all boards updated', 'saved');
   }).catch(function (e) {
     setTemplStatus('Save error: ' + e.message, 'dirty');
@@ -1244,6 +1292,132 @@ function resetTemplates() {
   }).catch(function (e) {
     setTemplStatus('Reset error: ' + e.message, 'dirty');
   });
+}
+
+// =============================================
+// QUICK ADD (text / voice) — adds a chore to TODAY
+// =============================================
+var QA_ICONS = [
+  [/trash|garbage|bin\b/, '🗑️'], [/recycl/, '♻️'], [/dishwasher|dishes|\bdish\b/, '🍽️'],
+  [/sink|plates|rinse/, '🫧'], [/vacuum|hoover/, '🧹'], [/wipe|counter|table|tineco/, '🧽'],
+  [/bathroom|toilet|shower/, '🚿'], [/laundry|fold|clothes/, '👕'], [/\bbed\b/, '🛏️'],
+  [/teeth|brush/, '🪥'], [/read|book/, '📖'], [/dog|sophie|\bpet\b|feed/, '🐾'],
+  [/snack/, '🍎'], [/lunch/, '🥪'], [/dinner|supper/, '🍽️'], [/breakfast/, '🥣'],
+  [/plant|water/, '🪴'], [/\broom\b|tidy|toys/, '🧸'], [/sweep|mop|floor/, '🧹'],
+  [/church|pray/, '⛪'], [/dress|get dressed/, '👕'], [/blanket/, '🛋️']
+];
+function iconFor(label) {
+  var l = label.toLowerCase();
+  for (var i = 0; i < QA_ICONS.length; i++) if (QA_ICONS[i][0].test(l)) return QA_ICONS[i][1];
+  return '📝';
+}
+function todFromTime() {
+  var h = new Date().getHours();
+  return h < 11 ? 'morning' : h < 16 ? 'afternoon' : 'evening';
+}
+function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+// Parse "Theodore take out trash" -> { kidIds, label, tod, icon }, or null.
+function parseQuickAdd(text) {
+  var raw = (text || '').trim();
+  if (!raw) return null;
+  var lower = raw.toLowerCase();
+
+  // assignees: any kid named, or "everyone"
+  var kidIds = [];
+  if (/\b(everyone|everybody|all kids|all of them|all)\b/.test(lower)) {
+    kidIds = ChoreEngine.KIDS.map(function (k) { return k.id; });
+  } else {
+    ChoreEngine.KIDS.forEach(function (k) {
+      var re = new RegExp('\\b(' + k.id + '|' + k.name.toLowerCase() + ')\\b');
+      if (re.test(lower)) kidIds.push(k.id);
+    });
+  }
+  if (!kidIds.length) return null;
+
+  // time of day
+  var tod = null;
+  if (/\b(morning|breakfast)\b/.test(lower)) tod = 'morning';
+  else if (/\b(afternoon|lunch|after school)\b/.test(lower)) tod = 'afternoon';
+  else if (/\b(evening|tonight|night|dinner|supper|bed ?time)\b/.test(lower)) tod = 'evening';
+
+  // strip names, "everyone", connectors, tod keywords -> the chore label
+  var label = raw;
+  ChoreEngine.KIDS.forEach(function (k) {
+    label = label.replace(new RegExp('\\b(' + k.id + '|' + k.name + ')\\b', 'ig'), ' ');
+  });
+  label = label
+    .replace(/\b(everyone|everybody|all kids|all of them|all|and|please|needs? to|should|to|the)\b/ig, ' ')
+    .replace(/\b(this )?(morning|afternoon|evening|tonight|night|today)\b/ig, ' ')
+    .replace(/[,&]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (!label) return null;
+
+  return { kidIds: kidIds, label: cap(label), tod: tod || todFromTime(), icon: iconForLabel(label) };
+}
+function iconForLabel(l) { return iconFor(l); }
+
+function qaMsg(text, cls) {
+  var el = document.getElementById('quickAddMsg');
+  if (!el) return;
+  el.textContent = text;
+  el.className = 'qa-msg' + (cls ? ' ' + cls : '');
+}
+
+function quickAddSubmit() {
+  var input = document.getElementById('quickAddInput');
+  var parsed = parseQuickAdd(input.value);
+  if (!parsed) {
+    qaMsg("Couldn't read that — try \"Theodore take out trash\".", 'err');
+    return;
+  }
+  var todayKey = ChoreEngine.getTodayKey();
+  qaMsg('Adding…', '');
+  var ref = db.collection('chores').doc(todayKey);
+  ref.get().then(function (snap) {
+    var data = snap.exists ? snap.data() : {};
+    var assignments = data.assignments ? JSON.parse(JSON.stringify(data.assignments)) : ChoreEngine.generateAllForKey(todayKey);
+    ChoreEngine.KIDS.forEach(function (k) { if (!assignments[k.id]) assignments[k.id] = []; });
+    parsed.kidIds.forEach(function (id) {
+      assignments[id].push({ tod: parsed.tod, label: parsed.label, icon: parsed.icon });
+    });
+    return ref.set({ assignments: assignments, updatedAt: Date.now() }, { merge: true });
+  }).then(function () {
+    var names = parsed.kidIds.map(function (id) { return ChoreEngine.kidById(id).name; }).join(', ');
+    qaMsg('✓ Added "' + parsed.icon + ' ' + parsed.label + '" (' + parsed.tod + ') to ' + names, 'ok');
+    input.value = '';
+    if (manageKey === todayKey) loadManage(todayKey);
+  }).catch(function (e) {
+    qaMsg('Error: ' + e.message, 'err');
+  });
+}
+
+// Voice input via the Web Speech API (best-effort; mic hidden if unsupported).
+var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+var recog = null;
+if (SR) {
+  var mic = document.getElementById('qaMic');
+  if (mic) mic.style.display = '';
+}
+function startVoice() {
+  if (!SR) return;
+  var mic = document.getElementById('qaMic');
+  if (recog) { recog.stop(); return; }
+  recog = new SR();
+  recog.lang = 'en-US';
+  recog.interimResults = false;
+  recog.maxAlternatives = 1;
+  if (mic) mic.classList.add('listening');
+  qaMsg('Listening… say e.g. "Alice feed the dog"', '');
+  recog.onresult = function (e) {
+    var t = e.results[0][0].transcript;
+    document.getElementById('quickAddInput').value = t;
+    quickAddSubmit();
+  };
+  recog.onerror = function (e) { qaMsg('Voice error: ' + e.error, 'err'); };
+  recog.onend = function () { if (mic) mic.classList.remove('listening'); recog = null; };
+  try { recog.start(); } catch (e) { recog = null; if (mic) mic.classList.remove('listening'); }
 }
 
 // close modal on overlay click
