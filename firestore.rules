@@ -1,0 +1,29 @@
+rules_version = '2';
+
+// Security rules for the Hull chore board.
+//
+// The app has no login (the admin PIN is only a UI gate, not real auth),
+// so writes can't be tied to a specific user. These rules therefore can't
+// stop someone who loads the app from editing chores — but they DO:
+//   * confine all access to the `chores` collection (day docs, `avatars`,
+//     `templates`) and deny everything else in the project, and
+//   * cap document size so the data can't be ballooned with junk.
+//
+// For real protection (so only a parent can write), add Firebase Auth
+// (e.g. Google sign-in) and change the writes below to
+// `allow write: if request.auth != null && request.auth.token.email in [...]`.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /chores/{doc} {
+      allow read: if true;
+      allow write: if request.resource == null              // allow deletes
+                   || request.resource.data.size() <= 60;   // sane field cap
+    }
+
+    // Everything outside the chore board is off-limits.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

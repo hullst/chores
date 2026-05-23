@@ -1,0 +1,14 @@
+{
+  "name": "Hull Family Chore Board",
+  "short_name": "Chores",
+  "description": "Daily chore board for the Hull kids",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f0f1a",
+  "theme_color": "#667eea",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

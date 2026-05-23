@@ -4,7 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Hull Chores">
+<meta name="theme-color" content="#667eea">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
 <title>Hull Family Chore Board</title>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -273,6 +278,8 @@ firebase.initializeApp({
   projectId: "hull-chores"
 });
 var db = firebase.firestore();
+// Keep working through brief wifi drops (kitchen tablet).
+try { db.enablePersistence({ synchronizeTabs: true }).catch(function(){}); } catch(e) {}
 
 // =============================================
 // KIDS & AVATARS  (roster comes from chore-engine.js)
@@ -689,6 +696,20 @@ function getChoresToday(kidId) {
   return ChoreEngine.generate(kidId);
 }
 
+// Kiosk mode: ?kid=alice focuses the board on one child (for handing
+// over a tablet). Falls back to the full board when absent/invalid.
+function getKidParam() {
+  try {
+    var p = new URLSearchParams(window.location.search).get('kid');
+    if (p) { p = p.toLowerCase(); if (KIDS.some(function(k){ return k.id === p; })) return p; }
+  } catch(e) {}
+  return null;
+}
+var KIOSK_KID = getKidParam();
+function visibleKids() {
+  return KIOSK_KID ? KIDS.filter(function(k){ return k.id === KIOSK_KID; }) : KIDS;
+}
+
 // =============================================
 // FIREBASE
 // =============================================
@@ -827,9 +848,12 @@ function render() {
   badge.textContent = dayName;
   badge.className = 'day-badge ' + dt;
 
-  // Jump links
-  document.getElementById('jumpLinks').innerHTML = KIDS.map(function(kid) {
-    return '<a class="jump-link jump-' + kid.id + '" href="#card-' + kid.id + '" title="' + kid.name + '">' +
+  // Jump links (in kiosk mode these switch which child is shown)
+  document.getElementById('jumpLinks').innerHTML =
+    (KIOSK_KID ? '<a class="jump-link" href="./" title="All kids" style="display:flex;align-items:center;justify-content:center;width:38px;height:38px;font-size:20px">🏠</a>' : '') +
+    KIDS.map(function(kid) {
+    var href = KIOSK_KID ? ('?kid=' + kid.id) : ('#card-' + kid.id);
+    return '<a class="jump-link jump-' + kid.id + '" href="' + href + '" title="' + kid.name + '">' +
       '<span id="jav-' + kid.id + '" style="display:flex;align-items:center;justify-content:center;width:38px;height:38px"></span>' +
     '</a>';
   }).join('');
@@ -838,12 +862,13 @@ function render() {
   }
 
   // Summary
+  var vKids = visibleKids();
   var totalDone = 0, totalAll = 0;
-  for (var ki = 0; ki < KIDS.length; ki++) {
-    var kc = getChoresToday(KIDS[ki].id);
+  for (var ki = 0; ki < vKids.length; ki++) {
+    var kc = getChoresToday(vKids[ki].id);
     totalAll += kc.length;
     for (var ci = 0; ci < kc.length; ci++) {
-      if (isChecked(KIDS[ki].id, kc[ci].tod, kc[ci].label)) totalDone++;
+      if (isChecked(vKids[ki].id, kc[ci].tod, kc[ci].label)) totalDone++;
     }
   }
   var pct = totalAll ? Math.round(totalDone/totalAll*100) : 0;
@@ -853,8 +878,8 @@ function render() {
 
   // Kid cards
   var gridHtml = '';
-  for (var k = 0; k < KIDS.length; k++) {
-    var kid    = KIDS[k];
+  for (var k = 0; k < vKids.length; k++) {
+    var kid    = vKids[k];
     var chores = getChoresToday(kid.id);
     var doneCt = 0;
     for (var c = 0; c < chores.length; c++) {
@@ -926,6 +951,20 @@ function resetAll() {
   render();
 }
 
+// Roll over to the new day automatically (for always-on displays left
+// open overnight) instead of getting stuck on yesterday's board.
+function startDayWatcher() {
+  setInterval(function() {
+    var k = getTodayKey();
+    if (k !== TODAY_KEY) {
+      TODAY_KEY = k;
+      resetCelebrationState();
+      subscribe();
+      render();
+    }
+  }, 60000);
+}
+
 // =============================================
 // BOOT
 // =============================================
@@ -933,6 +972,10 @@ loadAvatars();
 loadAvatarsRemote();
 subscribeTemplates();
 subscribe();
+startDayWatcher();
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); });
+}
 </script>
 </body>
 </html>
