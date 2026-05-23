@@ -698,6 +698,15 @@ var TODAY_KEY = getTodayKey();
 
 function docRef() { return db.collection('chores').doc(TODAY_KEY); }
 
+// Live-subscribe to the editable default templates. When the admin edits
+// the recurring chores, every board updates without a code change.
+function subscribeTemplates() {
+  db.collection('chores').doc('templates').onSnapshot(function(snap) {
+    ChoreEngine.setConfig(snap.exists ? snap.data() : null);
+    render();
+  }, function() {});
+}
+
 function subscribe() {
   if (unsub) unsub();
   setSyncStatus('syncing');
@@ -922,6 +931,7 @@ function resetAll() {
 // =============================================
 loadAvatars();
 loadAvatarsRemote();
+subscribeTemplates();
 subscribe();
 </script>
 </body>

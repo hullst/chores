@@ -212,6 +212,70 @@
     background:#1a1a2a; color:#aaa; font-family:'Nunito',sans-serif; font-weight:800; font-size:0.88rem;
   }
   .ghost-btn:hover { background:#24243a; color:#fff; }
+
+  /* ---- DEFAULTS EDITOR ---- */
+  .hint { font-size:0.82rem; color:#777; margin:-4px 0 14px; }
+  .dt-tabs { display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap; }
+  .dt-tab {
+    padding:9px 16px; border-radius:50px; border:1px solid #2a2a3a; cursor:pointer;
+    background:#1a1a2a; color:#aaa; font-family:'Nunito',sans-serif; font-weight:800; font-size:0.85rem;
+  }
+  .dt-tab.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+
+  .tod-group { margin-bottom:18px; }
+  .tod-group h4 {
+    font-family:'Fredoka One',cursive; font-size:0.95rem; color:#bbb; margin-bottom:8px;
+    display:flex; align-items:center; gap:6px;
+  }
+  .rule-row {
+    display:flex; align-items:center; gap:8px; padding:9px 11px; border-radius:10px;
+    background:#13131f; border:1px solid #232336; margin-bottom:7px;
+  }
+  .rule-main { flex:1; min-width:0; }
+  .rule-label { font-size:0.88rem; font-weight:700; color:#ddd; }
+  .rule-who { font-size:0.74rem; font-weight:700; color:#7a86b6; margin-top:2px; }
+  .rule-row .rr-btn {
+    border:none; background:transparent; color:#666; font-size:0.95rem; cursor:pointer; padding:2px 4px;
+  }
+  .rule-row .rr-btn:hover { color:#fff; }
+  .rule-row .rr-btn.del:hover { color:#f5576c; }
+  .rotate-tag {
+    display:inline-block; font-size:0.62rem; font-weight:800; text-transform:uppercase;
+    padding:1px 6px; border-radius:6px; background:#2a2440; color:#a98bff; margin-right:6px; vertical-align:middle;
+  }
+
+  /* ---- MODAL ---- */
+  .modal-overlay {
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6);
+    align-items:center; justify-content:center; z-index:1000; padding:16px;
+  }
+  .modal-overlay.open { display:flex; }
+  .modal {
+    background:var(--card); border-radius:var(--radius); padding:22px; width:100%; max-width:440px;
+    max-height:88vh; overflow-y:auto; box-shadow:0 10px 50px rgba(0,0,0,0.5);
+  }
+  .modal h3 { font-family:'Fredoka One',cursive; color:#fff; margin-bottom:16px; }
+  .modal label { display:block; font-size:0.78rem; font-weight:800; color:#9aa; margin:12px 0 5px; }
+  .modal input[type=text], .modal select {
+    width:100%; padding:9px 11px; border-radius:9px; border:1px solid #2a2a3a;
+    background:#13131f; color:#eee; font-family:'Nunito',sans-serif; font-weight:700; font-size:0.9rem;
+  }
+  .chk-row { display:flex; flex-wrap:wrap; gap:7px; }
+  .chk {
+    display:flex; align-items:center; gap:5px; padding:6px 11px; border-radius:50px;
+    background:#13131f; border:1px solid #2a2a3a; cursor:pointer; font-size:0.8rem; font-weight:700; color:#bbb; user-select:none;
+  }
+  .chk.on { background:#1e2a4a; border-color:var(--accent); color:#cdd; }
+  .icon-input { display:flex; gap:8px; align-items:center; }
+  .icon-input input { width:70px; text-align:center; font-size:1.2rem; }
+  .rot-chore { display:flex; gap:6px; align-items:center; margin-bottom:6px; }
+  .rot-chore input.lbl { flex:1; }
+  .rot-chore input.ico { width:56px; text-align:center; }
+  .rot-chore button, .add-row-btn {
+    border:none; background:#2a2a3a; color:#ccc; border-radius:8px; padding:7px 10px; cursor:pointer; font-weight:800;
+  }
+  .modal-actions { display:flex; gap:10px; margin-top:20px; }
+  .small-note { font-size:0.74rem; color:#666; margin-top:6px; line-height:1.4; }
 </style>
 </head>
 <body>
@@ -267,6 +331,21 @@
     <button class="ghost-btn" onclick="resetManage()">↺ Reset to defaults</button>
   </div>
 
+  <!-- EDIT RECURRING DEFAULTS -->
+  <div class="section-title">🔁 Edit Recurring Defaults</div>
+  <p class="hint">These templates auto-generate each day's chores. Editing them changes every future day (a day you've already customised above keeps its custom assignments). <span id="templStatus" style="font-weight:800"></span></p>
+  <div class="dt-tabs" id="dtTabs">
+    <button class="dt-tab active" data-dt="weekday"  onclick="selectDayType('weekday')">📚 Weekday</button>
+    <button class="dt-tab"        data-dt="saturday" onclick="selectDayType('saturday')">🗓️ Saturday</button>
+    <button class="dt-tab"        data-dt="sunday"   onclick="selectDayType('sunday')">⛪ Sunday</button>
+  </div>
+  <div id="rulesEditor"></div>
+  <div class="manage-actions">
+    <button class="save-btn" onclick="saveTemplates()">💾 Save defaults</button>
+    <button class="ghost-btn" onclick="loadTemplates()">⟲ Discard</button>
+    <button class="ghost-btn" onclick="resetTemplates()">↺ Restore originals</button>
+  </div>
+
   <div id="loadingMsg" class="loading-msg">Loading all-time data...</div>
   <div id="statsContent" style="display:none">
 
@@ -303,6 +382,18 @@
   </div>
 </div>
 
+<!-- RULE EDITOR MODAL -->
+<div class="modal-overlay" id="ruleModal">
+  <div class="modal">
+    <h3 id="ruleModalTitle">Edit chore</h3>
+    <div id="ruleFormBody"></div>
+    <div class="modal-actions">
+      <button class="save-btn" onclick="saveRule()">Save</button>
+      <button class="ghost-btn" onclick="closeRuleModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
@@ -332,6 +423,7 @@ function pinPress(d) {
         document.getElementById('admin-board').style.display = 'block';
         loadStats();
         initManage();
+        initTemplates();
       } else {
         var err = document.getElementById('pinError');
         err.style.visibility = 'visible';
@@ -374,7 +466,8 @@ function loadStats() {
     allDays = [];
     snap.forEach(function(doc) {
       var key = doc.id;
-      if (key === 'sunday_test') return; // skip test doc
+      if (!/^(weekday|saturday|sunday)_/.test(key)) return; // skip avatars, templates, etc.
+      if (/_test$/.test(key)) return; // skip ?day= preview docs
       var data = doc.data();
       var state = data.state || {};
       var info = ChoreEngine.parseKey(key);
@@ -833,6 +926,311 @@ function resetManage() {
     setManageStatus('Reset error: ' + e.message, 'dirty');
   });
 }
+
+// =============================================
+// EDIT RECURRING DEFAULTS (templates)
+// =============================================
+var editConfig = null;     // working copy of the templates config
+var curDayType = 'weekday';
+var ruleCtx = { index: null };  // index of rule being edited (null = new)
+var formRule = null;       // working copy while the modal is open
+var DOW_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+function cloneCfg(o) { return JSON.parse(JSON.stringify(o)); }
+
+function initTemplates() { loadTemplates(); }
+
+function loadTemplates() {
+  setTemplStatus('Loading…', '');
+  db.collection('chores').doc('templates').get().then(function (snap) {
+    var data = snap.exists ? snap.data() : null;
+    if (data && data.dayTypes && data.dayTypes.weekday && data.dayTypes.saturday && data.dayTypes.sunday) {
+      editConfig = cloneCfg(data);
+      setTemplStatus('Using your saved templates', '');
+    } else {
+      editConfig = ChoreEngine.getDefaultConfig();
+      setTemplStatus('Using the built-in defaults', '');
+    }
+    renderRules();
+  }).catch(function (e) {
+    editConfig = ChoreEngine.getDefaultConfig();
+    setTemplStatus('Load error (' + e.message + ') — showing built-in defaults', 'dirty');
+    renderRules();
+  });
+}
+
+function setTemplStatus(text, cls) {
+  var el = document.getElementById('templStatus');
+  if (!el) return;
+  el.textContent = text;
+  el.className = cls === 'dirty' ? 'dirty' : (cls === 'saved' ? 'saved' : '');
+  el.style.color = cls === 'dirty' ? '#f7971e' : cls === 'saved' ? '#43e97b' : '#888';
+}
+function markTemplDirty() { setTemplStatus('Unsaved changes', 'dirty'); }
+
+function selectDayType(dt) {
+  curDayType = dt;
+  var tabs = document.querySelectorAll('#dtTabs .dt-tab');
+  for (var i = 0; i < tabs.length; i++) {
+    tabs[i].classList.toggle('active', tabs[i].getAttribute('data-dt') === dt);
+  }
+  renderRules();
+}
+
+function whoLabel(who) {
+  if (who === 'all') return 'Everyone';
+  if (who === 'big') return 'Big kids';
+  if (who === 'small') return 'Little kids';
+  if (Array.isArray(who)) {
+    return who.map(function (id) { var k = ChoreEngine.kidById(id); return k ? k.name : id; }).join(', ');
+  }
+  return '';
+}
+
+function ruleSummary(r) {
+  if (r.type === 'rotateOne') {
+    return '<span class="rotate-tag">rotates</span>' + (r.icon || '') + ' ' + escHtml(r.label) +
+      '<div class="rule-who">one of: ' + escHtml(whoLabel(r.pool)) + '</div>';
+  }
+  if (r.type === 'rotateEach') {
+    var labels = (r.chores || []).map(function (c) { return c.icon + ' ' + c.label; }).join(' · ');
+    return '<span class="rotate-tag">rotates each</span>' + escHtml(labels) +
+      '<div class="rule-who">among: ' + escHtml(whoLabel(r.pool)) + '</div>';
+  }
+  var dowStr = (r.dow && r.dow.length) ? ' · ' + r.dow.map(function (d) { return DOW_NAMES[d]; }).join('/') : '';
+  return (r.icon || '') + ' ' + escHtml(r.label) +
+    '<div class="rule-who">' + escHtml(whoLabel(r.who)) + dowStr + '</div>';
+}
+
+function renderRules() {
+  if (!editConfig) return;
+  var rules = editConfig.dayTypes[curDayType].rules;
+  var html = '';
+  ChoreEngine.TOD_ORDER.forEach(function (tod) {
+    html += '<div class="tod-group"><h4>' + ChoreEngine.TOD_LABELS[tod] + '</h4>';
+    rules.forEach(function (r, i) {
+      if (r.tod !== tod) return;
+      html += '<div class="rule-row">' +
+        '<div class="rule-main">' + ruleSummary(r) + '</div>' +
+        '<button class="rr-btn" onclick="editRule(' + i + ')">✏️</button>' +
+        '<button class="rr-btn del" onclick="deleteRule(' + i + ')">🗑️</button>' +
+      '</div>';
+    });
+    html += '<button class="add-chore-btn" style="width:100%" onclick="addRule(\'' + tod + '\')">+ Add chore to ' + tod + '</button>';
+    html += '</div>';
+  });
+  document.getElementById('rulesEditor').innerHTML = html;
+}
+
+function addRule(tod) {
+  openRuleModal({ type: 'fixed', tod: tod, who: 'all', label: '', icon: '📝' }, null);
+}
+function editRule(i) {
+  openRuleModal(editConfig.dayTypes[curDayType].rules[i], i);
+}
+function deleteRule(i) {
+  var r = editConfig.dayTypes[curDayType].rules[i];
+  if (!confirm('Delete this chore from ' + curDayType + ' defaults?')) return;
+  editConfig.dayTypes[curDayType].rules.splice(i, 1);
+  renderRules();
+  markTemplDirty();
+}
+
+// ---- modal ----
+function openRuleModal(rule, index) {
+  ruleCtx.index = index;
+  formRule = normalizeToForm(rule);
+  document.getElementById('ruleModalTitle').textContent = index === null ? 'Add chore' : 'Edit chore';
+  renderRuleForm();
+  document.getElementById('ruleModal').classList.add('open');
+}
+function closeRuleModal() {
+  document.getElementById('ruleModal').classList.remove('open');
+  formRule = null;
+}
+
+function normalizeToForm(rule) {
+  var f = {
+    type: rule.type || 'fixed', tod: rule.tod || 'morning',
+    label: rule.label || '', icon: rule.icon || '📝',
+    dow: (rule.dow || []).slice(), pool: (rule.pool || []).slice(),
+    chores: rule.chores ? cloneCfg(rule.chores) : [], whoMode: 'all', whoKids: []
+  };
+  if (f.type === 'fixed') {
+    var who = rule.who || 'all';
+    if (Array.isArray(who)) { f.whoMode = 'specific'; f.whoKids = who.slice(); }
+    else f.whoMode = who;
+  }
+  if (f.type === 'rotateEach' && !f.chores.length) f.chores = [{ label: '', icon: '📝' }];
+  if ((f.type === 'rotateOne' || f.type === 'rotateEach') && !f.pool.length) {
+    f.pool = ChoreEngine.BIG_KIDS.slice();
+  }
+  return f;
+}
+
+function kidChips(selected, handler) {
+  return '<div class="chk-row">' + ChoreEngine.KIDS.map(function (k) {
+    var on = selected.indexOf(k.id) !== -1;
+    return '<div class="chk' + (on ? ' on' : '') + '" onclick="' + handler + '(\'' + k.id + '\')">' +
+      (k.emoji || '') + ' ' + k.name + '</div>';
+  }).join('') + '</div>';
+}
+
+function renderRuleForm() {
+  var f = formRule;
+  var h = '';
+  h += '<label>Type</label>' +
+    '<select id="rfType" onchange="onRuleTypeChange()">' +
+      opt('fixed', 'Same chore for chosen kids', f.type) +
+      opt('rotateOne', 'Rotates — one kid does it each day', f.type) +
+      opt('rotateEach', 'Rotates — each kid gets a different one', f.type) +
+    '</select>';
+
+  h += '<label>Time of day</label>' +
+    '<select id="rfTod">' +
+      opt('morning', 'Morning', f.tod) + opt('afternoon', 'Afternoon', f.tod) + opt('evening', 'Evening', f.tod) +
+    '</select>';
+
+  if (f.type === 'fixed') {
+    h += labelIconFields(f);
+    h += '<label>Who does it?</label>' +
+      '<select id="rfWhoMode" onchange="onWhoModeChange()">' +
+        opt('all', 'Everyone', f.whoMode) + opt('big', 'Big kids', f.whoMode) +
+        opt('small', 'Little kids', f.whoMode) + opt('specific', 'Specific kids…', f.whoMode) +
+      '</select>';
+    if (f.whoMode === 'specific') h += '<div style="margin-top:8px">' + kidChips(f.whoKids, 'toggleWhoKid') + '</div>';
+    if (curDayType === 'weekday') {
+      h += '<label>Only on certain weekdays? <span style="color:#666;font-weight:600">(leave empty = every weekday)</span></label>';
+      h += '<div class="chk-row">' + [1, 2, 3, 4, 5].map(function (d) {
+        var on = f.dow.indexOf(d) !== -1;
+        return '<div class="chk' + (on ? ' on' : '') + '" onclick="toggleDow(' + d + ')">' + DOW_NAMES[d] + '</div>';
+      }).join('') + '</div>';
+    }
+  } else if (f.type === 'rotateOne') {
+    h += labelIconFields(f);
+    h += '<label>Rotate among which kids?</label>' + kidChips(f.pool, 'togglePool');
+    h += '<div class="small-note">Each day, one kid from this list does the chore; it cycles to the next kid the following day.</div>';
+  } else { // rotateEach
+    h += '<label>Rotate among which kids?</label>' + kidChips(f.pool, 'togglePool');
+    h += '<label>Chores in the rotation</label><div id="rotChores">' + rotChoresHtml(f.chores) + '</div>';
+    h += '<button class="add-row-btn" onclick="addRotChore()">+ Add to rotation</button>';
+    h += '<div class="small-note">Each kid gets a different chore from this list, shifting by one each day.</div>';
+  }
+  document.getElementById('ruleFormBody').innerHTML = h;
+}
+
+function opt(val, label, cur) { return '<option value="' + val + '"' + (val === cur ? ' selected' : '') + '>' + label + '</option>'; }
+function labelIconFields(f) {
+  return '<label>Chore name</label><input type="text" id="rfLabel" value="' + escAttr(f.label) + '" placeholder="e.g. Feed the dog">' +
+    '<label>Icon</label><div class="icon-input"><input type="text" id="rfIcon" value="' + escAttr(f.icon) + '"><span style="color:#666;font-size:0.78rem">an emoji</span></div>';
+}
+function rotChoresHtml(chores) {
+  return chores.map(function (c, i) {
+    return '<div class="rot-chore">' +
+      '<input class="lbl" type="text" data-ri="' + i + '" value="' + escAttr(c.label) + '" placeholder="chore name">' +
+      '<input class="ico" type="text" data-ri="' + i + '" value="' + escAttr(c.icon) + '">' +
+      '<button onclick="removeRotChore(' + i + ')">✕</button>' +
+    '</div>';
+  }).join('');
+}
+
+function syncForm() {
+  if (!formRule) return;
+  var g = function (id) { return document.getElementById(id); };
+  if (g('rfType')) formRule.type = g('rfType').value;
+  if (g('rfTod')) formRule.tod = g('rfTod').value;
+  if (g('rfLabel')) formRule.label = g('rfLabel').value;
+  if (g('rfIcon')) formRule.icon = g('rfIcon').value;
+  if (g('rfWhoMode')) formRule.whoMode = g('rfWhoMode').value;
+  var lbls = document.querySelectorAll('#rotChores .lbl');
+  var icos = document.querySelectorAll('#rotChores .ico');
+  for (var i = 0; i < lbls.length; i++) {
+    var ri = +lbls[i].getAttribute('data-ri');
+    if (formRule.chores[ri]) formRule.chores[ri].label = lbls[i].value;
+  }
+  for (var j = 0; j < icos.length; j++) {
+    var rj = +icos[j].getAttribute('data-ri');
+    if (formRule.chores[rj]) formRule.chores[rj].icon = icos[j].value;
+  }
+}
+
+function onRuleTypeChange() {
+  syncForm();
+  formRule = normalizeToForm(denormalizeFromForm(formRule, true));
+  renderRuleForm();
+}
+function onWhoModeChange() { syncForm(); renderRuleForm(); }
+function toggleWhoKid(id) { syncForm(); toggleIn(formRule.whoKids, id); renderRuleForm(); }
+function togglePool(id) { syncForm(); toggleIn(formRule.pool, id); renderRuleForm(); }
+function toggleDow(d) { syncForm(); toggleIn(formRule.dow, d); renderRuleForm(); }
+function toggleIn(arr, v) { var i = arr.indexOf(v); if (i === -1) arr.push(v); else arr.splice(i, 1); }
+function addRotChore() { syncForm(); formRule.chores.push({ label: '', icon: '📝' }); renderRuleForm(); }
+function removeRotChore(i) { syncForm(); formRule.chores.splice(i, 1); if (!formRule.chores.length) formRule.chores.push({ label: '', icon: '📝' }); renderRuleForm(); }
+
+// Build a real rule object from the working form. If `lenient`, skip validation (used on type switch).
+function denormalizeFromForm(f, lenient) {
+  if (f.type === 'rotateOne') {
+    return { type: 'rotateOne', tod: f.tod, pool: f.pool.slice(), label: f.label, icon: f.icon || '📝' };
+  }
+  if (f.type === 'rotateEach') {
+    var chores = f.chores.map(function (c) { return { label: c.label, icon: c.icon || '📝' }; });
+    return { type: 'rotateEach', tod: f.tod, pool: f.pool.slice(), chores: chores };
+  }
+  var who = f.whoMode === 'specific' ? f.whoKids.slice() : f.whoMode;
+  var rule = { type: 'fixed', tod: f.tod, who: who, label: f.label, icon: f.icon || '📝' };
+  if (f.dow && f.dow.length) rule.dow = f.dow.slice();
+  return rule;
+}
+
+function saveRule() {
+  syncForm();
+  var f = formRule;
+  // validation
+  if (f.type === 'fixed' || f.type === 'rotateOne') {
+    if (!f.label.trim()) { alert('Please enter a chore name.'); return; }
+  }
+  if (f.type === 'fixed' && f.whoMode === 'specific' && !f.whoKids.length) { alert('Pick at least one child.'); return; }
+  if (f.type === 'rotateOne' && !f.pool.length) { alert('Pick at least one child to rotate among.'); return; }
+  if (f.type === 'rotateEach') {
+    if (!f.pool.length) { alert('Pick at least one child to rotate among.'); return; }
+    var valid = f.chores.filter(function (c) { return c.label.trim(); });
+    if (!valid.length) { alert('Add at least one chore to the rotation.'); return; }
+    f.chores = valid;
+  }
+  var rule = denormalizeFromForm(f);
+  var rules = editConfig.dayTypes[curDayType].rules;
+  if (ruleCtx.index === null) rules.push(rule);
+  else rules[ruleCtx.index] = rule;
+  closeRuleModal();
+  renderRules();
+  markTemplDirty();
+}
+
+function saveTemplates() {
+  if (!editConfig) return;
+  editConfig.version = (editConfig.version || 1);
+  setTemplStatus('Saving…', '');
+  db.collection('chores').doc('templates').set(editConfig).then(function () {
+    setTemplStatus('Saved ✓ — all boards updated', 'saved');
+  }).catch(function (e) {
+    setTemplStatus('Save error: ' + e.message, 'dirty');
+  });
+}
+
+function resetTemplates() {
+  if (!confirm('Restore the original built-in chore templates? This discards your saved custom defaults.')) return;
+  db.collection('chores').doc('templates').delete().then(function () {
+    loadTemplates();
+    setTemplStatus('Restored built-in defaults ✓', 'saved');
+  }).catch(function (e) {
+    setTemplStatus('Reset error: ' + e.message, 'dirty');
+  });
+}
+
+// close modal on overlay click
+document.getElementById('ruleModal').addEventListener('click', function (e) {
+  if (e.target === this) closeRuleModal();
+});
 </script>
 </body>
 </html>
