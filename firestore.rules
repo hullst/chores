@@ -2,26 +2,50 @@ rules_version = '2';
 
 // Security rules for the Hull chore board.
 //
-// The app has no login (the admin PIN is only a UI gate, not real auth),
-// so writes can't be tied to a specific user. These rules therefore can't
-// stop someone who loads the app from editing chores — but they DO:
-//   * confine all access to the `chores` collection (day docs, `avatars`,
-//     `templates`) and deny everything else in the project, and
-//   * cap document size so the data can't be ballooned with junk.
+// Model: the kids' board needs no login (read everything; tick chores;
+// pick avatars). Only the two parent Google accounts may reassign chores,
+// edit the recurring defaults, or delete days.
 //
-// For real protection (so only a parent can write), add Firebase Auth
-// (e.g. Google sign-in) and change the writes below to
-// `allow write: if request.auth != null && request.auth.token.email in [...]`.
+// The ALLOWED list must match ALLOWED_PARENTS in admin.html. To add/remove
+// a parent, edit both places. Enable Google sign-in in the Firebase console
+// (Authentication > Sign-in method) for this to work.
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    match /chores/{doc} {
-      allow read: if true;
-      allow write: if request.resource == null              // allow deletes
-                   || request.resource.data.size() <= 60;   // sane field cap
+    function isParent() {
+      return request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email.lower() in [
+             'hullst89@gmail.com',
+             'kerilynhull@gmail.com'
+           ];
     }
 
-    // Everything outside the chore board is off-limits.
+    // A board "tick" only changes a kid's completion state, nothing else.
+    function choreTickOnly() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['state', 'updatedAt']);
+    }
+
+    // Avatar picking is a kid action on the board — stays open.
+    match /chores/avatars {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Day docs + the `templates` doc.
+    match /chores/{doc} {
+      allow read: if true;
+      // New day doc: a kid's first tick creates it with only state/updatedAt.
+      allow create: if isParent()
+                    || request.resource.data.keys().hasOnly(['state', 'updatedAt']);
+      // Updates: kids may tick chores; parents may change anything
+      // (assignments, away, templates...).
+      allow update: if isParent() || choreTickOnly();
+      // Only parents may delete (admin "reset day" / "restore defaults").
+      allow delete: if isParent();
+    }
+
+    // Nothing else in the project is reachable.
     match /{document=**} {
       allow read, write: if false;
     }

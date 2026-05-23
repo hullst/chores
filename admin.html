@@ -36,8 +36,15 @@
   .pin-btn:hover  { background: #2a2a40; }
   .pin-btn:active { transform: scale(0.94); background: var(--accent); }
   .pin-btn.clear  { background: #2a1a1a; color: #f5576c; }
-  .pin-error { color: #f5576c; font-weight: 700; font-size: 0.9rem; animation: shake 0.3s ease; }
+  .pin-error { color: #f5576c; font-weight: 700; font-size: 0.9rem; animation: shake 0.3s ease; max-width: 320px; text-align: center; }
   @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+  .signin-btn {
+    display: inline-flex; align-items: center; gap: 10px; padding: 14px 26px;
+    border-radius: 50px; border: none; cursor: pointer; margin-top: 8px;
+    background: #fff; color: #222; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 1rem;
+  }
+  .signin-btn:hover { opacity: 0.9; }
+  .signin-btn:disabled { opacity: 0.5; cursor: default; }
 
   /* ---- ADMIN BOARD ---- */
   #admin-board { display: none; }
@@ -284,38 +291,26 @@
 </head>
 <body>
 
-<!-- PIN SCREEN -->
+<!-- LOGIN SCREEN -->
 <div id="pin-screen">
   <h1>🔐 Admin Access</h1>
-  <p>Enter your PIN to continue</p>
-  <div class="pin-dots" id="pinDots">
-    <div class="pin-dot" id="dot0"></div>
-    <div class="pin-dot" id="dot1"></div>
-    <div class="pin-dot" id="dot2"></div>
-    <div class="pin-dot" id="dot3"></div>
-  </div>
-  <div id="pinError" class="pin-error" style="visibility:hidden">Wrong PIN, try again</div>
-  <div class="pin-pad">
-    <button class="pin-btn" onclick="pinPress('1')">1</button>
-    <button class="pin-btn" onclick="pinPress('2')">2</button>
-    <button class="pin-btn" onclick="pinPress('3')">3</button>
-    <button class="pin-btn" onclick="pinPress('4')">4</button>
-    <button class="pin-btn" onclick="pinPress('5')">5</button>
-    <button class="pin-btn" onclick="pinPress('6')">6</button>
-    <button class="pin-btn" onclick="pinPress('7')">7</button>
-    <button class="pin-btn" onclick="pinPress('8')">8</button>
-    <button class="pin-btn" onclick="pinPress('9')">9</button>
-    <button class="pin-btn clear" onclick="pinClear()">⌫</button>
-    <button class="pin-btn" onclick="pinPress('0')">0</button>
-    <button class="pin-btn clear" onclick="pinReset()">✕</button>
-  </div>
+  <p>Sign in with a parent Google account to manage chores.</p>
+  <button class="signin-btn" id="signinBtn" onclick="signInGoogle()">
+    <span style="font-size:1.2rem">🔑</span> Sign in with Google
+  </button>
+  <div id="authError" class="pin-error" style="display:none"></div>
+  <a href="#" onclick="signOut();return false;" style="color:#666;font-size:0.8rem;font-weight:700;margin-top:6px">Sign out</a>
 </div>
 
 <!-- ADMIN BOARD -->
 <div id="admin-board">
   <div class="page-header">
     <h1>📊 Hull Chores Admin</h1>
-    <a href="index.html">← Back to Board</a>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <span id="whoami" style="font-size:0.8rem;color:#777;font-weight:700"></span>
+      <a href="index.html">← Board</a>
+      <a href="#" onclick="signOut();return false;">Sign out</a>
+    </div>
   </div>
 
   <!-- MANAGE ASSIGNMENTS -->
@@ -400,6 +395,7 @@
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 <script src="chore-engine.js"></script>
 <script>
@@ -415,44 +411,59 @@ if ('serviceWorker' in navigator) {
 }
 
 // =============================================
-// PIN
+// AUTH (parent Google sign-in)
 // =============================================
-var CORRECT_PIN = '5718';
-var pinEntry = '';
+// Only these accounts may manage chores. Must match firestore.rules.
+var ALLOWED_PARENTS = ['hullst89@gmail.com', 'kerilynhull@gmail.com'];
+var auth = firebase.auth();
+var adminBooted = false;
 
-function pinPress(d) {
-  if (pinEntry.length >= 4) return;
-  pinEntry += d;
-  updatePinDots();
-  if (pinEntry.length === 4) {
-    setTimeout(function() {
-      if (pinEntry === CORRECT_PIN) {
-        document.getElementById('pin-screen').style.display = 'none';
-        document.getElementById('admin-board').style.display = 'block';
-        loadStats();
-        initManage();
-        initTemplates();
-      } else {
-        var err = document.getElementById('pinError');
-        err.style.visibility = 'visible';
-        err.style.animation = 'none';
-        setTimeout(function(){ err.style.animation = 'shake 0.3s ease'; }, 10);
-        pinEntry = '';
-        updatePinDots();
-      }
-    }, 150);
-  }
+function signInGoogle() {
+  showAuthError('');
+  var btn = document.getElementById('signinBtn');
+  if (btn) btn.disabled = true;
+  var provider = new firebase.auth.GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: 'select_account' });
+  auth.signInWithPopup(provider).catch(function (e) {
+    if (btn) btn.disabled = false;
+    if (e.code !== 'auth/popup-closed-by-user' && e.code !== 'auth/cancelled-popup-request') {
+      showAuthError('Sign-in failed: ' + e.message);
+    }
+  });
 }
 
-function pinClear() { pinEntry = pinEntry.slice(0,-1); updatePinDots(); }
-function pinReset() { pinEntry = ''; updatePinDots(); }
+function signOut() { auth.signOut(); }
 
-function updatePinDots() {
-  document.getElementById('pinError').style.visibility = 'hidden';
-  for (var i = 0; i < 4; i++) {
-    document.getElementById('dot'+i).classList.toggle('filled', i < pinEntry.length);
-  }
+function showAuthError(msg) {
+  var el = document.getElementById('authError');
+  if (!el) return;
+  el.style.display = msg ? 'block' : 'none';
+  el.textContent = msg;
 }
+
+auth.onAuthStateChanged(function (user) {
+  var btn = document.getElementById('signinBtn');
+  if (btn) btn.disabled = false;
+  var ok = user && user.email && ALLOWED_PARENTS.indexOf(user.email.toLowerCase()) !== -1;
+  if (ok) {
+    document.getElementById('pin-screen').style.display = 'none';
+    document.getElementById('admin-board').style.display = 'block';
+    document.getElementById('whoami').textContent = '👤 ' + user.email;
+    if (!adminBooted) {
+      adminBooted = true;
+      loadStats();
+      initManage();
+      initTemplates();
+    }
+  } else {
+    document.getElementById('admin-board').style.display = 'none';
+    document.getElementById('pin-screen').style.display = 'flex';
+    if (user) {
+      // Signed in, but not an allowed parent.
+      showAuthError(user.email + ' is not authorised. Sign out and use a parent account.');
+    }
+  }
+});
 
 // =============================================
 // KIDS  (roster comes from chore-engine.js)
