@@ -40,6 +40,14 @@ Potential value-adds, grouped by theme. Effort is a rough guess (S/M/L).
 - **Tighten security further** (M) — parent auth is in place; could add App
   Check to block drive-by bots, or per-field validation in the Firestore rules.
 
+## Deferred — needs Stephen (plist/launchd/backup/secrets/deploy automation)
+- **CI to validate `firestore.rules` on PR** (S) — a GitHub Actions workflow that
+  lint/compiles the rules before merge. Deferred: adds a CI workflow to the deploy
+  path; Stephen should decide whether to introduce Actions to this repo.
+- **Single source for the parent allowlist** (S–M) — generate `ALLOWED_PARENTS`
+  (admin.html) and the `isParent()` list (firestore.rules) from one config to stop
+  them drifting. Deferred: touches the auth/security boundary and the deploy flow.
+
 ## Suggested next 2–3
 1. **Points + visible streaks** — biggest behavioral payoff, builds on what's
    already there.

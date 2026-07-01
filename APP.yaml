@@ -41,13 +41,15 @@ secrets:
   - Firebase web config is public by design; access is enforced by firestore.rules
 
 docs_present:
+  - README.md
+  - ARCHITECTURE.md
   - CHANGELOG.md
   - ROADMAP.md
 docs_missing: []
 
 distribution: local+github
 git_remote: https://github.com/hullst/chores.git
-deploy: Firestore backend (rules in firestore.rules); static hosting target not committed to the repo — CONFIRM where it deploys (Firebase Hosting / Cloudflare Pages?)
+deploy: Static files served from GitHub Pages on the `main` branch at https://hullst.github.io/chores/ (push to main to publish; no CI). Backend is Cloud Firestore (rules in firestore.rules, published via the Firebase console). Cloudflare Pages migration is a roadmap item, not yet done.
 tags:
   - pwa
   - family
@@ -56,4 +58,4 @@ tags:
 
 notable: >
   Backend is Firestore, not the fleet's usual JSON-on-disk — the one app in the
-  fleet with a hosted database. Confirm/record the hosting target in deploy.
+  fleet with a hosted database. Hosted on GitHub Pages (see deploy).
