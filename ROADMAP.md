@@ -41,12 +41,16 @@ Potential value-adds, grouped by theme. Effort is a rough guess (S/M/L).
   Check to block drive-by bots, or per-field validation in the Firestore rules.
 
 ## Deferred — needs Stephen (plist/launchd/backup/secrets/deploy automation)
-- **CI to validate `firestore.rules` on PR** (S) — a GitHub Actions workflow that
-  lint/compiles the rules before merge. Deferred: adds a CI workflow to the deploy
-  path; Stephen should decide whether to introduce Actions to this repo.
-- **Single source for the parent allowlist** (S–M) — generate `ALLOWED_PARENTS`
-  (admin.html) and the `isParent()` list (firestore.rules) from one config to stop
-  them drifting. Deferred: touches the auth/security boundary and the deploy flow.
+- **CI to validate `firestore.rules` on PR** (S) — ✅ DONE (2026-07-06).
+  `.github/workflows/firestore-rules-ci.yml` runs `scripts/lint-firestore-rules.js`
+  (auth-free syntax/structure lint — no emulator, no `firebase login`) and
+  `scripts/check-allowlist-sync.js` on every PR/push touching the rules,
+  allowlist, admin, or scripts.
+- **Single source for the parent allowlist** (S–M) — ✅ DONE (2026-07-06).
+  `allowlist.json` is now the single source of truth; `admin.html` fetches it
+  at runtime and `scripts/sync-allowlist.js` regenerates the marker-delimited
+  block in `firestore.rules` (which still needs its own copy since rules have
+  no network access). `scripts/check-allowlist-sync.js` fails CI if they drift.
 
 ## Suggested next 2–3
 1. **Points + visible streaks** — biggest behavioral payoff, builds on what's

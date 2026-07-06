@@ -1,5 +1,38 @@
 # Changelog
 
+## 2026-07-06
+
+Closed out the two "Deferred — needs Stephen" roadmap items: CI validation for
+`firestore.rules` and a single source of truth for the parent allowlist.
+
+### Added
+- **allowlist.json** — single source of truth for parent-admin emails,
+  replacing the old two-place hand-sync (`ALLOWED_PARENTS` in `admin.html`
+  and the `isParent()` list in `firestore.rules`). `admin.html` fetches it at
+  runtime.
+- **scripts/sync-allowlist.js** — regenerates the marker-delimited allowlist
+  block in `firestore.rules` from `allowlist.json` (Firestore rules can't
+  fetch external config at eval time, so the rules file still carries its
+  own copy).
+- **scripts/check-allowlist-sync.js** — fails non-zero if `firestore.rules`
+  has drifted from `allowlist.json`; run in CI on every PR.
+- **scripts/lint-firestore-rules.js** — lightweight, auth-free syntax/
+  structure lint for `firestore.rules` (balanced delimiters, required
+  structural pieces present). No emulator, no `firebase login` — see the
+  script's header comment for why a full rules-engine check was ruled out.
+- **.github/workflows/firestore-rules-ci.yml** — runs the lint and the
+  allowlist sync-check on every PR and push touching `firestore.rules`,
+  `allowlist.json`, `admin.html`, or `scripts/**`.
+
+### Changed
+- **README.md** — parent-allowlist section rewritten to document the new
+  single-source workflow (edit `allowlist.json` → `node
+  scripts/sync-allowlist.js` → redeploy rules) instead of the old two-place
+  manual sync.
+- **firestore.rules** — the `isParent()` email list is now a
+  `ALLOWLIST:START`/`ALLOWLIST:END` marker block generated from
+  `allowlist.json`; do not hand-edit it.
+
 ## 2026-05-23
 
 Moved the chore board from hand-edited HTML to a data-driven app with a real

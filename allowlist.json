@@ -1,0 +1,7 @@
+{
+  "_comment": "Single source of truth for parent-admin emails. admin.html fetches this at runtime. firestore.rules cannot fetch it (Firestore rules have no network access at eval time), so its copy is regenerated from this file by scripts/sync-allowlist.js — run that script after editing this list, then redeploy rules. scripts/check-allowlist-sync.js (run in CI) fails the build if firestore.rules drifts from this file.",
+  "parents": [
+    "hullst89@gmail.com",
+    "kerilynhull@gmail.com"
+  ]
+}

@@ -457,8 +457,19 @@ if ('serviceWorker' in navigator) {
 // =============================================
 // AUTH (parent Google sign-in)
 // =============================================
-// Only these accounts may manage chores. Must match firestore.rules.
-var ALLOWED_PARENTS = ['hullst89@gmail.com', 'kerilynhull@gmail.com'];
+// Only these accounts may manage chores. The list itself lives in
+// allowlist.json — the single source of truth shared with firestore.rules
+// (see that file for how the two stay in sync). Loaded at runtime here
+// since this is a static, no-build app and can't literally import it.
+var ALLOWED_PARENTS = [];
+var allowlistReady = fetch('allowlist.json')
+  .then(function (r) { return r.json(); })
+  .then(function (data) {
+    ALLOWED_PARENTS = (data.parents || []).map(function (e) { return e.toLowerCase(); });
+  })
+  .catch(function (err) {
+    console.error('Failed to load allowlist.json — no one will be able to sign in as admin.', err);
+  });
 var auth = firebase.auth();
 var adminBooted = false;
 
@@ -488,25 +499,30 @@ function showAuthError(msg) {
 auth.onAuthStateChanged(function (user) {
   var btn = document.getElementById('signinBtn');
   if (btn) btn.disabled = false;
-  var ok = user && user.email && ALLOWED_PARENTS.indexOf(user.email.toLowerCase()) !== -1;
-  if (ok) {
-    document.getElementById('pin-screen').style.display = 'none';
-    document.getElementById('admin-board').style.display = 'block';
-    document.getElementById('whoami').textContent = '👤 ' + user.email;
-    if (!adminBooted) {
-      adminBooted = true;
-      loadStats();
-      initManage();
-      initTemplates();
+  // Wait for allowlist.json before deciding — avoids a flash of "not
+  // authorised" (or worse, treating an empty list as "nobody's allowed")
+  // while the fetch is still in flight.
+  allowlistReady.then(function () {
+    var ok = user && user.email && ALLOWED_PARENTS.indexOf(user.email.toLowerCase()) !== -1;
+    if (ok) {
+      document.getElementById('pin-screen').style.display = 'none';
+      document.getElementById('admin-board').style.display = 'block';
+      document.getElementById('whoami').textContent = '👤 ' + user.email;
+      if (!adminBooted) {
+        adminBooted = true;
+        loadStats();
+        initManage();
+        initTemplates();
+      }
+    } else {
+      document.getElementById('admin-board').style.display = 'none';
+      document.getElementById('pin-screen').style.display = 'flex';
+      if (user) {
+        // Signed in, but not an allowed parent.
+        showAuthError(user.email + ' is not authorised. Sign out and use a parent account.');
+      }
     }
-  } else {
-    document.getElementById('admin-board').style.display = 'none';
-    document.getElementById('pin-screen').style.display = 'flex';
-    if (user) {
-      // Signed in, but not an allowed parent.
-      showAuthError(user.email + ' is not authorised. Sign out and use a parent account.');
-    }
-  }
+  });
 });
 
 // =============================================

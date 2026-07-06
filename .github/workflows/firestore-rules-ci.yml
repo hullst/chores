@@ -1,0 +1,44 @@
+name: Firestore rules CI
+
+# Validates firestore.rules on every PR:
+#   1. lightweight syntax/structure lint (no auth, no emulator — see
+#      scripts/lint-firestore-rules.js for why)
+#   2. allowlist.json <-> firestore.rules sync check, so the parent
+#      allowlist (single source of truth: allowlist.json) can never drift
+#      from the copy baked into the security rules.
+#
+# This is a static, no-build GitHub Pages app — this workflow only ever
+# reads files with plain Node, it does not touch the deploy path.
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'firestore.rules'
+      - 'allowlist.json'
+      - 'admin.html'
+      - 'scripts/**'
+      - '.github/workflows/firestore-rules-ci.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'firestore.rules'
+      - 'allowlist.json'
+      - 'admin.html'
+      - 'scripts/**'
+
+jobs:
+  validate-rules:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Lint firestore.rules syntax/structure
+        run: node scripts/lint-firestore-rules.js
+
+      - name: Check allowlist.json is in sync with firestore.rules
+        run: node scripts/check-allowlist-sync.js

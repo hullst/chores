@@ -45,14 +45,21 @@ Both the child roster and the parent allowlist are **hardcoded** today (roster e
 in the admin is a roadmap item):
 
 - **Kids** — `KIDS` in `chore-engine.js`.
-- **Parents who may manage** — must be listed in **two** places that have to stay in
-  sync:
-  1. `ALLOWED_PARENTS` in `admin.html`, and
-  2. the `isParent()` email list in `firestore.rules` (then re-publish the rules in
-     the Firebase console).
+- **Parents who may manage** — single source of truth is `allowlist.json`.
+  `admin.html` fetches it at runtime; `firestore.rules` carries its own copy
+  (Firestore rules have no network access, so it can't fetch the JSON at
+  eval time). To add/remove a parent:
+  1. edit `allowlist.json`
+  2. run `node scripts/sync-allowlist.js` to regenerate the marked block in
+     `firestore.rules`
+  3. re-publish the rules in the Firebase console (or `firebase deploy
+     --only firestore:rules`)
 
-  If they drift, a parent can sign in but writes will be silently rejected by the
-  rules (or vice versa). Currently: `hullst89@gmail.com`, `kerilynhull@gmail.com`.
+  `node scripts/check-allowlist-sync.js` (also run in CI on every PR, see
+  `.github/workflows/firestore-rules-ci.yml`) fails if the two ever drift —
+  previously a silent failure mode where a parent could sign in but every
+  write got rejected by the rules (or vice versa). Currently:
+  `hullst89@gmail.com`, `kerilynhull@gmail.com`.
 
 ## Deploy
 
